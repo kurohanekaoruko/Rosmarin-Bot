@@ -30,7 +30,7 @@ interface Room {
     /** 房间中的powerBank数组 */
     powerBank: StructurePowerBank[];
     /** 房间中的deposit数组 */
-    deposit: StructureDeposit[];
+    deposit: Deposit[];
     /** 房间中的rampart数组 */
     rampart: StructureRampart[];
     /** 房间等级 */

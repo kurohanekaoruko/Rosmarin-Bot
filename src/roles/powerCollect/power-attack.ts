@@ -66,7 +66,7 @@ const power_attack = {
         // 索敌
         if (Game.time % 5 == 0 || !creep.memory['hostile']) {
             let hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 8, {
-                filter: (c) => c.pos.inRangeTo(powerBank.pos, 6)
+                filter: (c) => c.pos.inRangeTo(powerBank.pos, 8)
             }) || [];
 
             // 最近敌人优先
@@ -87,7 +87,7 @@ const power_attack = {
         // 攻击 Creep
         if (creep.memory['hostile']) {
             const hostile = Game.getObjectById(creep.memory['hostile']) as Creep;
-            if (hostile && hostile.pos.inRangeTo(powerBank.pos, 6)) {
+            if (hostile && hostile.pos.inRangeTo(powerBank.pos, 10)) {
                 if (creep.pos.isNearTo(hostile)) creep.attack(hostile);
                 creep.doubleMove(hostile.pos, '#ff0000', false);
                 return;

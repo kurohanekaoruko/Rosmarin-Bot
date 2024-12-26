@@ -1,4 +1,4 @@
-import {LabMap,Goods} from "@/constant/ResourceConstant";
+import {LabMap,Goods,BarList} from "@/constant/ResourceConstant";
 
 function UpdateManageMission(room: Room) {
     CheckTerminalResAmount(room);  // 检查终端资源预留数量，不足则补充
@@ -17,15 +17,16 @@ function CheckTerminalResAmount(room: Room) {
     const THRESHOLD = {
         source: {
             [RESOURCE_ENERGY]: 25000,
-            default: 6000
+            default: 4000
         },
         target: {
             [RESOURCE_ENERGY]: 20000,
-            default: 4000
+            default: 3000
         }
     }
-    Object.keys(LabMap).forEach((r) => { THRESHOLD.source[r] = 3000; THRESHOLD.target[r] = 3000 } )
-    Goods.forEach((r) => { THRESHOLD.source[r] = 1200; THRESHOLD.target[r] = 1000 } )
+    Object.keys(LabMap).forEach((r) => { THRESHOLD.source[r] = 3000; THRESHOLD.target[r] = 3000 } );
+    Goods.forEach((r) => { THRESHOLD.source[r] = 1200; THRESHOLD.target[r] = 1000 } );
+    BarList.forEach((r) => { THRESHOLD.source[r] = 3000; THRESHOLD.target[r] = 3000 } );
 
     // 检查终端自动转入
     for (const resourceType in room.storage.store) {

@@ -185,52 +185,13 @@ export default class OutMine extends Room {
             if (outminePower && !this.memory['powerMine'][roomName]) {
                 let P_num = PowerBankCheck(room);
                 if (P_num) {
-                    const powerBank = room.find(FIND_STRUCTURES,{
+                    const power = room.find(FIND_STRUCTURES,{
                         filter:(s)=>s.structureType===STRUCTURE_POWER_BANK
-                    })[0] as StructurePowerBank;
-                    const stores = [this.storage, this.terminal, ...this.lab]
-                    const GO_Amount = stores.reduce((a, b) => a + b.store['GO'], 0);
-                    const UH_Amount = stores.reduce((a, b) => a + b.store['UH'], 0);
-                    const GHO2_Amount = stores.reduce((a, b) => a + b.store['GHO2'], 0);
-                    const UH2O_Amount = stores.reduce((a, b) => a + b.store['UH2O'], 0);
-                    const LO_Amount = stores.reduce((a, b) => a + b.store['LO'], 0);
-                    let boostLevel = 0;
-                    // T2配置, 一队打满
-                    if (powerBank.power >= 6000 &&
-                        GHO2_Amount >= 3000 && UH2O_Amount >= 3000 && LO_Amount >= 3000) {
-                        P_num = 1;
-                        this.memory['powerMine'][roomName] = {
-                            creep: P_num,      // creep队伍数
-                            max: 1,            // 最大孵化数量
-                            boostLevel: 2,     // 强化等级
-                            prCountMax: 0,     // ranged最大孵化数
-                        }
-                        boostLevel = 2;
-                    }
-                    // T1配置, 两队打满
-                    else if (powerBank.power > 2000 &&
-                        GO_Amount >= 3000 && UH_Amount >= 3000 && LO_Amount >= 3000) {
-                        P_num = Math.min(P_num, 2);
-                        this.memory['powerMine'][roomName] = {
-                            creep: P_num,
-                            max: 3,
-                            boostLevel: 1,
-                            prCountMax: 6,
-                        }
-                        boostLevel = 1;
-                    }
-                    // T0配置, 三队打满
-                    else {
-                        this.memory['powerMine'][roomName] = {
-                            creep: P_num,
-                            max: Math.max(2*P_num-1, 3),
-                            boostLevel: 0,
-                            prCountMax: 9,
-                        }
-                        boostLevel = 0;
-                    }
-                    console.log(`在 ${roomName} 发现 PowerBank (${powerBank.power} power), 已加入开采队列。`);
-                    console.log(`将从 ${this.name} 派出 ${P_num} 数量的T${boostLevel}采集队。`);
+                    })[0].power;
+                    let data = PowerMineMissionData(this, P_num, power);
+                    this.memory['powerMine'][roomName] = data;
+                    console.log(`在 ${roomName} 发现 PowerBank (${power} power), 已加入开采队列。`);
+                    console.log(`将从 ${this.name} 派出 ${data.creep} 数量的T${data.boostLevel}采集队。Ranged数量:${data.prNum}。`);
                 }
             }
 
@@ -333,23 +294,11 @@ export default class OutMine extends Room {
             if (!room) continue;
             
             if (!mineData.prCount) mineData.prCount = 0;
-            if (powerBank.hits > 500000 && mineData.prCount < mineData.prCountMax) {
-                // mineData.prCount计数用于避免过多重生ranged
-                // 两队T0或一队T1, 需要补上等价一支T0队的伤害
-                let prnum = 0, prMaxNum = 0;
-                if ((mineData.creep == 2 && mineData.boostLevel == 0) ||
-                    (mineData.creep == 1 && mineData.boostLevel == 1)) {
-                    prnum = (CreepByTargetRoom['power-ranged'] || []).length +
-                            (CreepBySpawnMissionNum['power-ranged'] || 0);
-                    prMaxNum = 4;
-                }
-                // 一队T0, 需要补上等价两支T0的伤害
-                if (mineData.creep == 1 && mineData.boostLevel == 0) {
-                    prnum = (CreepByTargetRoom['power-ranged'] || []).length +
-                            (CreepBySpawnMissionNum['power-ranged'] || 0);
-                    prMaxNum = 7;
-                }
-                for (let i = prnum; i < prMaxNum; i++) {
+            if (mineData.prCount < mineData.prMax && mineData.prNum > 0) {
+                let prnum = (CreepByTargetRoom['power-ranged'] || []).length +
+                        (CreepBySpawnMissionNum['power-ranged'] || 0);
+                // 根据设定的数量孵化ranged
+                for (let i = prnum; i < mineData.prNum; i++) {
                     const memory = { homeRoom: this.name, targetRoom: targetRoom } as CreepMemory;
                     this.SpawnMissionAdd('PR', [], -1, 'power-ranged', memory);
                     mineData.prCount = mineData.prCount + 1;
@@ -377,7 +326,7 @@ export default class OutMine extends Room {
         }
     }
 
-    DepositMine(){
+    DepositMine() {
         if (Game.time % LookInterval != 1) return;
         const depositMines = this.memory['depositMine'];
         if (!depositMines || Object.keys(depositMines).length == 0) return;
@@ -676,6 +625,72 @@ const DepositCheck = function (room: Room) {
     }
 
     return D_num;
+}
+
+const PowerMineMissionData = function (room: Room, P_num: number, power: number) {
+    const stores = [room.storage, room.terminal, ...room.lab]
+    const LO_Amount = stores.reduce((a, b) => a + b.store['LO'], 0);
+    const GO_Amount = stores.reduce((a, b) => a + b.store['GO'], 0);
+    const UH_Amount = stores.reduce((a, b) => a + b.store['UH'], 0);
+    const GHO2_Amount = stores.reduce((a, b) => a + b.store['GHO2'], 0);
+    const UH2O_Amount = stores.reduce((a, b) => a + b.store['UH2O'], 0);
+
+    let data = null;
+    // 一队T2
+    if (power > 6000 && LO_Amount >= 3000 &&
+        GHO2_Amount >= 3000 && UH2O_Amount >= 3000) {
+        data = {
+            creep: 1,      // creep队伍数
+            max: 1,            // 最大孵化数量
+            boostLevel: 2,     // 强化等级
+            prNum: 0,          // ranged数量
+            prMax: 0,     // ranged最大孵化数
+        }
+    }
+    // 一队T1 + 6个ranged
+    else if (power > 6000 && LO_Amount >= 3000 &&
+        GO_Amount >= 3000 && UH_Amount >= 3000) {
+        data = {
+            creep: 1,
+            max: 2,
+            boostLevel: 1,
+            prNum: 6,
+            prMax: 8,
+        }
+    }
+    // 两队T1, 只有一个位置时补充4个ranged
+    else if (power > 3000 && LO_Amount >= 3000 &&
+        GO_Amount >= 3000 && UH_Amount >= 3000) {
+        data = {
+            creep: Math.min(P_num, 2),
+            max: 3,
+            boostLevel: 1,
+            prNum: P_num == 1 ? 4 : 0,
+            prMax: 6,
+        }
+    }
+    // 一队T0 + 8个ranged
+    else if (power > 6000) {
+        data = {
+            creep: 1,
+            max: 2,
+            boostLevel: 0,
+            prNum: 8,
+            prMax: 10,
+        }
+    }
+    // 三队T0, 只有1个位置时补充8个ranged, 2个位置时补充4个ranged
+    else {
+        data = {
+            creep: P_num,
+            max: 6,
+            boostLevel: 0,
+            prNum: P_num == 1 ? 8 : P_num == 2 ? 4 : 0,
+            prMax: 10,
+        }
+    }
+
+    return data;
 }
 
 // 获取到指定房间工作creep数量, 根据role分组

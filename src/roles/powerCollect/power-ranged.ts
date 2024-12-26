@@ -19,7 +19,7 @@ const power_ranged = {
             healOK = true;
         }
 
-        const hostileCreeps = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 5, {
+        const hostileCreeps = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 8, {
             filter: (c) => 
                 c.body.some(p => p.type == HEAL || p.type == ATTACK || p.type == RANGED_ATTACK)
         });

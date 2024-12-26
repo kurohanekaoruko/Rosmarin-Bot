@@ -37,6 +37,15 @@ export default {
                 break;
             }
             return `CPU used:${Game.cpu.getUsed() - cpu0}`;
+        },
+        // 清除所有nuke发射标记
+        clear() {
+            for (const flagName of Object.keys(Game.flags)) {
+                const launchNukeMatch = flagName.match(/^nuke[-#/ ](\d+)$/);
+                if (!launchNukeMatch) continue;
+                Game.flags[flagName].remove();
+            }
+            return `已清除所有nuke发射标记`;
         }
     }
 }

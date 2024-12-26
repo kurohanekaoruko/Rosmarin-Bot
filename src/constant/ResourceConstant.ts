@@ -171,6 +171,8 @@ export const CompoundColor = {
     'UL': '#7c8577'
 }
 
+export const BarList = [RESOURCE_BATTERY, 'lemergium_bar', 'zynthium_bar', 'keanium_bar', 'utrium_bar', 'ghodium_melt', 'oxidant', 'reductant', 'purifier']
+
 export const zipMap = {
     'energy': RESOURCE_BATTERY,
     'L': 'lemergium_bar',

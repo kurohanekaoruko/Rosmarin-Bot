@@ -29,8 +29,7 @@ export default {
             return OK;
         },
         // 设置lab合成底物
-        set(roomName: string, A: string, B: string, amount: number = 0) {
-            const RES = global.BaseConfig.RESOURCE_ABBREVIATIONS;
+        set(roomName: string, product: string, amount: number = 0) {
             const room = Game.rooms[roomName];
             if(!room || !room.my) {
                 global.log(`房间 ${roomName} 不存在或未拥有。`);
@@ -38,12 +37,13 @@ export default {
             }
             const BotMemStructures =  Memory['StructControlData'];
             if(!BotMemStructures[roomName]) BotMemStructures[roomName] = {};
-            if (A && B) {
-                A = RES[A] || A; B = RES[B] || B;
-                if (!REACTIONS[A] || !REACTIONS[A][B]) {
-                    global.log(`资源 ${RES[A] || A} 或 ${RES[B] || B} 不存在有效合成。`);
+            if (product) {
+                if (!LabMap[product]) {
+                    global.log(`不存在Lab合成产物 ${product} 。`);
                     return;
                 }
+                let A = LabMap[product].raw1;
+                let B = LabMap[product].raw2;
                 BotMemStructures[roomName]['labAtype'] = A;
                 BotMemStructures[roomName]['labBtype'] = B;
                 BotMemStructures[roomName]['labAmount'] = Math.max(0, amount);
@@ -115,39 +115,39 @@ export default {
             return OK;
         },
         auto: {
-            set(roomName: string, res: string, amount: number=30000) {
+            set(roomName: string, product: string, amount: number=30000) {
                 const room = Game.rooms[roomName];
                 if(!room || !room.my) {
                     global.log(`房间 ${roomName} 不存在或未拥有。`);
                     return;
                 }
-                if(!LabMap[res]) {
-                    global.log(`资源 ${res} 不存在。`);
+                if(!LabMap[product]) {
+                    global.log(`资源 ${product} 不存在。`);
                     return;
                 }
                 const BotMem =  Memory['AutoData']['AutoLabData'];
                 if(!BotMem[roomName]) BotMem[roomName] = {};
     
                 amount = amount || 0;
-                BotMem[roomName][res] = amount;
-                global.log(`已设置 ${roomName} 的自动lab合成: ${res} - ${amount}`);
+                BotMem[roomName][product] = amount;
+                global.log(`已设置 ${roomName} 的自动lab合成: ${product} - ${amount}`);
                 return OK;
             },
-            remove(roomName: string, res?: string) {
+            remove(roomName: string, product?: string) {
                 const room = Game.rooms[roomName];
                 if(!room || !room.my) {
                     global.log(`房间 ${roomName} 不存在或未拥有。`);
                     return;
                 }
-                if(!LabMap[res]) {
-                    global.log(`资源 ${res} 不存在。`);
+                if(!LabMap[product]) {
+                    global.log(`资源 ${product} 不存在。`);
                     return;
                 }
                 const BotMem = Memory['AutoData']['AutoLabData'];
                 if(!BotMem[roomName]) BotMem[roomName] = {};
     
-                delete BotMem[roomName][res];
-                global.log(`已删去 ${roomName} 的自动lab合成: ${res}`);
+                delete BotMem[roomName][product];
+                global.log(`已删去 ${roomName} 的自动lab合成: ${product}`);
                 return OK;
             },
             list(roomName: string) {
@@ -158,8 +158,8 @@ export default {
                         global.log(`[${roomName}]没有开启自动lab合成`);
                     } else {
                         console.log(`[${roomName}]自动lab合成有: `);
-                        for (const res in BotMemAutoFactory[roomName]) {
-                            console.log(`\n    -${res} - ${autoLab[res]}`);
+                        for (const product in BotMemAutoFactory[roomName]) {
+                            console.log(`\n    -${product} - ${autoLab[product]}`);
                         }
                     }
                     return OK;
@@ -174,8 +174,8 @@ export default {
                         continue;
                     }
                     console.log(`[${roomName}]自动lab合成有: `);
-                    for (const res in BotMemAutoFactory[roomName]) {
-                        console.log(`\n    -${res} - ${BotMemAutoFactory[roomName][res]}`);
+                    for (const product in BotMemAutoFactory[roomName]) {
+                        console.log(`\n    -${product} - ${BotMemAutoFactory[roomName][product]}`);
                     }
                 }
                 return OK;

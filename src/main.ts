@@ -24,9 +24,7 @@ import '@/modules/helper_roomResource';    // 资源统计
 
 const app = createApp();
 
-app.on(GlobalInit);     // 全局变量模块
-
-app.on(MemoryInit);     // 初始化内存
+app.mount(PrototypeExtension);    // 原型挂载
 
 app.set('room', roomControl);    // 房间运行
 
@@ -34,9 +32,11 @@ app.set('creep', creepControl);    // creep行动
 
 app.set('powerCreep', powerControl);  // powerCreep行动
 
-app.mount(PrototypeExtension);    // 原型挂载
+app.on(GlobalInit);     // 全局变量模块
 
-app.on(SquadModule);  // 四人小队模块
+app.on(MemoryInit);     // 初始化内存
+
+app.on(SquadModule);    // 四人小队模块
 
 app.on(ResourceManage); // 资源调度管理
 
@@ -52,10 +52,6 @@ app.on(Statistics);     // 统计
 
 
 export const loop = app.run;
-
-// // 性能开销分析
-// global.CPUprint = require('调用栈分析器').print;
-// export const loop = require('调用栈分析器').warpLoop(app.run);
 
 
 // // 性能开销分析

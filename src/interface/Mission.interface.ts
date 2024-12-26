@@ -4,13 +4,13 @@ interface Room {
     // 添加任务到任务池
     addMissionToPool(type: Task["type"], level: Task["level"], data: Task["data"]): OK | void;
     // 获取任务池中的任务
-    getMissionFromPool(type: Task["type"], pos?: Task["pos"], checkFunc?: (task: Task) => boolean): Task | null;
+    getMissionFromPool(type: Task["type"], pos?: string, checkFunc?: (task: Task) => boolean): Task | null;
     // 获取任务池中的第一个任务
     getMissionFromPoolFirst(type: Task["type"], checkFunc?: (task: Task) => boolean): Task | null;
     // 获取任务池中的随机一个任务
     getMissionFromPoolRandom(type: Task["type"]): Task | null;
     // 获取任务池中的所有任务
-    getAllMissionFromPool(type: task["type"]): Task[] | null;
+    getAllMissionFromPool(type: Task["type"]): Task[] | null;
     // 用id获取任务池中的任务
     getMissionFromPoolById(type: Task["type"], id: Task["id"]): Task | null;
     // 检查是否有相同任务
@@ -86,7 +86,7 @@ interface Task {
     level: number,  // 优先级
     type: 'transport' | 'manage' | 'build' | 'repair' | 'walls' | 'send' | 'spawn',  // 任务类型
     data: TransportTask | BuildTask | RepairTask | ManageTask | SendTask | SpawnTask | any // 任务数据
-    lock?: Id, // 任务是否被锁定, 如果需要记录锁定者那么是id，否则以布尔值表示
+    lock?: Id<Creep> | boolean | null, // 任务是否被锁定, 如果需要记录锁定者那么是id，否则以布尔值表示
 }
 
 interface TransportTask {

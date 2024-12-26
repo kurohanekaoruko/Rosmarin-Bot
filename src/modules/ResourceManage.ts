@@ -1,12 +1,13 @@
-
+/** 资源管理模块 */
 export const ResourceManage = {
     tick: () => {
         if (Game.time % 100) return;
         const botmem = Memory['ResourceManage'];
         if (!botmem || Object.keys(botmem).length == 0) return;
 
-        // 每种资源对应的供应房间与需求房间
+        // 记录每种资源对应的供应房间与需求房间
         const RessourceManageMap = {};
+        // 遍历所有房间的设置
         for (const roomName in botmem) {
             const room = Game.rooms[roomName];
             if (!room || !room.my || room.terminal.cooldown > 0 || !room.terminal ||
@@ -15,7 +16,9 @@ export const ResourceManage = {
             const store = [room.storage, room.terminal];
             for (const res in botmem[roomName]) {
                 if (!RessourceManageMap[res]) RessourceManageMap[res] = { source: [], target: [] };
+                // 供应阈值
                 let sourceThreshold = botmem[roomName][res].source ?? Infinity;
+                // 需求阈值
                 let targetThreshold = botmem[roomName][res].target ?? 0;
                 let resAmount = store.reduce((a, b) => a + (b.store[res] || 0), 0);
                 // 资源量足够时供应

@@ -61,7 +61,7 @@ function RoleSpawnCheck(room: Room, role: string, currentNum: number, num: numbe
         case 'speedup-repair':
             if (!spre) return false;
             if (room.level < 7)  return false;
-            if (room.storage?.store[RESOURCE_ENERGY] < 10000) return false;
+            if (room.storage?.store[RESOURCE_ENERGY] < 100000) return false;
             return currentNum < spre && room.checkMissionInPool('walls');
         default:
             return false;

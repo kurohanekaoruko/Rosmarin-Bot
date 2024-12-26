@@ -29,7 +29,7 @@ interface CreepMemory {
     homeRoom: string;
     sourceRoom: string;
     targetRoom: string;
-    bind: any;
+    bind: Id<Creep>;
     notified: boolean;
     boosted: boolean;
     squad: string;

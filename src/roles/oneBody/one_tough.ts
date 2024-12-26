@@ -39,7 +39,7 @@ const one_tough = {
     
         if (!creep.memory.boosted) {
             const boost = ['XGHO2', 'XLHO2'];
-            creep.memory.boosted = creep.goBoost(boost, true);
+            creep.memory.boosted = creep.goBoost(boost, true, true);
             return
         }
     
