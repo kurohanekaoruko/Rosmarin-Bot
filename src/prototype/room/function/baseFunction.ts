@@ -14,12 +14,12 @@ export default class BaseFunction extends Room {
     }
 
     // 获取房间指定资源储备
-    getResourceAmount(resource: ResourceConstant) {
+    getResAmount(resource: ResourceConstant) {
+        if (!RESOURCES_ALL.includes(resource)) return 0;
         let amount = 0;
-        for(const s of [this.storage, this.terminal]) {
-            if(!s) continue;
-            amount += s.store[resource];
-        }
+        if(this.storage) amount += this.storage.store[resource];
+        if(this.terminal) amount += this.terminal.store[resource];
+
         return amount;
     }
 
@@ -63,7 +63,7 @@ export default class BaseFunction extends Room {
         return true;
     }
 
-    // 绑定最少且最近的能量源
+    // 获取绑定最少的能量源
     closestSource(creep: Creep) {
         // 初始化最少Creep绑定计数
         let minCreepCount = Infinity;
@@ -71,14 +71,13 @@ export default class BaseFunction extends Room {
 
         if(!this.memory.sourcePosCount) this.memory.sourcePosCount = {}
         let terrain = null;
+        let creeps = this.find(FIND_MY_CREEPS, {
+            filter: c => c.id != creep.id && c.ticksToLive > 100 &&
+                    c.memory.role === creep.memory.role
+        }) || [];
         // 找到绑定最少的，有位置的采集点
         this.source.forEach((source: Source) => {
-            let creepCount = this.find(FIND_MY_CREEPS, {
-                filter: c => 
-                    c.memory.role === creep.memory.role &&
-                    c.memory.targetSourceId === source.id &&
-                    c.ticksToLive > 100
-            }).length;
+            let creepCount = creeps.filter(c => c.memory.targetSourceId === source.id).length;
             // 该采集点的最大位置
             let maxPosCount: number;
             if (this.memory.sourcePosCount[source.id]) {
@@ -105,15 +104,29 @@ export default class BaseFunction extends Room {
             }
         });
     
-        // 若有多个结果, 则选取最近的
-        let closestSource = null;
+        let targetSource = null;
         if (leastCrowdedSources.length == 1) {
-            closestSource = leastCrowdedSources[0];
+            targetSource = leastCrowdedSources[0];
+        } else if (minCreepCount === 0) {
+            targetSource = creep.pos.findClosestByRange(leastCrowdedSources);
         } else if (leastCrowdedSources.length > 1) {
-            closestSource = creep.pos.findClosestByRange(leastCrowdedSources);
+            targetSource = leastCrowdedSources.reduce((obj, source) => {
+                const minTickToLive = creeps.reduce((min, c) => {
+                    if (c.memory.targetSourceId === source.id) {
+                        return Math.min(min, c.ticksToLive);
+                    } else {
+                        return min;
+                    }
+                }, Infinity);
+                if (!obj) return { source, minTickToLive };
+                if (obj.minTickToLive > minTickToLive) {
+                    return { source, minTickToLive }
+                }
+                return obj;
+            }, null).source;
         }
     
-        return closestSource;
+        return targetSource;
     }
 
     /* 动态生成角色体型 */
@@ -130,7 +143,7 @@ export default class BaseFunction extends Room {
                     body = bodyconfig.bodypart
                 }
                 if (this.energyCapacityAvailable >=
-                    this.CalculateEnergy(body)) break;
+                    this.CalculateEnergy(this.GenerateBodys(body))) break;
                 lv--;
             }
             if (lv === 0) return [];
@@ -218,9 +231,9 @@ export default class BaseFunction extends Room {
                 if (attack) body_list = AddList(body_list, attack, ATTACK)
                 if (range_attack) body_list = AddList(body_list, range_attack, RANGED_ATTACK)
                 if (carry) body_list = AddList(body_list, carry, CARRY)
-                if (claim) body_list = AddList(body_list, claim, CLAIM)
                 if (move) body_list = AddList(body_list, move, MOVE)
                 if (heal) body_list = AddList(body_list, heal, HEAL)
+                if (claim) body_list = AddList(body_list, claim, CLAIM)
                 break;
             }
             return body_list
@@ -332,6 +345,7 @@ export default class BaseFunction extends Room {
             }
         }
     }
+
 }
 
 function AddList(list: any[], num: number, type: any) {

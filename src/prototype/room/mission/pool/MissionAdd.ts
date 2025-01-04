@@ -58,19 +58,27 @@ export default class MissionAdd extends Room {
     BuildRepairMissionAdd(type: 'build' | 'repair' | 'walls', level: number, data: BuildTask | RepairTask) {
         // 检查是否有相同任务
         let existingTaskId = this.checkSameMissionInPool(type, { target: data.target });
-        return existingTaskId === null ? 
-                this.addMissionToPool(type, level, data) : // 如果不存在相同任务，添加新任务
-                this.updateMissionPool(type, existingTaskId, {level, data}); // 如果存在相同任务，更新任务数据
+        if (existingTaskId) {
+            // 如果存在相同任务，更新任务数据
+            return this.updateMissionPool(type, existingTaskId, {level, data});
+        } else {
+            // 如果不存在相同任务，添加新任务
+            return this.addMissionToPool(type, level, data);
+        }
     }
 
     // 添加运输任务
     TransportMissionAdd(level: number, data: TransportTask) {
         // 检查是否有相同任务
         let existingTaskId = this.checkSameMissionInPool('transport', 
-                            {source:data.source, target:data.target, resourceType:data.resourceType});
-        return existingTaskId === null ? 
-                this.addMissionToPool('transport', level, data) : // 如果不存在相同任务，添加新任务
-                this.updateMissionPool('transport', existingTaskId, {level, data}); // 如果存在相同任务，更新任务数据
+                    {source:data.source, target:data.target,resourceType:data.resourceType});
+        if (existingTaskId) {
+            // 如果存在相同任务，更新任务数据
+            return this.updateMissionPool('transport', existingTaskId, {level, data});
+        } else {
+            // 如果不存在相同任务，添加新任务
+            return this.addMissionToPool('transport', level, data);
+        }
     }
 
     // 添加孵化任务

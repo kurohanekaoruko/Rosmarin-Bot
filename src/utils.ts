@@ -69,7 +69,7 @@ export function genSortNumber() {
 
 export function genCreepName(code: string) {
     const number = genSortNumber();
-    const name = `[${code}]#${number}`;
+    const name = `${code}#${number}`;
     if (Game.creeps[name]) {
         return genCreepName(code);
     } else {

@@ -87,5 +87,5 @@ export const createApp = () => {
         RawMemory._parsed = global.Memory;
     };
 
-    return { name, set, mount, on, init, run }
+    return { name, set, mount, on, run }
 };

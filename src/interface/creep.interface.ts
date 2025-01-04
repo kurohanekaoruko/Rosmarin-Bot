@@ -14,6 +14,12 @@ interface Creep {
     pickupOrMoveTo(target: any, ...args: any[]): boolean;
     repairOrMoveTo(target: any, ...args: any[]): boolean;
     buildOrMoveTo(target: any, ...args: any[]): boolean;
+
+    goHaverst(target: Source | Mineral): boolean;
+    goWithdraw(target: Structure, resoureType?: ResourceConstant, amount?: number): boolean;
+    goTransfer(target: Structure, resoureType?: ResourceConstant, amount?: number): boolean;
+    goBuild(target: ConstructionSite): boolean;
+    goRepair(target: Structure): boolean;
 }
 
 interface CreepMemory {
@@ -37,4 +43,6 @@ interface CreepMemory {
     Rerunt: number;
     sayText: string[];
     boostLevel: number;
+    // creep当前的行动
+    action: string;
 }

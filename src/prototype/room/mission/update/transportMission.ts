@@ -38,7 +38,7 @@ function UpdateEnergyMission(room: Room) {
 
     // 检查spawn和扩展是否需要填充能量
     if(room.spawn) {
-        const spawnsAndExtensions = (room.spawn?.concat(room.extension as any) ?? [])
+        const spawnsAndExtensions = (room.spawn?.concat(room.extension||[] as any) ?? [])
             .filter((s: StructureSpawn | StructureExtension) => s && s.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
         spawnsAndExtensions.forEach((s: StructureSpawn | StructureExtension) => {
             if(energy < s.store.getFreeCapacity(RESOURCE_ENERGY)) return;
@@ -75,7 +75,7 @@ function UpdateEnergyMission(room: Room) {
     }
 
     // 能量缺少时不填充以下的
-    if(room.getResourceAmount(RESOURCE_ENERGY) < 10000) return;
+    if(room.getResAmount(RESOURCE_ENERGY) < 10000) return;
 
     // 检查lab是否需要填充能量
     if (Game.time % 20 === 0 && room.level >= 6 && room.lab) {
@@ -152,23 +152,28 @@ function UpdatePowerMission(room: Room) {
     const storage = room.storage;
     const terminal = room.terminal;
     if(!storage && !terminal) return;
-    if(room.getResourceAmount(RESOURCE_POWER) < 1000) return;
 
     const powerSpawn = room.powerSpawn;
     if(!powerSpawn) return;
-    const neededAmount = 100 - powerSpawn.store[RESOURCE_POWER];
+    let neededAmount = 100 - powerSpawn.store[RESOURCE_POWER];
     if (neededAmount < 50) return;
 
-    const source = (storage.store[RESOURCE_POWER] >= neededAmount && storage) || 
-                    (terminal.store[RESOURCE_POWER] >= neededAmount && terminal) || null;
-    if(!source) return;
+    let target = [storage, terminal].reduce((a, b) => {
+        if (!a && !b) return null;
+        if (!a || !b) return a || b;
+        if (a.store[RESOURCE_POWER] > b.store[RESOURCE_POWER]) return a;
+        return b;
+    }, null)
+
+    if(!target || target.store[RESOURCE_POWER] <= 0) return;
+
     const posInfo = `${powerSpawn.pos.x}/${powerSpawn.pos.y}/${powerSpawn.pos.roomName}`;
     const taskdata = {
         pos: posInfo,
-        source: source.id,
+        source: target.id,
         target: powerSpawn.id,
         resourceType: RESOURCE_POWER,
-        amount: neededAmount,
+        amount: Math.min(neededAmount, target.store[RESOURCE_POWER]),
     }
     room.TransportMissionAdd(LevelMap.powerSpawn, taskdata)
 }
@@ -230,7 +235,7 @@ function UpdateLabMission(room: Room) {
         const type = index === 0 ? labAtype : labBtype;
         if(lab.mineralType && lab.mineralType !== type) return;    // 有其他资源时不填充
         if(lab.store.getFreeCapacity(type) < 1000) return;   // 需要填充的量太少时不添加任务
-        if(room.getResourceAmount(type) < 1000) return; // 资源不足时不添加任务
+        if(room.getResAmount(type) < 1000) return; // 资源不足时不添加任务
         const posInfo = `${lab.pos.x}/${lab.pos.y}/${lab.pos.roomName}`;
         const target = [storage, terminal].find(target => target.store[type] > 0);
         const taskdata = {
@@ -396,15 +401,20 @@ function UpdateNukerMission(room: Room) {
     if(!nuker) return;
     if(nuker.store[RESOURCE_GHODIUM] === 5000) return;  // 如果nuker中已经满了，则不补充
 
-    const amount = 5000 - nuker.store[RESOURCE_GHODIUM];
+    let amount = 5000 - nuker.store[RESOURCE_GHODIUM];
+    if (!storage && !terminal) return;  // 如果storage和terminal都不存在，则不补充
+
     let source: Id<Structure>;
-    if (storage.store[RESOURCE_GHODIUM] >= amount) {
+    if (storage.store[RESOURCE_GHODIUM] > 0) {
         source = storage.id; // 从storage获取
-    } else if (terminal && terminal.store[RESOURCE_GHODIUM] >= amount) {
+        amount = Math.min(amount, storage.store[RESOURCE_GHODIUM])
+    } else if (terminal && terminal.store[RESOURCE_GHODIUM] > 0) {
         source = terminal.id; // 从terminal获取
+        amount = Math.min(amount, terminal.store[RESOURCE_GHODIUM])
     } else {
         return; // 如果storage和terminal都不足，则不补充
     }
+
     const posInfo = `${nuker.pos.x}/${nuker.pos.y}/${nuker.pos.roomName}`;
     const taskdata = {
         pos: posInfo,
@@ -420,11 +430,14 @@ function UpdateNukerMission(room: Room) {
 // 检查任务是否有效
 function TransportMissionCheck(room: Room) {
     const checkFunc = (task: Task) => {
-        // 如果任务被锁定，检查锁定是否有效，那么解锁
+        // 如果任务被锁定，检查锁定是否有效，无效则解锁
         if(task.lock) {
-            const creep = Game.getObjectById(task.lock) as Creep;
+            const creep = Game.getObjectById(task.bindCreep) as Creep;
             const mission = creep?.memory?.mission;
-            if(!creep || !mission || mission?.id !== task.id) task.lock = null;
+            if(!creep || !mission || mission?.id !== task.id) {
+                task.lock = false;
+                task.bindCreep = null;
+            }
         };
         // 检查目标是否有效
         const data = task.data as TransportTask

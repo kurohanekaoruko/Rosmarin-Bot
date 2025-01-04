@@ -4,8 +4,9 @@ export const Statistics = {
         if (!Memory.stats) Memory.stats = {}
     },
     tickEnd: function() {
+        if (Game.shard.name == 'sim') return;
+        
         updateCPUinfo();       // 统计 CPU 使用量
-
         if (Game.time % 20 !== 1) return     // 每 20 个 tick 执行一次
         updateGclGpl();        // 统计 GCL / GPL 的升级百分比和等级
         updateGclGplSpeed();   // 统计 GCL / GPL 的升级速度

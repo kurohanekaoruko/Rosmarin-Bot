@@ -1,7 +1,9 @@
+import {Goods} from '@/constant/ResourceConstant'
+
 /** 资源管理模块 */
 export const ResourceManage = {
     tick: () => {
-        if (Game.time % 100) return;
+        if (Game.time % 50) return;
         const botmem = Memory['ResourceManage'];
         if (!botmem || Object.keys(botmem).length == 0) return;
 
@@ -43,38 +45,54 @@ export const ResourceManage = {
                     .map((r:any) => Game.rooms[r]);
             // 按资源数量降序排序
             sourceRooms.sort((a: Room, b: Room) => {
-                return b.getResourceAmount(res) - a.getResourceAmount(res);
+                return b.getResAmount(res) - a.getResAmount(res);
             });
             // 按资源数量升序排序
             targetRooms.sort((a: Room, b: Room) => {
-                return a.getResourceAmount(res) - b.getResourceAmount(res);
+                return a.getResAmount(res) - b.getResAmount(res);
             })
             // 多的分给少的
             let i = 0, j = 0;
             while (i < sourceRooms.length) {
                 const sourceRoom = sourceRooms[i] as Room;
                 const targetRoom = targetRooms[j] as Room;
-                const sourceAmount = sourceRoom.getResourceAmount(res); // 供应房间的资源数量
+                const sourceAmount = sourceRoom.getResAmount(res); // 供应房间的资源数量
                 const terminalAmount = sourceRoom.terminal.store[res];  // 供应房间的终端资源数量
-                const targetAmount = targetRoom.getResourceAmount(res); // 需求房间的资源数量
-                const terminalCapacity = targetRoom.terminal.store.getFreeCapacity(res as any); // 需求房间的终端空闲容量
+                const targetAmount = targetRoom.getResAmount(res); // 需求房间的资源数量
+                const terminalCapacity = targetRoom.terminal.store.getFreeCapacity(); // 需求房间的终端空闲容量
                 let sendAmount = Math.min(
                     // 不使供应房间的资源数量低于需求阈值
                     sourceAmount - (botmem[sourceRoom.name][res].target ?? 0),
+                    // 不使供应房间的资源数量低于供应阈值
+                    sourceAmount - (botmem[sourceRoom.name][res].source ?? Infinity),
                     // 发送数量不超过终端资源数量
                     terminalAmount,
                     // 不使需求房间的资源数量超过供应阈值
                     (botmem[targetRoom.name][res].source ?? Infinity) - targetAmount,
+                    // 不使需求房间的资源数量超过需求阈值
+                    (botmem[targetRoom.name][res].target ?? 0) - targetAmount,
                     // 不超过需求房间的终端容量
                     terminalCapacity
                 );
+                if (Goods.includes(res as any)) {
+                    sendAmount = Math.min(sendAmount, 100)
+                }
+                let cost = Game.market.calcTransactionCost(sendAmount, sourceRoom.name, targetRoom.name);
+                if (res == RESOURCE_ENERGY) {
+                    sendAmount = Math.min(sendAmount, sourceRoom.terminal.store[RESOURCE_ENERGY] - cost);
+                    cost = Game.market.calcTransactionCost(sendAmount, sourceRoom.name, targetRoom.name);
+                } else if(cost > sourceRoom.terminal.store[RESOURCE_ENERGY]) {
+                    sendAmount = sendAmount * sourceRoom.terminal.store[RESOURCE_ENERGY] / cost;
+                    sendAmount = Math.floor(sendAmount);
+                    cost = Game.market.calcTransactionCost(sendAmount, sourceRoom.name, targetRoom.name);
+                }
                 // 不发送非正数
                 if (sendAmount <= 0) {
                     i++; continue;
                 }
                 const result = sourceRoom.terminal.send(res as any, sendAmount, targetRoom.name, '资源自动管理');
                 if (result == OK) {
-                    console.log(`[ResourceManage] 从${sourceRoom.name}向${targetRoom.name}发送${sendAmount} ${res}`);
+                    global.log(`[资源管理] ${sourceRoom.name} -> ${targetRoom.name}, ${sendAmount} ${res}, cost: ${cost}`);
                     sendOK[sourceRoom.name] = true;
                     j = (j + 1) % targetRooms.length;
                     i++;

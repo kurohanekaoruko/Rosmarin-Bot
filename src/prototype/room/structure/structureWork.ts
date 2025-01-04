@@ -26,7 +26,11 @@ export default class StructureWork extends Room {
                 return;
             }
             const role = Memory.creeps[spawn.spawning.name].role;
-            const code = RoleData[role].code;
+            if (!role) {
+                spawn.spawning.cancel();
+                return;
+            }
+            const code = RoleData[role]?.code;
             this.visual.text(
                 `${code} 🕒${spawn.spawning.remainingTime}`,
                 spawn.pos.x,
@@ -53,12 +57,12 @@ export default class StructureWork extends Room {
         spawns.forEach(spawn => {
             const task = this.getSpawnMission(energyAvailable);
             if (!task) return;
-            if (!task.data?.memory?.role) {
+            const data = task.data as SpawnTask;
+            let role = data.memory.role;
+            if (!role) {
                 this.deleteMissionFromPool('spawn', task.id);
                 return;
             }
-            const data = task.data as SpawnTask;
-            let role = data.memory.role;
             const name = genCreepName(data.name||RoleData[role].code)
             let body: Number[];
             if (data.body?.length > 0) {
@@ -283,6 +287,11 @@ export default class StructureWork extends Room {
         if (!task) return;
 
         const { targetRoom, resourceType, amount } = task.data;
+        if(amount <= 0) {
+            this.deleteMissionFromPool('send', task.id);
+            return;
+        }
+
         let sendAmount = Math.min(amount, terminal.store[resourceType]);
         let cost = Game.market.calcTransactionCost(sendAmount, this.name, targetRoom);
         if (resourceType === RESOURCE_ENERGY) {
@@ -291,6 +300,8 @@ export default class StructureWork extends Room {
         else if (cost > terminal.store[RESOURCE_ENERGY]) {
             sendAmount = Math.floor(sendAmount * (terminal.store[RESOURCE_ENERGY] / cost));
         }
+        if (sendAmount <= 0) return;
+        
         const result = terminal.send(resourceType, sendAmount, targetRoom);
         if (result === OK) {
             if(amount - sendAmount > 0) {
@@ -299,9 +310,9 @@ export default class StructureWork extends Room {
                 this.deleteMissionFromPool('send', task.id);
             }
             cost = Game.market.calcTransactionCost(sendAmount, this.name, targetRoom);
-            console.log(`房间 ${this.name} 向 ${targetRoom} 发送了 ${sendAmount} 单位的 ${resourceType}, 能量消耗: ${cost}`);
+            global.log(`[资源发送] ${this.name} -> ${targetRoom}, ${sendAmount} ${resourceType}, 能量消耗: ${cost}`);
         } else {
-            console.log(`房间 ${this.name} 向 ${targetRoom} 发送 ${sendAmount} 单位的 ${resourceType} 失败，错误代码：${result}`);
+            global.log(`[资源发送] ${this.name} -> ${targetRoom}, ${sendAmount} ${resourceType} 失败，错误代码：${result}`);
         }
     }
 
@@ -324,13 +335,13 @@ export default class StructureWork extends Room {
         // 原料不足时不处理
         if (Object.keys(components).some((c: any) => factory.store[c] < components[c])) return;
 
-        const result = factory.produce(product);
-        if (result !== OK) {
-            if (Game.time % 10 == 0)
+        let result = factory.produce(product);
+        
+        if (Game.time % 1000 == 0 || result != OK){
             if(factory.store[product] > 0) {
                 this.ManageMissionAdd('f', 's', product, factory.store[product]);
             }
-        };
+        }
     }
 
     PowerSpawnWork() {
@@ -339,7 +350,7 @@ export default class StructureWork extends Room {
         // 关停时不处理
         if(!Memory['StructControlData'][this.name]?.powerSpawn) return;
         // 能量不足不处理
-        if(this.getResourceAmount(RESOURCE_ENERGY) < 10000) return;
+        if(this.getResAmount(RESOURCE_ENERGY) < 50000) return;
 
         const powerSpawn = this.powerSpawn;
         if(!powerSpawn) return;

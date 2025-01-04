@@ -36,7 +36,7 @@ const plugins = [
     Mission,        // 任务模块
 
     ActiveDefend,   // 房间防御
-    RoomInit,        // 房间运行
+    RoomInit,       // 房间初始化
 ]
 
 export default () => plugins.forEach(plugin => assignPrototype(Room, plugin))

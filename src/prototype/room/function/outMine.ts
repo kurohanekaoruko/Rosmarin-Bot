@@ -2,11 +2,11 @@ import { RoleLevelData, RoleData } from '@/constant/CreepConstant';
 import { decompress } from '@/utils';
 
 // 过道观察间隔
-const LookInterval = 5;
+const LookInterval = 10;
 // 沉积物最大冷却
 const DepositMaxCooldown = 100;
 // 最小power数量限制
-const PowerMinAmount = 1000;
+const PowerMinAmount = 2000;
 
 
 /** 外矿采集模块 */
@@ -20,7 +20,7 @@ export default class OutMine extends Room {
     }
 
     EnergyMine() { // 能量矿
-        if (Game.time % 10 > 1) return;
+        if (Game.time % 20 > 2 || Game.time % 20 < 1) return;
         const Mem = Memory['OutMineData'][this.name]?.['energy'];
         if (!Mem || !Mem.length) return;
         // 孵化任务数统计
@@ -28,13 +28,13 @@ export default class OutMine extends Room {
         for (const roomName of Mem) {
             const targetRoom = Game.rooms[roomName];
             // 如果没有视野, 尝试侦查
-            if (!targetRoom && Game.time % 10 == 0) {
+            if (!targetRoom && Game.time % 20 == 1) {
                 if (this.observer) this.observer.observeRoom(roomName);
                 else scoutSpawn(this, roomName);    // 侦查
                 continue;
             }
             // 没有房间视野不孵化
-            if (!targetRoom || Game.time % 10 != 1) continue;
+            if (!targetRoom || Game.time % 20 != 2) continue;
 
             if(Game.time % 100 == 1 && targetRoom.memory['road']?.length > 0) {
                 for(const road of targetRoom.memory['road']) {
@@ -61,8 +61,7 @@ export default class OutMine extends Room {
 
             const lv = this.getEffectiveRoomLevel();
 
-            // 六级以上才防御外矿
-            if (this.level >= 6 && outDefendSpawn(this, targetRoom, lv, hostiles)) continue;
+            outDefendSpawn(this, targetRoom, lv, hostiles)
 
             // 有带攻击组件的敌人时不孵化
             if (hostiles.length > 0) continue;
@@ -142,7 +141,8 @@ export default class OutMine extends Room {
             outHarvesterSpawn(this, targetRoom, 3, true);    // 采集
             const mineral = targetRoom.find(FIND_MINERALS)[0];
             if (mineral && mineral.mineralAmount > 0) {
-                outMineSpawn(this, targetRoom);}    // 采矿
+                outMineSpawn(this, targetRoom);
+            }    // 采矿
             outCarrySpawn(this, targetRoom, 4);    // 搬运
             outBuilderSpawn(this, targetRoom);    // 建造
         }
@@ -290,8 +290,6 @@ export default class OutMine extends Room {
                     if (mineData.count >= mineData.max) break;
                 }
             }
-
-            if (!room) continue;
             
             if (!mineData.prCount) mineData.prCount = 0;
             if (mineData.prCount < mineData.prMax && mineData.prNum > 0) {
@@ -305,13 +303,15 @@ export default class OutMine extends Room {
                 }
             }
 
+            if (!room) continue;
+
             // 按照power容量孵化搬运工
             const maxPc = powerBank.power / 1250;
             // 预计搬运工到达时间
             let TICK = Game.map.getRoomLinearDistance(this.name, targetRoom) * 50 + Math.ceil(maxPc/3)*150 + 50;
             let threshold = TICK * Math.max(1800, mineData.creep*600*(mineData.boostLevel+1));
-            if (threshold < 500e3) threshold = 500e3;
-            if (threshold > 1.2e6) threshold = 1.2e6;
+            if (threshold < 600e3) threshold = 600e3;
+            if (threshold > 1.5e6) threshold = 1.5e6;
             if (powerBank.hits <= threshold) {
                 const pc = (CreepByTargetRoom['power-carry'] || [])
                         .filter((c: any) => c.spawning || c.ticksToLive > 150).length;
@@ -437,33 +437,27 @@ const outDefendSpawn = function (homeRoom: Room, targetRoom: Room, lv: number, h
     const outerInvaders = (CreepByTargetRoom['out-invader'] || []).length;
 
     let role: string;
-    let bodys: number[];
     let memory: any;
     let name: string;
-    let level: number;
 
     if(hostiles.length > 0) {
         const spawnNum = global.SpawnMissionNum[homeRoom.name]['out-defend'] || 0;
         if (outerDefenders + spawnNum >= 1) return false;
         role = 'out-defend';
-        bodys = GetRoleBodys(role, lv);
         memory = { homeRoom: homeRoom.name, targetRoom: targetRoom.name };
         name = 'OD';
-        level = RoleData[role].level;
-        if(!bodys || !memory || !level) return false;
-        homeRoom.SpawnMissionAdd(name, bodys, level, role, memory);
+        if(!memory) return false;
+        homeRoom.SpawnMissionAdd(name, [], -1, role, memory);
         return true;
     }
     if(invaderCore.length > 0) {
         const spawnNum = global.SpawnMissionNum[homeRoom.name]['out-invader'] || 0;
         if (outerInvaders + spawnNum >= 2) return false;
         role = 'out-invader';
-        bodys = GetRoleBodys(role, lv);
         memory = { homeRoom: homeRoom.name, targetRoom: targetRoom.name };
         name = 'OI';
-        level = RoleData[role].level;
-        if(!bodys || !memory || !level) return false;
-        homeRoom.SpawnMissionAdd(name, bodys, level, role, memory);
+        if(!memory) return false;
+        homeRoom.SpawnMissionAdd(name, [], -1, role, memory);
         return true;
     }
     
@@ -637,7 +631,7 @@ const PowerMineMissionData = function (room: Room, P_num: number, power: number)
 
     let data = null;
     // 一队T2
-    if (power > 6000 && LO_Amount >= 3000 &&
+    if (power > 7000 && LO_Amount >= 3000 &&
         GHO2_Amount >= 3000 && UH2O_Amount >= 3000) {
         data = {
             creep: 1,      // creep队伍数

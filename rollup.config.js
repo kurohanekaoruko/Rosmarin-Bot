@@ -28,7 +28,7 @@ const runCopy = () => {
                 dest: config.copyPath
             },
             {
-                src: 'src/planner/dynamic/algo_wasm_priorityqueue.wasm',
+                src: 'src/modules/planner/dynamic/algo_wasm_priorityqueue.wasm',
                 dest: config.copyPath
             },
             {
@@ -88,13 +88,9 @@ export default {
         copy({
             targets: [
                 {
-                    src: 'src/planner/dynamic/algo_wasm_priorityqueue.wasm',
+                    src: 'src/modules/planner/dynamic/algo_wasm_priorityqueue.wasm',
                     dest: 'dist'
                 },
-                // {
-                //     src: 'src/modules/调用栈分析器.js',
-                //     dest: 'dist'
-                // }
             ]
         }),
         // 执行上传或者复制

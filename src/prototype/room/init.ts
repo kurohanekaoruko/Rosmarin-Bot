@@ -1,4 +1,4 @@
-export default class RoomRun extends Room {
+export default class RoomInit extends Room {
     // 房间初始化
     init() {
         if (!this.my || !Memory['RoomControlData'][this.name]) return;

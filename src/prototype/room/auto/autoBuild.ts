@@ -14,8 +14,8 @@ export default class AutoBuild extends Room {
 
         // 开启了自动建造, 且有布局Memory, 则自动建筑
         const memory = Memory['RoomControlData'][this.name];
+        if (!memory) return;
         const layoutMemory = Memory['LayoutData'][this.name];
-        if(!memory) return;
         if (memory.autobuild && layoutMemory &&
             Object.keys(layoutMemory).length) {
             plannerCreateSite(this, layoutMemory);

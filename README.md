@@ -2,7 +2,7 @@
 
 ![language-typescript](https://img.shields.io/badge/language-typescript-3178c6)
 
-一个用于 [Screeps](https://screeps.com/) 的 TypeScript 半自动脚本。基本的房间运营均可自动，其他功能则通过旗帜控制。
+一个用于 [Screeps](https://screeps.com/) 的 TypeScript 半自动脚本。
 
 ## 注意
 
@@ -46,7 +46,7 @@
             "path": "/",
             "branch": "main"
         },
-        "local": {  // 可选
+        "local": {
             "copyPath": "游戏客户端放代码的本地路径"
         }
     }

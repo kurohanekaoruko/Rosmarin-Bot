@@ -20,3 +20,5 @@ export default class Mission extends Room {
         if(Game.time % 200 === 2) BuildRepairMissionCheck(this);  // 检查建造与维修任务是否有效
     }
 }
+
+

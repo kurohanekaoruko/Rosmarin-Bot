@@ -150,15 +150,20 @@ export default class PowerCreepUsePower extends PowerCreep {
         if (!labA || !labB) return;
         const labAtype = botmem.labAtype;
         const labBtype = botmem.labBtype;
-        if (labA.store[labAtype] < 1000 || labB.store[labBtype] < 1000) {
+        if (!labAtype || !labBtype ||
+            labA.store[labAtype] < 1000 ||
+            labB.store[labBtype] < 1000) {
             return;
         }
         
+        const product = REACTIONS[labAtype][labBtype];
+
         if (!labAtype || !labBtype) return;
         const lab = this.room.lab.find(l => {
             if(l.id == botmem.labA || l.id == botmem.labB) return false;
             if(botmem['boostRes'][l.id]) return false;
             if(botmem['boostTypes'][l.id]) return false;
+            if(l.mineralType != product) return false;
             return !l.effects || l.effects.every(e => e.effect != PWR_OPERATE_LAB)
         });
         if(!lab) return false;

@@ -71,7 +71,10 @@ export default class TowerControl extends Room {
             } else if (part.boost == 'XGHO2') {
                 realDamage += Math.min(Math.floor(towerDamage*0.3), part.hits);
                 towerDamage -= Math.ceil(part.hits / 0.3);
-            } else return;
+            } else {
+                realDamage += Math.min(towerDamage, part.hits);
+                towerDamage -= part.hits;
+            }
         });
         if (towerDamage > 0) realDamage += towerDamage;
         // 治疗量
@@ -168,10 +171,13 @@ export default class TowerControl extends Room {
                 filter: c => c.owner.username == 'Source Keeper' || c.owner.username == 'Invader'
             }).map(c => c.id);
         }
-        if (global.towerAttackNPC[this.name]?.length > 0) {
+        let Hostiles = (global.towerAttackNPC[this.name]||[])
+                    .map((id: Id<Creep>) => Game.getObjectById(id))
+                    .filter((c:Creep) => c && this.TowerDamageToCreep(c) > 0);
+        if (Hostiles.length > 0) {
             this.tower.forEach(tower => {
-                let index = Math.floor(Math.random() * global.towerAttackNPC[this.name].length);
-                tower.attack(Game.getObjectById(global.towerAttackNPC[this.name][index]) as Creep);
+                let index = Math.floor(Math.random() * Hostiles.length);
+                tower.attack(Hostiles[index]);
             })
             return true;
         }

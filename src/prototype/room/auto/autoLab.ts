@@ -15,29 +15,26 @@ export default class AutoLab extends Room {
         const labA = Game.getObjectById(botmem.labA) as StructureLab;
         const labB = Game.getObjectById(botmem.labB) as StructureLab;
         // 检查库存是否够合成
-        const ResAmountCheck = (this.getResourceAmount(botmem.labAtype) >= 1000 &&
-                                this.getResourceAmount(botmem.labBtype) >= 1000)
+        const ResAmountCheck = (this.getResAmount(botmem.labAtype) >= 1000 &&
+                                this.getResAmount(botmem.labBtype) >= 1000)
         // 检查当前填充的是否够合成
         const LabMineralCheck = labA && labB &&
                                 labA.mineralType === botmem.labAtype &&
                                 labB.mineralType === botmem.labBtype &&
-                                labA.store[botmem.labAtype] >= 15 &&
-                                labB.store[botmem.labBtype] >= 15;
-        // 没有限额，原料充足，则不变更任务
-        if (amount <= 0 && botmem.labAtype && botmem.labBtype &&
+                                labA.store[botmem.labAtype] >= 5 &&
+                                labB.store[botmem.labBtype] >= 5;
+        // 未超限额，原料充足，则不变更任务
+        if (botmem.labAtype && botmem.labBtype && labProduct &&
+            (amount <= 0 || this.getResAmount(labProduct) < amount) &&
             (ResAmountCheck || LabMineralCheck)
         ) return;
 
-        // 有限额，则增加数量检查
-        if (amount > 0 && botmem.labAtype && botmem.labBtype &&
-            labProduct && this.getResourceAmount(labProduct) < amount &&
-            (ResAmountCheck || LabMineralCheck)
-        ) return;
 
         if (labProduct) {
             botmem.labAtype = '';
             botmem.labBtype = '';
             botmem.labAmount = 0;
+            global.log(`[自动Lab合成] ${this.name}已自动关闭lab合成任务: ${labProduct}`)
         }
 
         // 获取自动任务列表
@@ -50,9 +47,9 @@ export default class AutoLab extends Room {
         for (const res in autoLabMap) {
             const level = LabLevel[res];
             if (lv <= level) continue;
-            if (autoLabMap[res] > 0 && this.getResourceAmount(res) >= autoLabMap[res] * 0.9) continue;
-            if (this.getResourceAmount(LabMap[res]['raw1']) < 6000 ||
-                this.getResourceAmount(LabMap[res]['raw2']) < 6000) continue;
+            if (autoLabMap[res] > 0 && this.getResAmount(res) >= autoLabMap[res] * 0.9) continue;
+            if (this.getResAmount(LabMap[res]['raw1']) < 6000 ||
+                this.getResAmount(LabMap[res]['raw2']) < 6000) continue;
             task = res;
             lv = level;
         }
@@ -62,7 +59,7 @@ export default class AutoLab extends Room {
         botmem.labBtype = LabMap[task]['raw2'];
         botmem.labAmount = autoLabMap[task];
 
-        global.log(`[${this.name}] 已自动分配lab合成任务: ${botmem.labAtype}/${botmem.labBtype} -> ${REACTIONS[botmem.labAtype][botmem.labBtype]}, 限额: ${autoLabMap[task] || '无'}`)
+        global.log(`[自动Lab合成] ${this.name}已自动分配lab合成任务: ${botmem.labAtype}/${botmem.labBtype} -> ${REACTIONS[botmem.labAtype][botmem.labBtype]}, 限额: ${autoLabMap[task] || '无'}`)
         return OK;
     }
 }

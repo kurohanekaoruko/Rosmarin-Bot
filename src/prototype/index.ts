@@ -1,7 +1,7 @@
 import mountCreep from './creep'
 import mountRoom from './room'
 import mountPower from './power'
-import mountControl from './control'
+import mountGlobal from './global'
 import mountPosition from './position'
 import mountHelp from './help'
 
@@ -11,7 +11,7 @@ export const PrototypeExtension = function () {
     mountCreep();
     mountRoom();
     mountPower();
-    mountControl();
+    mountGlobal();
     mountPosition();
     mountHelp();
 }

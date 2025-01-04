@@ -17,8 +17,7 @@ function RoleSpawnCheck(room: Room, role: string, currentNum: number, num: numbe
             if(room.memory.defend) return false;
             if(spup) return false;
             if(global.CreepNum[room.name]['speedup-upgrade']) return false;
-            if (lv == 8 && !mustUpgrade &&
-                room.controller.ticksToDowngrade >= 150000) return false;
+            if (lv == 8 && !mustUpgrade && room.controller.ticksToDowngrade >= 150000) return false;
             return currentNum < num;
         case 'transport':
             if (room.AllEnergy() < 1000) return false;
@@ -33,15 +32,14 @@ function RoleSpawnCheck(room: Room, role: string, currentNum: number, num: numbe
                     room.find(FIND_DROPPED_RESOURCES).filter(r => r.amount > 1000).length > 0);
             }
             return currentNum < num && room.container.length > 0;
-        case 'builder':
-            if(room.memory.defend) return false;
-            if(!room.checkMissionInPool('build')) return false;
-            if(room.getMissionNumInPool('build') > 10) return currentNum < 2;
-            else return currentNum < 1;
-        case 'repair':
-            return currentNum < 1 && 
-                ((room.getMissionNumInPool('repair') > 20 || room.checkMissionInPool('walls'))
-                && room.AllEnergy() > 50000);
+        case 'worker':
+            if (room.memory.defend) return false;
+            if(room.getMissionNumInPool('build') > 10 && currentNum < 2) return true;
+            else if (room.checkMissionInPool('build') && currentNum < 1) return true;
+            else if (room.getMissionNumInPool('repair') >= 20) return true;
+            if (currentNum >= 1 || room[RESOURCE_ENERGY] < 100000) return false;
+            if (room.checkMissionInPool('walls')) return true;
+            return false;
         case 'miner':
             if(room.memory.defend) return false;
             return currentNum < 1 && lv >= 6 &&

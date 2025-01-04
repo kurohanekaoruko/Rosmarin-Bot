@@ -9,7 +9,7 @@ function UpdateBuildRepairMission(room: Room) {
 
     const NORMAL_STRUCTURE_THRESHOLD = 0.8;     // 普通修复建筑耐久度阈值
     const URGENT_STRUCTURE_THRESHOLD = 0.1;     // 紧急修复建筑耐久度阈值
-    const NORMAL_WALL_HITS = 1e6;               // 普通修复墙耐久度
+    const NORMAL_WALL_HITS = room.level < 6 ? 300e3 : 1e6;               // 普通修复墙耐久度
     const URGENT_WALL_HITS = 3000;              // 紧急修复墙耐久度
 
     // 维修优先级：紧急维修-建筑 > 紧急维修-墙 > 常规维修-建筑 > 常规维修-墙
@@ -73,13 +73,21 @@ function UpdateWallRepairMission(room: Room) {
     if (botMem['ram_threshold']) {
         WALL_HITS_MAX_THRESHOLD = Math.min(botMem['ram_threshold'], 1);
     }
-    const memory = Memory['LayoutData'][room.name] as { [key: string]: number[]};
-    if (!memory) return;
+    const memory = Memory['LayoutData'][room.name] as { [key: string]: number[]} || {};
     let wallMem = memory['constructedWall'] || [];
     let rampartMem = memory['rampart'] || [];
     let structRampart = [];
     for (let s of ['spawn', 'tower', 'storage', 'terminal', 'factory', 'lab', 'nuker', 'powerSpawn']) {
-        structRampart.push(...(memory[s] || []));
+        if (memory[s]) {
+            structRampart.push(...(memory[s] || []));
+        } else {
+            if (Array.isArray(room[s])) {
+                const poss = room[s].map((s) => compress(s.pos.x, s.pos.y));
+                structRampart.push(...poss);
+            } else if (room[s]) {
+                structRampart.push(compress(room[s].pos.x, room[s].pos.y));
+            }
+        }
     }
     rampartMem = [...new Set(rampartMem.concat(structRampart))];
     const ramwalls = room.find(FIND_STRUCTURES, {

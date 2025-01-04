@@ -83,14 +83,14 @@ export default class MissionPools extends Room {
     // (私有方法) 生成一个16进制id
     private generateId() {
         const Gametime = Game.time.toString(16);
-        const Random = Math.random().toString(16).slice(2,11);
-        return Gametime + Random;
+        const Random = Math.random().toString(16).slice(2,-1);
+        return (Gametime + Random).toUpperCase();
     }
 
     // 添加任务到任务池
     public addMissionToPool(type: Task["type"], level: Task["level"], data: Task["data"]) {
-        const id = this.generateId(); // 生成id
-        let task: Task = {id, type, level, data, lock: null}
+        const id = `${type}-${this.generateId()}`; // 生成id
+        let task: Task = {id, type, level, data}
         this.pushTaskToPool(type, task);
         return OK;
     }
@@ -188,7 +188,8 @@ export default class MissionPools extends Room {
         const task = tasks.find(t => t.id === id);
         if (!task) { console.log(`任务${id}不存在`);return;}
 
-        task.lock = creepId;
+        task.lock = true;
+        task.bindCreep = creepId;
         return OK;
     }
 
@@ -201,7 +202,8 @@ export default class MissionPools extends Room {
         const task = tasks.find(t => t.id === id)
         if (task) {console.log(`任务${id}不存在`);return;}
 
-        task.lock = null;
+        task.lock = false;
+        task.bindCreep = null;
         return OK;
     }
 
@@ -251,7 +253,8 @@ export default class MissionPools extends Room {
 
         for (const task of tasks) {
             // 检查函数返回false，则删除任务
-            if (!checkFunc(task)) this.deleteMissionFromPool(type, task.id)
+            if (!checkFunc(task))
+                this.deleteMissionFromPool(type, task.id)
         }
         return OK;
     }
@@ -269,9 +272,11 @@ export default class MissionPools extends Room {
             task.data[key] = data[key];
         }
         // 去除锁定
-        task.lock = null;
+        task.lock = false;
+        task.bindCreep = null;
         // 判断任务是否该被删除
-        if(deleteFunc(task.data)) this.deleteMissionFromPool(type, id);
+        if(deleteFunc(task.data))
+            this.deleteMissionFromPool(type, id);
         return OK;
     }
 }

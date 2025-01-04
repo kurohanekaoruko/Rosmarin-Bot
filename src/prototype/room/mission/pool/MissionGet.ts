@@ -26,7 +26,7 @@ export default class MissionGet extends Room {
 
         return task;
     }
-
+    // 获取建造任务
     getBuildMission(creep: Creep) {
         const posInfo = `${creep.pos.x}/${creep.pos.y}/${creep.pos.roomName}`
 
@@ -39,7 +39,7 @@ export default class MissionGet extends Room {
         
         return null;
     }
-
+    // 获取维修任务
     getRepairMission(creep: Creep) {
         const posInfo = `${creep.pos.x}/${creep.pos.y}/${creep.pos.roomName}`
 
@@ -51,7 +51,7 @@ export default class MissionGet extends Room {
         }
 
         if(this.checkMissionInPool('walls')){
-            if (this.AllEnergy() < 10000) return null;
+            if (this[RESOURCE_ENERGY] < 50000) return null;
             const task = this.getMissionFromPool('walls', posInfo);
             if(!task) return null;
 
@@ -60,7 +60,7 @@ export default class MissionGet extends Room {
 
         return null;
     }
-
+    // 获取发送任务
     getSendMission() {
         const terminal = this.terminal;
         const checkFunc = (task: Task) => {
@@ -72,7 +72,7 @@ export default class MissionGet extends Room {
         if(!task) return null;
         return task;
     }
-
+    // 获取发送任务总共发送量
     getSendMissionTotalAmount() {
         const tasks = this.getAllMissionFromPool('send');
         const sends = {};
@@ -87,14 +87,13 @@ export default class MissionGet extends Room {
         }
         return sends;
     }
-
     // 获取孵化任务
     getSpawnMission(energyAvailable: number) {
         const checkFunc = (task: Task) => {
             const data = task.data as SpawnTask;
             return (energyAvailable||0) >= (data.energy||0);
         }
-        const task = this.getMissionFromPool('spawn', checkFunc);
+        const task = this.getMissionFromPool('spawn', null, checkFunc);
         if(!task) return null;
         return task;
     }
