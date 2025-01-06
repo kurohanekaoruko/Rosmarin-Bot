@@ -227,13 +227,21 @@ function AutoDeal(roomName: string, res: ResourceConstant, amount: number, order
         if(orderType === ORDER_SELL && order.price > price) continue;
         else if(orderType === ORDER_BUY && order.price < price) continue;
 
-        const dealAmount = Math.min(amount, order.amount);  // 交易数量
-        const transferEnergyCost = Game.market.calcTransactionCost(dealAmount, roomName, order.roomName);  // 交易能量成本
-        const resourceCost = dealAmount * order.price;  // 交易金额
-        const ENERGY_COST_FACTOR = ecost;
+        let dealAmount = Math.min(amount, order.amount);  // 交易数量
+        let transferEnergyCost = Game.market.calcTransactionCost(dealAmount, roomName, order.roomName);  // 交易能量成本
+        if (res != RESOURCE_ENERGY && transferEnergyCost > room.terminal.store[RESOURCE_ENERGY]) {
+            dealAmount *= room.terminal.store[RESOURCE_ENERGY] / transferEnergyCost;
+            transferEnergyCost = Game.market.calcTransactionCost(dealAmount, roomName, order.roomName);
+        } else if (res == RESOURCE_ENERGY && dealAmount + transferEnergyCost > room.terminal.store[RESOURCE_ENERGY]) {
+            dealAmount = room.terminal.store[RESOURCE_ENERGY] - transferEnergyCost;
+            transferEnergyCost = Game.market.calcTransactionCost(dealAmount, roomName, order.roomName);
+        }
+
+        let resourceCost = dealAmount * order.price;  // 交易金额
 
         let cost = 0;
-        if(res === RESOURCE_ENERGY) {
+        const ENERGY_COST_FACTOR = ecost;
+        if(res == RESOURCE_ENERGY) {
             if(orderType === ORDER_SELL) {
                 cost = resourceCost / (dealAmount - transferEnergyCost);  // 购买能量：交易金额÷(交易数量-传输消耗)=实际价格
             } else {
@@ -263,6 +271,11 @@ function AutoDeal(roomName: string, res: ResourceConstant, amount: number, order
     const transferEnergyCost = bestTransferEnergyCost;
     const resourceCost = bestResourceCost;
     const id = order.id;
+
+    if (res == RESOURCE_ENERGY && dealAmount < 3000) {
+        return;
+    }
+
     const result = Game.market.deal(id, dealAmount, roomName);
 
     if (result === OK) {

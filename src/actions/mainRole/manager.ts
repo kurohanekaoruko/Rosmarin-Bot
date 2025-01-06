@@ -3,7 +3,7 @@
  * @param {Creep} creep - 执行任务的 creep
  * @returns {boolean} - 是否成功执行任务
  */
-function manageMission(creep: Creep): boolean {
+function managerMission(creep: Creep): boolean {
     if(!creep.room.checkMissionInPool('manage')) return false;
 
     const task = creep.room.getMissionFromPoolFirst('manage') as Task;
@@ -145,6 +145,8 @@ function LinkEnergyTransfer(creep: Creep) {
         if (creep.store[RESOURCE_ENERGY] >= 100) {  // 有能量时转移
             return creep.transferOrMoveTo(manageLink, RESOURCE_ENERGY);
         }
+        // 如果身上有不是energy的资源，先将其放到storage或terminal
+        if (handleOtherResources(creep, RESOURCE_ENERGY)) return true;
         const source = storage?.store[RESOURCE_ENERGY] > 0 ? storage : null;
         if (source) return creep.withdrawOrMoveTo(source, RESOURCE_ENERGY);
     }
@@ -155,11 +157,15 @@ function LinkEnergyTransfer(creep: Creep) {
         if (creep.store[RESOURCE_ENERGY] >= 100) {  // 有能量时转移
             return creep.transferOrMoveTo(manageLink, RESOURCE_ENERGY);
         }
+        // 如果身上有不是energy的资源，先将其放到storage或terminal
+        if (handleOtherResources(creep, RESOURCE_ENERGY)) return true;
         const source = storage?.store[RESOURCE_ENERGY] > 0 ? storage : null;
         if (source) return creep.withdrawOrMoveTo(source, RESOURCE_ENERGY);
     }
     // 从link提取能量
     else if (manageLink?.store[RESOURCE_ENERGY] > 0) {
+        // 如果身上有不是energy的资源，先将其放到storage或terminal
+        if (handleOtherResources(creep, RESOURCE_ENERGY)) return true;
         if (creep.store.getFreeCapacity() > 0) {
             return creep.withdrawOrMoveTo(manageLink, RESOURCE_ENERGY);
         }
@@ -168,21 +174,22 @@ function LinkEnergyTransfer(creep: Creep) {
 }
 
 
-const Manage = {
+const ManagerAction = {
     run: function(creep: Creep) {
         if (!creep.memory.dontPullMe) creep.memory.dontPullMe = true;
         const storage = creep.room.storage;
         const terminal = creep.room.terminal;
-    
-        // 搬运任务
-        if (manageMission(creep)) {
-            return;
-        }
+
         // 取放Link
         if (LinkEnergyTransfer(creep)) {
             return;
         }
-        
+    
+        // 搬运任务
+        if (managerMission(creep)) {
+            return;
+        }
+
         // 将身上的资源存放到storage、terminal中
         const resourceType = Object.keys(creep.store)[0] as ResourceConstant;
         const target = storage?.store.getFreeCapacity(RESOURCE_ENERGY) > 0 ? storage :
@@ -203,4 +210,4 @@ const Manage = {
     }
 };
 
-export default Manage;
+export default ManagerAction;

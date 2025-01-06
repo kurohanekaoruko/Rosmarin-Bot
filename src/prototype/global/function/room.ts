@@ -130,8 +130,14 @@ export default {
         },
         // 添加发送任务
         send(roomName: string, targetRoom: string, type: string, amount: number) {
+            if (!roomName.match(/^[EW][1-9]+[NS][1-9]+$/)) return Error(`房间名格式不正确。`);
+            if (!targetRoom.match(/^[EW][1-9]+[NS][1-9]+$/)) return Error(`目标房间名格式不正确。`);
             const RESOURCE_ABBREVIATIONS = global.BaseConfig.RESOURCE_ABBREVIATIONS;
             type = RESOURCE_ABBREVIATIONS[type] || type;
+            if (!RESOURCES_ALL.includes(type as ResourceConstant)) return Error(`资源类型不正确。`);
+            if (typeof amount !== 'number') return Error(`数量必须是数字。`);
+            if (amount <= 0) return Error(`数量必须大于0。`);
+            
             const room = Game.rooms[roomName];
             room.SendMissionAdd(targetRoom, type, amount);
             global.log(`[任务模块] 在房间 ${room.name} 添加了发送任务: ${amount} ${type} -> ${targetRoom} `);
@@ -144,7 +150,14 @@ export default {
                 if(!room || !room.my) return Error(`房间 ${roomName} 不存在或未拥有。`);
                 const roomMem = Memory['RoomControlData'][roomName];
                 const structMem = Memory['StructControlData'][roomName];
-                console.log(`<b>房间 ${roomName} 工作状态:</b>`);
+                console.log(`<b>房间 ${roomName} 状态:</b>`);
+                if (room.nuker) {
+                    console.log(`   - <b>核弹</b>: ${room.nuker.cooldown ?
+                                                    colorText('冷却中', '#D9C07B') :
+                                                    room.nuker.store['energy'] < 300e3 || room.nuker.store['G'] < 5000 ?
+                                                    colorText('资源不足', '#D9C07B') :
+                                                    colorText('可发射', '#62BE78')}`);
+                }
                 if (roomMem.spup) {
                     console.log(`   - <b>冲级</b>: ${colorText(`${roomMem.spup}个工作中`, '#62BE78')}`);
                 }
@@ -155,34 +168,34 @@ export default {
                     console.log(`   - <b>过道</b>: power:${roomMem.outminePower ? colorText('开启', '#62BE78') : colorText('关闭', '#EF4E4E')} deposit:${roomMem.outmineDeposit ? colorText('开启', '#62BE78') : colorText('关闭', '#EF4E4E')}`);
                 }
                 if (!structMem['powerSpawn']) {
-                    console.log(`   - <b>powerSpawn</b>: ${colorText('已关闭', '#EF4E4E')}`);
+                    console.log(`   - <b>PowerSpawn</b>: ${colorText('已关闭', '#EF4E4E')}`);
                 } else if (
                     room.powerSpawn.store[RESOURCE_ENERGY] < 50 ||
                     room.powerSpawn.store[RESOURCE_POWER] < 1) {
-                    console.log(`   - <b>powerSpawn</b>: ${colorText('资源不足', '#D9C07B')}`);
+                    console.log(`   - <b>PowerSpawn</b>: ${colorText('资源不足', '#D9C07B')}`);
                 } else {
-                    console.log(`   - <b>powerSpawn</b>: ${colorText('工作中', '#62BE78')}`);
+                    console.log(`   - <b>PowerSpawn</b>: ${colorText('工作中', '#62BE78')}`);
                 }
 
                 if (!structMem['lab']) {
-                    console.log(`   - <b>lab</b>: ${colorText('已关闭', '#EF4E4E')}`);
+                    console.log(`   - <b>Lab</b>: ${colorText('已关闭', '#EF4E4E')}`);
                 } else if (!structMem['labAtype'] || !structMem['labBtype']) {
-                    console.log(`   - <b>lab</b>: ${colorText('闲置中', '#D9C07B')}`);
+                    console.log(`   - <b>Lab</b>: ${colorText('闲置中', '#D9C07B')}`);
                 } else {
                     const labAtype = structMem['labAtype'];
                     const labBtype = structMem['labBtype'];
                     const product = REACTIONS[labAtype][labBtype];
-                    console.log(`   - <b>lab</b>: ${colorText(`${labAtype}/${labBtype} -> ${product}`, '#62BE78')}`);
+                    console.log(`   - <b>Lab</b>: ${colorText(`${labAtype}/${labBtype} -> ${product}`, '#62BE78')}`);
                 }
 
                 if (!structMem['factory']) {
-                    console.log(`   - <b>factory</b>: ${colorText('已关闭', '#EF4E4E')}`);
+                    console.log(`   - <b>Factory</b>: ${colorText('已关闭', '#EF4E4E')}`);
                 } else if (!structMem['factoryProduct']) {
-                    console.log(`   - <b>factory</b>: ${colorText('闲置中', '#D9C07B')}`);
+                    console.log(`   - <b>Factory</b>: ${colorText('闲置中', '#D9C07B')}`);
                 } else {
                     const product = structMem['factoryProduct'];
                     const components = COMMODITIES[product]?.components;
-                    console.log(`   - <b>factory</b>: ${colorText(`-> ${product}`, '#62BE78')}`);
+                    console.log(`   - <b>Factory</b>: ${colorText(`正在生产 ${product}`, '#62BE78')}`);
                 }
             } else {
                 for(const roomName in Memory['RoomControlData']) {

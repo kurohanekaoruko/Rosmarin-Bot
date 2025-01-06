@@ -78,7 +78,7 @@ export default class MissionGet extends Room {
         const sends = {};
         for(const task of tasks) {
             const data = task.data as SendTask;
-            const resTotalAmount = (this.terminal.store[data.resourceType] || 0) + (this.storage.store[data.resourceType] || 0);
+            const resTotalAmount = (this.terminal?.store[data.resourceType] || 0) + (this.storage?.store[data.resourceType] || 0);
             if(resTotalAmount < Math.min(data.amount, 10000)) {
                 this.deleteMissionFromPool('send', task.id);
                 continue;

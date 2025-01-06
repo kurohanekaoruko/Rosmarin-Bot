@@ -8,7 +8,9 @@ import { PrototypeExtension } from '@/prototype';
 
 import { GlobalInit } from '@/modules/GlobalInit';
 import { MemoryInit } from '@/modules/MemoryInit';
-import { ClearModule, GeneratePixel, Statistics } from '@/modules/function';
+import { ClearModule  } from '@/modules/function/ClearModule';
+import { GeneratePixel } from '@/modules/function/Pixel';
+import { Statistics } from '@/modules/function/Statistics'
 
 import { DoubleSquad } from '@/modules/DoubleSquad';
 import { ClaimModule } from '@/modules/ClaimModule';
@@ -18,9 +20,9 @@ import { ResourceManage } from '@/modules/ResourceManage';
 
 import SquadModule from '@/modules/warSquad/SquadModule';
 
-import '@/modules/betterMove';    // 超级移动优化
-import '@/modules/structureCache';  // 极致建筑缓存
-import '@/modules/helper_roomResource'; // 资源统计
+import '@/modules/function/betterMove';    // 超级移动优化
+import '@/modules/function/structureCache';  // 极致建筑缓存
+import '@/modules/function/helper_roomResource'; // 资源统计
 
 
 const app = createApp();

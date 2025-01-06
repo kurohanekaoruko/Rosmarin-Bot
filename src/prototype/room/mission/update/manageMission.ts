@@ -20,11 +20,11 @@ function CheckTerminalResAmount(room: Room) {
     // 自动调度资源阈值
     const THRESHOLD = {
         source: {
-            [RESOURCE_ENERGY]: 25000,
+            [RESOURCE_ENERGY]: 30000,
             default: 4000
         },
         target: {
-            [RESOURCE_ENERGY]: 20000,
+            [RESOURCE_ENERGY]: 25000,
             default: 3000
         }
     }
@@ -41,7 +41,7 @@ function CheckTerminalResAmount(room: Room) {
         if(resourceType === RESOURCE_ENERGY && Object.keys(sendTotal).length > 0) {
             amount = Math.min(
                 room.storage.store[resourceType],
-                Object.values(sendTotal).reduce((a, b) => a + b, 0) - room.terminal.store[resourceType],
+                Object.values(sendTotal).reduce((a, b) => (a + b) || 0, 0) - room.terminal.store[resourceType],
                 50e3 - room.terminal.store[resourceType],
             )
         }
@@ -139,7 +139,7 @@ function CheckPowerSpawnResAmount(room: Room) {
     let center = Memory['RoomControlData'][room.name].center;
     let centerPos: RoomPosition;
     if (center) centerPos = new RoomPosition(center.x, center.y, room.name);
-    if (!centerPos || !room.powerSpawn.pos.inRangeTo(centerPos, 2)) return;
+    if (!centerPos || !powerSpawn.pos.inRangeTo(centerPos, 2)) return;
 
     if (powerSpawn.store[RESOURCE_ENERGY] < 1000) {
         if (room.storage && room.storage.store[RESOURCE_ENERGY] >= 5000) {

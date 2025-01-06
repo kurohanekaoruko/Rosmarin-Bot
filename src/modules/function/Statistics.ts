@@ -1,11 +1,8 @@
 /** 统计模块 */
 export const Statistics = {
-    init: function() {
-        if (!Memory.stats) Memory.stats = {}
-    },
     tickEnd: function() {
         if (Game.shard.name == 'sim') return;
-        
+        if (!Memory.stats) Memory.stats = {}
         updateCPUinfo();       // 统计 CPU 使用量
         if (Game.time % 20 !== 1) return     // 每 20 个 tick 执行一次
         updateGclGpl();        // 统计 GCL / GPL 的升级百分比和等级
@@ -33,7 +30,7 @@ function updateCPUinfo() {
     Memory.stats.cpuUsed['total'] += Game.cpu.getUsed();
     Memory.stats.cpuUsed['count'] += 1;
     if (Memory.stats.cpuUsed['count'] >= 1000) {
-        Memory.stats.cpuAvgUsed = Memory.stats.cpuUsed['total'] / Memory.stats.cpuUsed['count'];
+        Memory.stats.AvgCpuUsed = Memory.stats.cpuUsed['total'] / Memory.stats.cpuUsed['count'];
         Memory.stats.cpuUsed['total'] = 0;
         Memory.stats.cpuUsed['count'] = 0;
     }

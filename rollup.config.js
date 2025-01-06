@@ -96,5 +96,5 @@ export default {
         // 执行上传或者复制
         pluginDeploy
     ],
-    external: ['src/planner/dynamic/algo_wasm_priorityqueue.wasm']
+    external: ['src/modules/planner/dynamic/algo_wasm_priorityqueue.wasm']
 };

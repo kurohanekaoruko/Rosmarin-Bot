@@ -103,19 +103,20 @@ export default class MissionPools extends Room {
     }
 
     // 获取任务池中的任务
-    public getMissionFromPool(type: Task["type"], pos?: string, checkFunc?: (task: Task) => boolean) {
+    public getMissionFromPool(type: Task["type"], pos?: string, filter?: (task: Task) => boolean) {
         const tasks = this.getPool(type);
         if (!tasks) { return null; }
         if (tasks.length === 0) return null; // 如果没有任务，返回null
 
         // 筛选未锁且有效的任务
-        const unlockedTasks = tasks.filter(task => task && !task.lock && (checkFunc ? checkFunc(task) : true));
+        if (!filter) filter = () => true;
+        const unlockedTasks = tasks.filter(task => task && !task.lock && filter(task));
 
         if (unlockedTasks.length === 0) return null; // 如果没有可用任务，返回null
         if (unlockedTasks.length === 1) return unlockedTasks[0]; // 如果只有一个任务，返回该任务
         
         return unlockedTasks.reduce((prev, curr) => {
-            // 任务等级相同时，如果传入了pos，那么根据距离返回任务
+            // 任务优先级相同时，如果传入了pos，那么根据距离返回任务
             if (prev.level !== curr.level || !pos) return prev.level <= curr.level ? prev : curr;
             if (!prev.data.pos || !curr.data.pos) return prev;
             const prevDistance = this.getDistance(prev.data.pos, pos);
@@ -125,8 +126,9 @@ export default class MissionPools extends Room {
     }
 
     // 不考虑优先级，直接获取第一个任务
-    public getMissionFromPoolFirst(type: Task["type"], checkFunc?: (task: Task) => boolean) {
-        const tasks = this.getPool(type).filter(task => task && !task.lock && (checkFunc ? checkFunc(task) : true));
+    public getMissionFromPoolFirst(type: Task["type"], filter?: (task: Task) => boolean) {
+        if (!filter) filter = () => true;
+        const tasks = this.getPool(type).filter(task => task && !task.lock && filter(task));
         if (!tasks) { return; }
         if (tasks.length === 0) return null; // 如果没有任务，返回null
         return tasks[0];

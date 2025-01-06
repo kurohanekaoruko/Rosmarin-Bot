@@ -73,6 +73,9 @@ interface Room {
     // Tower根据任务修复建筑
     TowerTaskRepair(): boolean;
 
+    // 孵化信息可视化
+    VisualSpawnInfo(): void;
+
     // 计算中心点
     CacheCenterPos(): void;
     // 计算房间内所有结构体能量

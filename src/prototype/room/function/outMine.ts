@@ -36,7 +36,7 @@ export default class OutMine extends Room {
             // 没有房间视野不孵化
             if (!targetRoom || Game.time % 20 != 2) continue;
 
-            if(Game.time % 100 == 1 && targetRoom.memory['road']?.length > 0) {
+            if(Game.time % 100 == 2 && targetRoom.memory['road']?.length > 0) {
                 for(const road of targetRoom.memory['road']) {
                     const [x, y] = decompress(road);
                     const pos = new RoomPosition(x, y, roomName);

@@ -12,7 +12,7 @@ export const ResourceManage = {
         // 遍历所有房间的设置
         for (const roomName in botmem) {
             const room = Game.rooms[roomName];
-            if (!room || !room.my || room.terminal.cooldown > 0 || !room.terminal ||
+            if (!room || !room.my || !room.terminal || !room.storage || room.terminal.cooldown > 0 ||
                 room.terminal.owner.username != room.controller.owner.username
             ) continue;
             const store = [room.storage, room.terminal];
@@ -63,8 +63,6 @@ export const ResourceManage = {
                 let sendAmount = Math.min(
                     // 不使供应房间的资源数量低于需求阈值
                     sourceAmount - (botmem[sourceRoom.name][res].target ?? 0),
-                    // 不使供应房间的资源数量低于供应阈值
-                    sourceAmount - (botmem[sourceRoom.name][res].source ?? Infinity),
                     // 发送数量不超过终端资源数量
                     terminalAmount,
                     // 不使需求房间的资源数量超过供应阈值
@@ -88,6 +86,12 @@ export const ResourceManage = {
                 }
                 // 不发送非正数
                 if (sendAmount <= 0) {
+                    i++; continue;
+                } else if (Goods.includes(res as any) && sendAmount < 10) {
+                    i++; continue;
+                } else if (res != RESOURCE_ENERGY && sendAmount < 1000) {
+                    i++; continue;
+                } else if (res == RESOURCE_ENERGY && sendAmount < 10000) {
                     i++; continue;
                 }
                 const result = sourceRoom.terminal.send(res as any, sendAmount, targetRoom.name, '资源自动管理');

@@ -1,6 +1,6 @@
 import { compress, compressBatch, decompressBatch } from '@/utils';
-import autoPlanner63 from '@/modules/planner/dynamic/autoPlanner63'
-import HelperVisual from '@/modules/planner/helperVisual'
+import autoPlanner63 from '@/modules/planner/dynamic/autoPlanner63';
+import HelperVisual from '@/modules/planner/helperVisual';
 
 export default {
     layout: {
@@ -73,17 +73,18 @@ export default {
         // 查看布局可视化
         visual(roomName?: string, layout?: string) {
             let cpu = Game.cpu.getUsed();
+            let result = null;
             if (roomName && layout) {
                 if (layout == '63') {
-                    VisualDynamicPlanner_63(roomName);
+                    result = VisualDynamicPlanner_63(roomName);
                 } else {
-                    VisualStaticPlanner(roomName, layout);
+                    result = VisualStaticPlanner(roomName, layout);
                 }
             } else if (roomName) {
                 const layoutMemory = Memory['LayoutData'][roomName];
                 if (!layoutMemory || Object.keys(layoutMemory).length == 0) {
                     console.log(`房间 ${roomName} 的布局memory不存在，将根据自动布局可视化...`)
-                    VisualDynamicPlanner_63(roomName);
+                    result = VisualDynamicPlanner_63(roomName);
                 } else {
                     console.log(`将根据房间${roomName}的布局memory进行可视化...`)
                     const structMap = {};
@@ -91,13 +92,19 @@ export default {
                         structMap[s] = decompressBatch(layoutMemory[s]);
                     }
                     HelperVisual.showRoomStructures(roomName, structMap);
+                    result = OK;
                 }
             } else {
-                VisualDynamicPlanner_63();
+                result = VisualDynamicPlanner_63();
             }
-            cpu = Game.cpu.getUsed() - cpu;
-            console.log(`可视化完成，消耗CPU ${cpu.toFixed(2)}。`)
-            return OK;
+            if (result == OK) {
+                cpu = Game.cpu.getUsed() - cpu;
+                console.log(`可视化完成，消耗CPU ${cpu.toFixed(2)}。`)
+                return OK;
+            } else {
+                console.log(`可视化失败，消耗CPU ${cpu.toFixed(2)}。`)
+                return result;
+            }
         },
         // 将房间建筑加入布局memory
         save(roomName: string) {
@@ -604,21 +611,35 @@ const VisualDynamicPlanner_63 = function (roomName?: string) {
     if (Game.cpu.bucket < 100) {
         return Error(`CPU bucket余量过低, 暂时无法运行自动布局。`);
     }
-    let roomStructsData: any;
-    let pa = Game.flags.pa?.pos;
-    let pb = Game.flags.pb?.pos;
-    let pc = Game.flags.pc?.pos;
-    let pm = Game.flags.pm?.pos;
-    let room = Game.rooms[roomName];
-    if ((!pa || !pb || !pc || !pm) && room) {
+    let pa, pb, pc, pm;
+    if (roomName) {
+        let room = Game.rooms[roomName];
+        if (!room) return Error(`房间 ${roomName} 的视野不存在。`);
         pa = room.source?.[0]?.pos || room.find(FIND_SOURCES)[0]?.pos;
         pb = room.source?.[1]?.pos || room.find(FIND_SOURCES)[1]?.pos || pa;
-        pc = room.controller?.pos;
         pm = room.mineral?.pos || room.find(FIND_MINERALS)[0]?.pos;
+        pc = room.controller?.pos;
         if (!pa || !pb || !pc || !pm) return Error(`房间 ${roomName} 的能量源、控制器或矿点不存在。`);
-    } else if (!pa || !pb || !pc || !pm) return Error(`未找到pa、pb、pc、pm旗帜标记。`);
-
-    roomStructsData = autoPlanner63.ManagerPlanner.computeManor(pa.roomName, [pc, pm, pa, pb,]);
+    } else {
+        pa = Game.flags.pa?.pos;
+        pb = Game.flags.pb?.pos;
+        pc = Game.flags.pc?.pos;
+        pm = Game.flags.pm?.pos;
+        if (!pa || !pb || !pc || !pm) return Error(`未找到pa、pb、pc、pm旗帜标记。`);
+        if (pa.roomName != pb.roomName ||
+            pa.roomName != pc.roomName ||
+            pa.roomName != pm.roomName) {
+            return Error(`pa、pb、pc、pm旗帜标记不在同一房间内。`);
+        }
+    }
+    let storagePos = Game.flags.storagePos;
+    if (storagePos && storagePos.pos.roomName !== pa.roomName) {
+        storagePos.remove();
+    }
+    let roomStructsData = autoPlanner63.ManagerPlanner.computeManor(pa.roomName, [pc, pm, pa, pb]);
+    if (!roomStructsData) {
+        return Error(`房间 ${pa.roomName} 自动布局失败, 原因未知。`);
+    }
     console.log('自动布局完成, 正在可视化...');
     autoPlanner63.HelperVisual.showRoomStructures(pa.roomName, roomStructsData.structMap);
     return OK;

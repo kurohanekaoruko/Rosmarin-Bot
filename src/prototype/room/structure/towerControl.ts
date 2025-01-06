@@ -24,7 +24,7 @@ export default class TowerControl extends Room {
     }
 
     /**
-     * 计算Tower对某一点的伤害
+     * 计算Tower的伤害
      * @param dist 攻击距离
      * @returns 
      */
@@ -58,27 +58,21 @@ export default class TowerControl extends Room {
         if(this.name != creep.room.name) return 0;
         // tower伤害
         let towerDamage = this.TowerTotalDamage(creep.pos) || 0;
-        // tough减伤
+        // tough减伤后的伤害
         let realDamage = 0;
         creep.body.forEach(part => {
             if (towerDamage <= 0 || part.hits <= 0) return;
-            if (part.boost == 'GO') {
-                realDamage += Math.min(Math.floor(towerDamage*0.7), part.hits);
-                towerDamage -= Math.ceil(part.hits / 0.7);
-            } else if (part.boost == 'GHO2') {
-                realDamage += Math.min(Math.floor(towerDamage*0.5), part.hits);
-                towerDamage -= Math.ceil(part.hits / 0.5);
-            } else if (part.boost == 'XGHO2') {
-                realDamage += Math.min(Math.floor(towerDamage*0.3), part.hits);
-                towerDamage -= Math.ceil(part.hits / 0.3);
-            } else {
-                realDamage += Math.min(towerDamage, part.hits);
-                towerDamage -= part.hits;
-            }
+            let partDamage = (part.type == TOUGH && part.boost) ? 
+                Math.min(Math.floor(towerDamage * BOOSTS[TOUGH][part.boost].damage), part.hits) :
+                Math.min(towerDamage, part.hits);
+            towerDamage -= (part.type == TOUGH && part.boost) ?
+                Math.ceil(part.hits / BOOSTS[TOUGH][part.boost].damage) :
+                partDamage;
+            realDamage += partDamage
         });
         if (towerDamage > 0) realDamage += towerDamage;
         // 治疗量
-        const healers = creep.pos.findInRange(FIND_CREEPS, 3, {
+        const healers = creep.pos.findInRange(FIND_CREEPS, 2, {
             filter: creep => creep.owner.username == creep.owner.username && creep.body.some(b => b.type == HEAL)
         }) || [];
         let totalHeal = 0;
@@ -222,7 +216,7 @@ export default class TowerControl extends Room {
                 const center = Memory['RoomControlData'][this.name]?.center
                 const posInfo = `${center?.x||25}/${center?.y||25}/${this.name}`
                 const task = this.getMissionFromPool('repair', posInfo,
-                    (t) => (Game.getObjectById(t.data.target) as any)?.hits < 1e6
+                    (t) => (Game.getObjectById(t.data.target) as any)?.hits < 3e5
                 );
                 if(!task) return false;
                 const target = Game.getObjectById(task.data.target) as Structure;

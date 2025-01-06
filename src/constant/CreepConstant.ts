@@ -30,11 +30,9 @@ export const RoleData: RoleConfig = {
     'harvester': { num: 0, ability: [1, 1, 2, 0, 0, 0, 0, 0], level: 3, code: 'H', action: Actions.harvester },  // 采集
     'carrier': { num: 0, ability: [0, 3, 3, 0, 0, 0, 0, 0], level: 4, code: 'C', work: Actions.carrier },  // 矿点搬运
     'transport': { num: 0, ability: [0, 2, 2, 0, 0, 0, 0, 0], level: 2, code: 'T', mission: Actions.transport }, // 资源运输填充
-    'manage': { num: 0, ability: [0, 1, 1, 0, 0, 0, 0, 0], level: 1, code: 'M', mission: Actions.manage }, // 中央搬运
+    'manager': { num: 0, ability: [0, 1, 1, 0, 0, 0, 0, 0], level: 1, code: 'M', mission: Actions.manager }, // 中央搬运
     'upgrader': { num: 0, ability: [1, 1, 2, 0, 0, 0, 0, 0], level: 10, code: 'U', work: Actions.upgrader }, // 升级
     'worker': { num: 0, ability: [1, 1, 2, 0, 0, 0, 0, 0], level: 10, code: 'W', work: Actions.worker }, // 建造、维修、刷墙
-    'builder': { num: 0, ability: [1, 1, 2, 0, 0, 0, 0, 0], level: 10, code: 'B', work: Actions.builder }, // 建造
-    'repair': { num: 0, ability: [1, 1, 1, 0, 0, 0, 0, 0], level: 8, code: 'R', work: Actions.repair }, //维修、刷墙
     'mineral': { num: 0, ability: [1, 1, 2, 0, 0, 0, 0, 0], level: 6, code: 'MR', work: Actions.mineral }, // 矿工
 
     /* 特殊用途 */
@@ -148,11 +146,11 @@ export const RoleLevelData = {
         3: { bodypart: [0, 2, 2, 0, 0, 0, 0, 0], num: 0 },
         4: { bodypart: [0, 5, 5, 0, 0, 0, 0, 0], num: 1 },
         5: { bodypart: [0, 10, 10, 0, 0, 0, 0, 0], num: 1 },
-        6: { bodypart: [0, 15, 15, 0, 0, 0, 0, 0], num: 2 },
-        7: { bodypart: [0, 24, 12, 0, 0, 0, 0, 0], num: 2 },
+        6: { bodypart: [0, 16, 16, 0, 0, 0, 0, 0], num: 1 },
+        7: { bodypart: [0, 24, 12, 0, 0, 0, 0, 0], num: 1 },
         8: { bodypart: [0, 32, 16, 0, 0, 0, 0, 0], num: 1 },
     },
-    'manage': {
+    'manager': {
         1: { bodypart: [0, 1, 1, 0, 0, 0, 0, 0], num: 0 },
         2: { bodypart: [0, 1, 1, 0, 0, 0, 0, 0], num: 0 },
         3: { bodypart: [0, 2, 2, 0, 0, 0, 0, 0], num: 0 },

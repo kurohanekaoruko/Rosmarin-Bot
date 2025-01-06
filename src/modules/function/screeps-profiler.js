@@ -69,7 +69,7 @@ function resetMemory() {
 }
 
 function overloadCPUCalc() {
-  if (Game.rooms.sim) {
+  if (Game.shard.name == 'sim') {
     usedOnStart = 0; // This needs to be reset, but only in the sim.
     Game.cpu.getUsed = function getUsed() {
       return performance.now() - usedOnStart;

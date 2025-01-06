@@ -94,7 +94,7 @@ export const errorMapper = function (next: any, ...args: any) {
     catch (e) {
         if (e instanceof Error) {
             // 渲染报错调用栈，沙盒模式用不了这个
-            const errorMessage = Game.rooms.sim ?
+            const errorMessage = Game.shard.name == 'sim' ?
                 `沙盒模式无法使用 source-map - 显示原始追踪栈<br>${_.escape(e.stack)}` :
                 `${_.escape(sourceMappedStackTrace(e))}`
             

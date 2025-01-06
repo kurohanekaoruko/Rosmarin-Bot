@@ -1,4 +1,4 @@
-const Mineral = {
+const MineralAction = {
     source: function (creep: Creep) {
         const mineral = creep.room.mineral;
         if (!mineral) {
@@ -68,4 +68,4 @@ const Mineral = {
     }
 };
 
-export default Mineral;
+export default MineralAction;

@@ -23,7 +23,7 @@ function RoleSpawnCheck(room: Room, role: string, currentNum: number, num: numbe
             if (room.AllEnergy() < 1000) return false;
             if (spup > 4) num += 1
             return currentNum < num && (room.storage || room.terminal);
-        case 'manage':
+        case 'manager':
             return currentNum < num && room.storage && room.terminal;
         case 'carrier':
             if (num === 0) {
@@ -34,11 +34,11 @@ function RoleSpawnCheck(room: Room, role: string, currentNum: number, num: numbe
             return currentNum < num && room.container.length > 0;
         case 'worker':
             if (room.memory.defend) return false;
-            if(room.getMissionNumInPool('build') > 10 && currentNum < 2) return true;
-            else if (room.checkMissionInPool('build') && currentNum < 1) return true;
-            else if (room.getMissionNumInPool('repair') >= 20) return true;
+            if (room.getMissionNumInPool('build') > 10 && currentNum < 2) return true;
+            if (room.checkMissionInPool('build') && currentNum < 1) return true;
             if (currentNum >= 1 || room[RESOURCE_ENERGY] < 100000) return false;
             if (room.checkMissionInPool('walls')) return true;
+            if (room.getMissionNumInPool('repair') >= 20) return true;
             return false;
         case 'miner':
             if(room.memory.defend) return false;

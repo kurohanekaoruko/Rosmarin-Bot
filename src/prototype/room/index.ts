@@ -1,9 +1,12 @@
 import { assignPrototype } from "@/prototype/base"
 import BaseFunction from "./function/baseFunction"
+import ActiveDefend from "./function/activeDefend"
+import OutMine from "./function/outMine"
+
 import StructureWork from "./structure/structureWork"
 import TowerControl from "./structure/towerControl"
-import OutMine from "./function/outMine"
-import ActiveDefend from "./function/activeDefend"
+import SpawnControl from "./structure/spawnControl"
+
 import RoomInit from "./init"
 
 import AutoMarket from "./auto/autoMarket"
@@ -20,9 +23,12 @@ import MissionSubmit from "./mission/pool/MissionSubmit"
 
 const plugins = [
     BaseFunction,   // 基础函数
+    ActiveDefend,   // 房间防御
+    OutMine,        // 外矿采集
+
     StructureWork,  // 建筑物工作
     TowerControl,   // 塔防控制
-    OutMine,        // 外矿采集
+    SpawnControl,   // 孵化控制
     
     AutoMarket,     // 自动市场交易
     AutoBuild,      // 自动建筑
@@ -34,8 +40,7 @@ const plugins = [
     MissionGet,     // 获取任务
     MissionSubmit,  // 提交任务
     Mission,        // 任务模块
-
-    ActiveDefend,   // 房间防御
+    
     RoomInit,       // 房间初始化
 ]
 

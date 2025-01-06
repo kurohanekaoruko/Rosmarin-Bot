@@ -69,8 +69,8 @@ export default {
                 // 初步过滤
                 if (orderType === ORDER_BUY && order.price < 1) return false;
                 if (type == 'energy' && order.amount < 10000) return false;
-                if (order.price > (avgPrice + stddevPrice) * 2) return false;
-                if (order.price < avgPrice * 0.5) return false;
+                // if (order.price > (avgPrice + stddevPrice) * 2) return false;
+                // if (order.price < avgPrice * 0.5) return false;
                 if (rooms[order.roomName]) return false;
                 rooms[order.roomName] = true;
                 return true;

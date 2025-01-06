@@ -137,7 +137,7 @@ const HarvesterAction = {
             const source = Game.getObjectById(creep.memory.targetSourceId) as Source;
             if (!source) {
                 creep.memory.ready = false;
-            } else if (source.energy === 0) {
+            } else if (source.energy === 0 && creep.pos.isNearTo(source)) {
                 if(!creep.room.container || !creep.room.link) return;
                 const container = creep.room.container.find(c =>
                     c.store.getUsedCapacity(RESOURCE_ENERGY) > 0 && creep.pos.inRangeTo(c, 1));

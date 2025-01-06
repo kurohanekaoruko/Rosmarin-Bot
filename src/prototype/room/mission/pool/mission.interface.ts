@@ -86,7 +86,7 @@ interface Task {
     level: number,  // 优先级
     type: 'transport' | 'manage' | 'build' | 'repair' | 'walls' | 'send' | 'spawn',  // 任务类型
     data: TransportTask | BuildTask | RepairTask | ManageTask | SendTask | SpawnTask | any // 任务数据
-    lock?: boolean, // 任务是否被锁定, 如果需要记录锁定者那么是id，否则以布尔值表示
+    lock?: boolean, // 任务是否被锁定
     bindCreep?: Id<Creep> | null, // 绑定该任务的creep
 }
 

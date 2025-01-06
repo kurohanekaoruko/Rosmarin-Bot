@@ -1,6 +1,6 @@
-// @ts-nocheck
 
 import { PriorityQueue, NewNode } from './priorityQueue';
+// global.PriorityQueue = PriorityQueue;
 import { RoomArray } from './roomArray';
 
 const structuresShape = {
@@ -39,7 +39,6 @@ const structuresColor = {
 	nuker: 'cyan',
 	factory: 'yellow'
 };
-
 
 class UnionFind {
 	size: any;
@@ -1214,7 +1213,7 @@ const ManagerPlanner = {
 			);
 		});
 
-		// 新的连接外矿方式
+		//#region 新的连接外矿方式
 		const costs = new PathFinder.CostMatrix();
 		const terrain = new Room.Terrain(roomName);
 		for (let i = 0; i < 50; i++) {
@@ -1237,7 +1236,7 @@ const ManagerPlanner = {
 			Math.sqrt((e[0] - storageX) * (e[0] - storageX) + (e[1] - storageY) * (e[1] - storageY))
 		);
 		structMap['container'].forEach((e) => {
-			let ret = PathFinder.search(
+			PathFinder.search(
 				new RoomPosition(centerX, centerY, roomName),
 				{ pos: new RoomPosition(e[0], e[1], roomName), range: 1 },
 				{
@@ -1246,10 +1245,10 @@ const ManagerPlanner = {
 					},
 					maxRooms: 1
 				}
-			);
-			ret.path.forEach(pos=>{
+			).path.forEach(pos=>{
                 if(costs.get(pos.x,pos.y) != 1){
                     structMap['road'].push([pos.x,pos.y])
+					// roomStructs!.set(pos.x, pos.y, 'road');
                     costs.set(pos.x,pos.y,1)
                 }
             })
@@ -1259,15 +1258,15 @@ const ManagerPlanner = {
 		return {
 			roomName: roomName,
 			structMap: structMap,
-            storagePos: {storageX,storageY},
-			labPos: {labX, labY}
+			storagePos: {storageX,storageY}
 		};
 	}
 };
 
+global.HelperVisual = HelperVisual;
+global.ManagerPlanner = ManagerPlanner;
 
 export default {
-    ManagerPlanner: ManagerPlanner,
-	HelperVisual: HelperVisual,
-}
-
+	ManagerPlanner: ManagerPlanner,
+	HelperVisual: HelperVisual
+};

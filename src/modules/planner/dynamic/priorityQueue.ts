@@ -1,16 +1,4 @@
-/**
- *  wasm 优先队列
- *  帮你加速涉及优先级的调度算法
- *
- *  author: Scorpior
- *  version: v1.1.0
- *
- *  usage:
- *  1. add .js and .wasm modules
- *  2. require .js module and use
- *
- *  本人有改动！
- */
+// @ts-nocheck
 
 const NodeCache: any[] = [];
 export function NewNode(k?: any, x?: any, y?: any, v?: any) {
@@ -32,6 +20,7 @@ export function ReclaimNode(node) {
 }
 
 // @ts-ignore
+
 const tryRequire = (path) => {
 	try {
 		return require(`${path}`);
@@ -39,11 +28,8 @@ const tryRequire = (path) => {
 		return null;
 	}
 };
-
 // 读取二进制文件
-const binary = tryRequire('algo_wasm_priorityqueue') ||
-			   tryRequire('algo_wasm_priorityqueue.wasm');
-// @ts-ignore
+const binary = tryRequire('algo_wasm_priorityqueue') || tryRequire('algo_wasm_priorityqueue.wasm');
 const wasmModule = new WebAssembly.Module(binary); // 初始化为wasm类
 
 /**

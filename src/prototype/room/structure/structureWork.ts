@@ -19,32 +19,8 @@ export default class StructureWork extends Room {
 
     SpawnWork() {
         if (!this.spawn) return;
-        const spawns = []
-        this.spawn.forEach(spawn => {
-            if (!spawn.spawning) {
-                spawns.push(spawn);
-                return;
-            }
-            const role = Memory.creeps[spawn.spawning.name].role;
-            if (!role) {
-                spawn.spawning.cancel();
-                return;
-            }
-            const code = RoleData[role]?.code;
-            this.visual.text(
-                `${code} 🕒${spawn.spawning.remainingTime}`,
-                spawn.pos.x,
-                spawn.pos.y,
-                { align: 'center',
-                  color: 'red',
-                  stroke: '#ffffff',
-                  strokeWidth: 0.05,
-                  font: 'bold 0.32 inter' }
-            )
-        })
 
-        // 没有可用spawn则不处理
-        if (spawns.length == 0) return;
+        this.VisualSpawnInfo();
 
         // 处理 Spawn 孵化逻辑
         if (Game.time % 10) return;
@@ -53,8 +29,9 @@ export default class StructureWork extends Room {
 
         let hc = null;
         let energyAvailable = this.energyAvailable;
+ 
         // 如果有能量，则生产 creep
-        spawns.forEach(spawn => {
+        this.spawn.forEach(spawn => {
             const task = this.getSpawnMission(energyAvailable);
             if (!task) return;
             const data = task.data as SpawnTask;
@@ -91,8 +68,8 @@ export default class StructureWork extends Room {
             } else {
                 if (Game.time % 20) return;
                 if (hc && hc >= 2) return;
-                if (role !== 'harvester' && role !== 'transport' && role !== 'carrier' && role !== 'manage') return;
-                if (role == 'manage') role = 'transport';
+                if (role !== 'harvester' && role !== 'transport' && role !== 'carrier' && role !== 'manager') return;
+                if (role == 'manager') role = 'transport';
                 const num = this.find(FIND_MY_CREEPS, {filter: c => c.memory.role == role}).length;
                 if (num !== 0) return;
                 if (role !== 'carrier' || (role == 'carrier' && this.level < 4)) {
@@ -118,13 +95,13 @@ export default class StructureWork extends Room {
         // 没有tower时不处理
         if (!this.tower) return;
 
-        // 如果有敌人，则攻击敌人
+        // 攻击敌人
         if (this.TowerAttackEnemy()) return;
 
         // 自动修复被攻击的墙
         if (this.TowerAutoRepair()) return;
 
-        // 攻击 NPC
+        // 攻击NPC
         if (this.TowerAttackNPC()) return;
 
         // 治疗己方单位
