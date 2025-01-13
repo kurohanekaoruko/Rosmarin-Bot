@@ -50,9 +50,7 @@ interface Room {
     // 停机检查
     ShutdownInspection(): void;
     // 计算孵化所需能量
-    CalculateEnergy(abilityList: any[]): number;
-    // 计算角色孵化所需能量
-    CalculateRoleEnergy(role: string, lv: number): number;
+    CalculateEnergy(bodypartList: any[]): number;
     // 主动防御
     activeDefend(): void;
     // 全部建筑工作
@@ -75,6 +73,10 @@ interface Room {
 
     // 孵化信息可视化
     VisualSpawnInfo(): void;
+    // 获取孵化数据
+    GetSpawnTaskData(): any;
+    // 孵化Creep
+    SpawnCreep(): any;
 
     // 计算中心点
     CacheCenterPos(): void;
@@ -87,9 +89,9 @@ interface Room {
     // 返回一个等级, 取决于spawn总容量
     getEffectiveRoomLevel(): number;
     // 生成role体型, 压缩形式
-    GetRoleBodys(role,upbody?): number[];
+    GetRoleBodys(role:string, upbody?: boolean): any[];
     // 生成creep body
-    GenerateBodys(abilityList: any[], role?: string): BodyPartConstant[];
+    GenerateBodys(bodypartList: any[], role?: string): BodyPartConstant[];
     // 给lab分配boost任务
     AssignBoostTask(mineral: string, amount: number): void;
     // 提交lab boost任务

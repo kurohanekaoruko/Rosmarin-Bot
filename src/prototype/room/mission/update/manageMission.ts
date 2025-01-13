@@ -139,7 +139,7 @@ function CheckPowerSpawnResAmount(room: Room) {
     let center = Memory['RoomControlData'][room.name].center;
     let centerPos: RoomPosition;
     if (center) centerPos = new RoomPosition(center.x, center.y, room.name);
-    if (!centerPos || !powerSpawn.pos.inRangeTo(centerPos, 2)) return;
+    if (!centerPos || !powerSpawn.pos.inRangeTo(centerPos, 1)) return;
 
     if (powerSpawn.store[RESOURCE_ENERGY] < 1000) {
         if (room.storage && room.storage.store[RESOURCE_ENERGY] >= 5000) {

@@ -4,13 +4,9 @@ export default class AutoBuild extends Room {
     // 自动建筑
     autoBuild() {
         if(this.memory.defend) return;
-
-        if (Game.time % 100 == 0) {
-            this.memory['index'] = Object.keys(Game.rooms).indexOf(this.name) % 100;
-        }
-        
-        if (Game.time % 100 !== this.memory['index']) return;
         if (Game.cpu.bucket < 100) return;
+        
+        if (Game.time % 100 !== (this.memory['index']||0)) return;
 
         // 开启了自动建造, 且有布局Memory, 则自动建筑
         const memory = Memory['RoomControlData'][this.name];
@@ -33,7 +29,6 @@ const plannerCreateSite = function (room: Room, layoutMemory: any) {
         // 当前RCL能造的数量为最大建造数
         const buildMax = CONTROLLER_STRUCTURES[s][room.level];
         if (!buildMax) continue;
-        
         // 对于部分建筑, 如果数量达到上限，则跳过
         if (s == 'extension' || s == 'container' || s == 'link')  {
             // 建筑计数
@@ -70,7 +65,7 @@ const plannerCreateSite = function (room: Room, layoutMemory: any) {
 function getPoints(room: Room, structureType: string, layoutArray: any, buildMax: number) {
     if (structureType == 'road') {
         // 对于路则使用如下判断来限制
-        const layoutType = Memory['LayoutData'][room.name]['layout'];
+        const layoutType = Memory['RoomControlData'][room.name]['layout'];
         switch (layoutType) {
             case 'tea':
                 if (room.level < 3) return [];   // 3级以下不建造路
@@ -92,16 +87,23 @@ function getPoints(room: Room, structureType: string, layoutArray: any, buildMax
                 if (room.level == 4) return layoutArray.slice(0, 17);
                 if (room.level == 5) return layoutArray.slice(0, 41);
                 break;
+            case 'clover':
+                if (room.level < 3) return [];   // 3级以下不建造路
+                break;
             case '63':
                 if (room.level < 3) return [];   // 3级以下不建造路
                 // if (room.level == 3) return layoutArray.slice(0, 10);
                 // if (room.level == 4) return layoutArray.slice(0, 20);
                 // if (room.level == 5) return layoutArray.slice(0, 40);
                 break;
+            default:
+                if (room.level < 3) return [];   // 3级以下不建造路
+                break;
+
         }
     } else if (structureType == 'rampart') {
-        // 3级以下不建造墙
-        if (room.level < 3) return [];
+        // 4级以下不建造墙
+        if (room.level < 4) return [];
     }
 
     // 默认用当前等级建造上限来限制

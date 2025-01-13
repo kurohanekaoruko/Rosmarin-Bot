@@ -1,4 +1,4 @@
-import { createApp } from '@/framework/createApp';
+import { createBot } from '@/framework/createBot';
 
 import { roomControl } from '@/control/RoomControl'
 import { creepControl } from '@/control/CreepControl'
@@ -25,38 +25,38 @@ import '@/modules/function/structureCache';  // 极致建筑缓存
 import '@/modules/function/helper_roomResource'; // 资源统计
 
 
-const app = createApp();
+const Bot = createBot();
 
-app.mount(PrototypeExtension);        // 原型挂载
+Bot.mount(PrototypeExtension);        // 原型挂载
 
-app.set('room', roomControl);         // 房间运行
+Bot.set('room', roomControl);         // 房间运行
 
-app.set('creep', creepControl);       // creep行动
+Bot.set('creep', creepControl);       // creep行动
 
-app.set('powerCreep', powerControl);  // powerCreep行动
+Bot.set('powerCreep', powerControl);  // powerCreep行动
 
-app.on(GlobalInit);     // 全局变量模块
+Bot.on(GlobalInit);     // 全局变量模块
 
-app.on(MemoryInit);     // 初始化内存
+Bot.on(MemoryInit);     // 初始化内存
 
-app.on(SquadModule);    // 四人小队模块
+Bot.on(SquadModule);    // 四人小队模块
 
-app.on(ResourceManage); // 资源调度管理
+Bot.on(ResourceManage); // 资源调度管理
 
-app.on(ClaimModule);    // 占领模块
+Bot.on(ClaimModule);    // 占领模块
 
-app.on(AidModule);      // 援建模块
+Bot.on(AidModule);      // 援建模块
 
-app.on(DoubleSquad);    // 双人小队
+Bot.on(DoubleSquad);    // 双人小队
 
-app.on(ClearModule);    // 过期数据清理
+Bot.on(ClearModule);    // 过期数据清理
 
-app.on(GeneratePixel);  // 搓像素
+Bot.on(GeneratePixel);  // 搓像素
 
-app.on(Statistics);     // 统计
+Bot.on(Statistics);     // 统计
 
 
-export const loop = app.run;
+export const loop = Bot.run;
 
 
 // // 性能开销分析

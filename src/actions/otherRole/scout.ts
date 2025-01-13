@@ -19,7 +19,7 @@ const Scout = {
         
         return false;
     },
-    source: function(creep: Creep) {
+    source: function() {
         return true;
     }
 }

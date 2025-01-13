@@ -5,7 +5,7 @@ const harvest = function (creep: Creep) {
 
     if (droppedEnergy) {
         if (creep.pickup(droppedEnergy) === ERR_NOT_IN_RANGE) {
-            creep.moveTo(droppedEnergy, { visualizePathStyle: { stroke: '#ffaa00' } });
+            creep.moveTo(droppedEnergy, { maxRooms: 1, range: 1});
         }
         return;
     }
@@ -16,7 +16,7 @@ const harvest = function (creep: Creep) {
 
     if (ruinedEnergy) {
         if (creep.withdraw(ruinedEnergy, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-            creep.moveTo(ruinedEnergy, { visualizePathStyle: { stroke: '#ffaa00' }})
+            creep.moveTo(ruinedEnergy, { maxRooms: 1, range: 1})
         }
         return;
     }
@@ -27,7 +27,7 @@ const harvest = function (creep: Creep) {
     })
     if (container) {
         if (creep.withdraw(container, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-            creep.moveTo(container, { visualizePathStyle: { stroke: '#ffaa00' } });
+            creep.moveTo(container, { maxRooms: 1, range: 1});
         }
         return;
     }
@@ -38,29 +38,29 @@ const harvest = function (creep: Creep) {
     const storage = creep.room.storage;
     const terminal = creep.room.terminal;
 
-    // 检查storage是否存在且存储的能量大于10000
-    if (st && storage && storage.store[RESOURCE_ENERGY] > 10000) {
-        if (creep.withdraw(storage, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-            creep.moveTo(storage, { visualizePathStyle: { stroke: '#ffffff' } });
+    // 检查terminal是否存在且存储的能量大于10000
+    if (st && terminal && terminal.store[RESOURCE_ENERGY] > 10000){
+        if (creep.withdraw(terminal, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+            creep.moveTo(terminal, { maxRooms: 1, range: 1});
         }
     }
-    // 检查terminal是否存在且存储的能量大于10000
-    else if (st && terminal && terminal.store[RESOURCE_ENERGY] > 10000){
-        if (creep.withdraw(terminal, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-            creep.moveTo(terminal, { visualizePathStyle: { stroke: '#ffffff' } });
+    // 检查storage是否存在且存储的能量大于10000
+    else if (st && storage && storage.store[RESOURCE_ENERGY] > 10000) {
+        if (creep.withdraw(storage, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+            creep.moveTo(storage, { maxRooms: 1, range: 1});
         }
     }
     // 如果terminal能量大于storage，则从terminal中取出能量
     else if (!st && storage && terminal && terminal.store[RESOURCE_ENERGY] > storage.store[RESOURCE_ENERGY]) {
         if (creep.withdraw(terminal, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-            creep.moveTo(terminal, { visualizePathStyle: { stroke: '#ffffff' } });
+            creep.moveTo(terminal, { maxRooms: 1, range: 1});
         }
     }
     else {
         const targetSource = Game.getObjectById(creep.memory.targetSourceId) as Source | null;
         if (targetSource && targetSource.energy > 0) {
             if (creep.harvest(targetSource) === ERR_NOT_IN_RANGE) {
-                creep.moveTo(targetSource, { visualizePathStyle: { stroke: '#ffaa00' } });
+                creep.moveTo(targetSource, { maxRooms: 1, range: 1});
             }
         }
     }
@@ -74,11 +74,19 @@ const transfer = function (creep) {
 
         const targets = [];
 
-        // 优先查找未满的 spawn 和 extension
-        const spawnExtensions = (creep.room.spawn?.concat(creep.room.extension) ?? []).filter(o => o);
-        for (const spawnExtension of spawnExtensions) {
-            if (spawnExtension.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-                targets.push(spawnExtension);
+        // 如果终端无能量, 优先填充
+        if (creep.room.terminal && creep.room.terminal.store[RESOURCE_ENERGY] < 3000 &&
+            creep.room.terminal.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+            targets.push(creep.room.terminal);
+        }
+
+        // 查找未满的 spawn 和 extension
+        if(targets.length === 0) {
+            const spawnExtensions = (creep.room.spawn?.concat(creep.room.extension) ?? []).filter(o => o);
+            for (const spawnExtension of spawnExtensions) {
+                if (spawnExtension.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+                    targets.push(spawnExtension);
+                }
             }
         }
 
@@ -92,7 +100,11 @@ const transfer = function (creep) {
 
         // 如果没有找到未满的 spawn 和 extension，则查找 storage
         if (targets.length === 0) {
-            if (creep.room.storage && creep.room.storage.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+            if (creep.room.terminal && creep.room.terminal.store[RESOURCE_ENERGY] < 10000 &&
+                creep.room.terminal.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+                targets.push(creep.room.terminal);
+            }
+            else if (creep.room.storage && creep.room.storage.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
                 targets.push(creep.room.storage);
             }
         }
@@ -113,7 +125,7 @@ const transfer = function (creep) {
 
     if (target) {
         if (creep.transfer(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-            creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
+            creep.moveTo(target, { maxRooms: 1, range: 1});
         }
     } else {
         creep.say('🚨');
@@ -121,7 +133,31 @@ const transfer = function (creep) {
     }
 }
 
-const HarvestCarryFunction = {
+const upgrade = function (creep) {
+    const controller = creep.room.controller;
+    if (controller && controller.my && creep.pos.isNearTo(controller)) {
+        creep.upgradeController(controller)
+    } else {
+        creep.moveTo(controller, { maxRooms: 1, range: 1});
+    }
+}
+
+const sign = function (creep) {
+    const controller = creep.room.controller;
+    const botMem = Memory['RoomControlData'][creep.room.name];
+    const sign = botMem?.sign ?? '';
+    if(controller && (controller.sign?.text ?? '') != sign) {
+        if (creep.pos.inRangeTo(controller, 1)) {
+            creep.signController(controller, sign);
+        } else {
+            creep.moveTo(controller, { visualizePathStyle: { stroke: '#ffffff' } });
+            return true;
+        }
+    }
+    return false;
+}
+
+const UniversalFunction = {
     prepare: function (creep: Creep) {
         const targetSource = creep.room.closestSource(creep);
         if (!targetSource) return false;
@@ -130,14 +166,20 @@ const HarvestCarryFunction = {
     },
     source: function (creep: Creep) {
         if (!creep.moveHomeRoom()) return;
+        if (sign(creep)) return;
         harvest(creep);
         return creep.store.getFreeCapacity() === 0;
     },
     target: function (creep: Creep) {
         if (!creep.moveHomeRoom()) return;
-        transfer(creep);
+        if (sign(creep)) return;
+        if (creep.room.level < 2) {
+            upgrade(creep);
+        } else {
+            transfer(creep);
+        }
         return creep.store.getUsedCapacity() === 0;
     }
 };
 
-export default HarvestCarryFunction;
+export default UniversalFunction;

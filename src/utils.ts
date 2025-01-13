@@ -66,13 +66,3 @@ export function getDirection(fromPos, toPos) {
 export function genSortNumber() {
     return (Game.time*36*36 + Math.floor(Math.random()*36*36)).toString(36).slice(-4).toUpperCase();
 }
-
-export function genCreepName(code: string) {
-    const number = genSortNumber();
-    const name = `${code}#${number}`;
-    if (Game.creeps[name]) {
-        return genCreepName(code);
-    } else {
-        return name;
-    }
-}

@@ -1,4 +1,4 @@
-import { compress, compressBatch, decompressBatch } from '@/utils';
+import { compress, decompress, compressBatch, decompressBatch } from '@/utils';
 import autoPlanner63 from '@/modules/planner/dynamic/autoPlanner63';
 import HelperVisual from '@/modules/planner/helperVisual';
 
@@ -421,15 +421,25 @@ export default {
 }
 
 import ros from "@/modules/planner/static/ros"
+import clover from "@/modules/planner/static/clover"
 import tea from '@/modules/planner/static/tea';
 import hoho from '@/modules/planner/static/hoho';
 
 
 // 构建静态布局
 const BuildStaticPlanner = function (roomName: string, layoutType: string) {
+    let room = Game.rooms[roomName];
+
+    if (!room) {
+        console.log(`房间不存在或无视野: ${roomName}`);
+        return ERR_INVALID_ARGS;
+    }
+
     let data: any;
     if (layoutType === 'ros') {
         data = ros;
+    } else if (layoutType === 'clover') {
+        data = clover;
     } else if (layoutType === 'tea') {
         data = tea;
     } else if (layoutType === 'hoho') {
@@ -442,9 +452,9 @@ const BuildStaticPlanner = function (roomName: string, layoutType: string) {
     const BotMemRooms = Memory['RoomControlData'];
     let center = BotMemRooms[roomName]?.center;
     if (!center) {
-        let Pos = Game.flags['centerPos'] || Game.flags['layout-center'] || Game.flags['storagePos'];
-        if (Pos && Pos.pos.roomName === roomName) {
-            center = { x: Pos.pos.x, y: Pos.pos.y };
+        let PosFlag = Game.flags.storagePos || Game.flags.centerPos;
+        if (PosFlag && PosFlag.pos.roomName === roomName) {
+            center = { x: PosFlag.pos.x, y: PosFlag.pos.y };
         } else {
             console.log(`未设置布局中心.`);
             return;
@@ -454,12 +464,15 @@ const BuildStaticPlanner = function (roomName: string, layoutType: string) {
     const layoutMemory = Memory['LayoutData'][roomName];
     const terrain = new Room.Terrain(roomName);
 
+    let minX = 49, maxX = 0, minY = 49, maxY = 0;
     for (const s in data.buildings) {
         if (!layoutMemory[s]) layoutMemory[s] = [];
         const poss = data.buildings[s].pos;
         for (const pos of poss) {
             const x = pos.x - 25 + center.x;
             const y = pos.y - 25 + center.y;
+            minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+            minY = Math.min(minY, y); maxY = Math.max(maxY, y);
             try {
                 if (terrain.get(x, y) == TERRAIN_MASK_WALL) continue;
                 layoutMemory[s].push(compress(x, y));
@@ -470,17 +483,67 @@ const BuildStaticPlanner = function (roomName: string, layoutType: string) {
         }
     }
 
+    minX -= 3; maxX += 3; minY -= 3; maxY += 3;
     if (!layoutMemory['rampart']) layoutMemory['rampart'] = [];
-    for (let i = center.x - 9; i < center.x + 10; i++) {
-        for (let j = center.y - 9; j < center.y + 10; j++) {
+    for (let i = minX; i <= maxX; i++) {
+        for (let j = minY; j <= maxY; j++) {
             if([0, 1, 48, 49].includes(i)) continue;
             if([0, 1, 48, 49].includes(j)) continue;
             if (terrain.get(i, j) == TERRAIN_MASK_WALL) continue;
-            if (Math.abs(i - center.x) == 9 || Math.abs(j - center.y) == 9) {
+            if (i == minX || i == maxX || j == minY || j == maxY) {
                 layoutMemory['rampart'].push(compress(i, j));
             }
         }
     }
+
+    const costs = new PathFinder.CostMatrix();
+    for (let i = 0; i < 50; i++) {
+        for (let j = 0; j < 50; j++) {
+            const te = terrain.get(i, j);
+            costs.set(i, j, te == TERRAIN_MASK_WALL ? 255 : te == TERRAIN_MASK_SWAMP ? 4 : 2);
+        }
+    }
+
+    for (const struct of OBSTACLE_OBJECT_TYPES) {
+        if (layoutMemory[struct]) {
+            layoutMemory[struct].forEach((e: any) => {
+                const [x, y] = decompress(e);
+                costs.set(x, y, 255);
+            });
+        }
+    }
+    layoutMemory['road'].forEach((e: any) => {
+        const [x, y] = decompress(e);
+        costs.set(x, y, 1);
+    });
+
+    
+    let sources = room.find(FIND_SOURCES);
+    let mineral = room.find(FIND_MINERALS)[0];
+    let controller = room.controller;
+
+    let Pos = [...sources.map(s => s.pos), mineral.pos, controller.pos];
+    Pos.sort((e) => 
+        Math.sqrt((e[0] - center.x) * (e[0] - center.x) + (e[1] - center.y) * (e[1] - center.y))
+    )
+    Pos.forEach((pos: RoomPosition) => {
+        PathFinder.search(
+            new RoomPosition(center.x, center.y, roomName),
+            { pos: pos, range: 1 },
+            {
+                roomCallback: () => {
+                    return costs;
+                },
+                maxRooms: 1,
+            }
+        ).path.forEach(p => {
+            if (costs.get(p.x,p.y) != 1){
+                layoutMemory['road'].push(compress(p.x, p.y));
+                costs.set(p.x,p.y,1);
+            }
+        })
+    })
+
     console.log(`已构建${roomName}的${layoutType}静态布局`);
 
     return OK;
@@ -490,6 +553,8 @@ const VisualStaticPlanner = function (roomName: string, layoutType: string) {
     let data: any;
     if (layoutType === 'ros') {
         data = ros;
+    } else if (layoutType === 'clover') {
+        data = clover;
     } else if (layoutType === 'tea') {
         data = tea;
     } else if (layoutType === 'hoho') {
@@ -501,15 +566,15 @@ const VisualStaticPlanner = function (roomName: string, layoutType: string) {
 
     const BotMemRooms = Memory['RoomControlData'];
     let center = BotMemRooms[roomName]?.center;
-    if (!center) {
-        let Pos = Game.flags['centerPos'] || Game.flags['layout-center'] || Game.flags['storagePos'];
-        if (Pos && Pos.pos.roomName === roomName) {
-            center = { x: Pos.pos.x, y: Pos.pos.y };
-        } else {
-            console.log(`未设置布局中心.`);
-            return;
-        }
+    let PosFlag = Game.flags.storagePos || Game.flags.centerPos;
+    if (PosFlag && PosFlag.pos.roomName === roomName) {
+        center = { x: PosFlag.pos.x, y: PosFlag.pos.y };
     }
+    if (!center) {
+        console.log(`未设置布局中心.`);
+        return;
+    }
+    
 
     const terrain = new Room.Terrain(roomName);
     let structMap = {
@@ -531,12 +596,14 @@ const VisualStaticPlanner = function (roomName: string, layoutType: string) {
         factory: []
     };
 
-
+    let minX = 49, maxX = 0, minY = 49, maxY = 0;
     for (const s in data.buildings) {
         const poss = data.buildings[s].pos;
         for (const pos of poss) {
             const x = pos.x - 25 + center.x;
             const y = pos.y - 25 + center.y;
+            minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+            minY = Math.min(minY, y); maxY = Math.max(maxY, y);
             try {
                 if (terrain.get(x, y) == TERRAIN_MASK_WALL) continue;
                 structMap[s].push([x, y]);
@@ -547,12 +614,13 @@ const VisualStaticPlanner = function (roomName: string, layoutType: string) {
         }
     }
 
-    for (let i = center.x - 9; i < center.x + 10; i++) {
-        for (let j = center.y - 9; j < center.y + 10; j++) {
+    minX -= 3; maxX += 3; minY -= 3; maxY += 3;
+    for (let i = minX; i <= maxX; i++) {
+        for (let j = minY; j <= maxY; j++) {
             if([0, 1, 48, 49].includes(i)) continue;
             if([0, 1, 48, 49].includes(j)) continue;
             if (terrain.get(i, j) == TERRAIN_MASK_WALL) continue;
-            if (Math.abs(i - center.x) == 9 || Math.abs(j - center.y) == 9) {
+            if (i == minX || i == maxX || j == minY || j == maxY) {
                 structMap['rampart'].push([i, j]);
             }
         }
@@ -570,41 +638,42 @@ const BuildDynamicPlanner_63 = function (roomName: string) {
     if (Game.cpu.bucket < 100) {
         return Error(`CPU bucket余量过低, 暂时无法运行自动布局。`);
     }
-    let roomStructsData: any;
-    let pa = Game.flags.pa?.pos;
-    let pb = Game.flags.pb?.pos;
-    let pc = Game.flags.pc?.pos;
-    let pm = Game.flags.pm?.pos;
-    let room = Game.rooms[roomName];
-    if ((!pa || !pb || !pc || !pm) && room) {
+    let pa, pb, pc, pm;
+    if (roomName) {
+        let room = Game.rooms[roomName];
+        if (!room) return Error(`房间 ${roomName} 的视野不存在。`);
         pa = room.source?.[0]?.pos || room.find(FIND_SOURCES)[0]?.pos;
         pb = room.source?.[1]?.pos || room.find(FIND_SOURCES)[1]?.pos || pa;
-        pc = room.controller?.pos;
         pm = room.mineral?.pos || room.find(FIND_MINERALS)[0]?.pos;
+        pc = room.controller?.pos;
         if (!pa || !pb || !pc || !pm) return Error(`房间 ${roomName} 的能量源、控制器或矿点不存在。`);
-    } else if (!pa || !pb || !pc || !pm) return Error(`没有房间视野, 且未找到pa、pb、pc、pm旗帜标记。`);
+    } else return Error(`未指定房间名。`);
 
-    roomStructsData = autoPlanner63.ManagerPlanner.computeManor(roomName, [pc, pm, pa, pb,]);
-    if (roomStructsData) {
-        const BotMemRooms = Memory['RoomControlData'];
-        BotMemRooms[roomName]['layout'] = "63";
-        BotMemRooms[roomName]['center'] = {
-            x: roomStructsData.storagePos.storageX,
-            y: roomStructsData.storagePos.storageY,
-        }
-        Memory['LayoutData'][roomName] = {};
-        const layoutMemory = Memory['LayoutData'][roomName];
-        const structMap = roomStructsData.structMap;
-        for (const s in structMap) {
-            layoutMemory[s] = compressBatch(structMap[s]);
-        }
-        console.log(`房间 ${roomName} 的布局memory已生成。`);
-        console.log('storage集群中心位置: ' + JSON.stringify(roomStructsData.storagePos));
-        console.log('lab中心位置: ' + JSON.stringify(roomStructsData.labPos));
-        return OK;
-    } else {
-        return Error(`房间 ${roomName} 的自动布局失败。`);
+    let storagePos = Game.flags.storagePos;
+    if (storagePos && storagePos.pos.roomName !== roomName) {
+        storagePos.remove();
     }
+    let roomStructsData = autoPlanner63.ManagerPlanner.computeManor(roomName, [pc, pm, pa, pb]);
+    if (!roomStructsData) {
+        return Error(`房间 ${pa.roomName} 自动布局失败, 原因未知。`);
+    }
+
+    const BotMemRooms = Memory['RoomControlData'];
+    BotMemRooms[roomName]['layout'] = "63";
+    BotMemRooms[roomName]['center'] = {
+        x: roomStructsData.storagePos.storageX,
+        y: roomStructsData.storagePos.storageY,
+    }
+    Memory['LayoutData'][roomName] = {};
+    const layoutMemory = Memory['LayoutData'][roomName];
+    const structMap = roomStructsData.structMap;
+    for (const s in structMap) {
+        layoutMemory[s] = compressBatch(structMap[s]);
+    }
+    console.log(`房间 ${roomName} 的布局memory已生成。`);
+    console.log('storage集群中心位置: ' + JSON.stringify(roomStructsData.storagePos));
+    console.log('lab中心位置: ' + JSON.stringify(roomStructsData.labPos));
+    return OK;
 }
 
 const VisualDynamicPlanner_63 = function (roomName?: string) {
@@ -632,7 +701,7 @@ const VisualDynamicPlanner_63 = function (roomName?: string) {
             return Error(`pa、pb、pc、pm旗帜标记不在同一房间内。`);
         }
     }
-    let storagePos = Game.flags.storagePos;
+    let storagePos = Game.flags.storagePos || Game.flags.centerPos;
     if (storagePos && storagePos.pos.roomName !== pa.roomName) {
         storagePos.remove();
     }

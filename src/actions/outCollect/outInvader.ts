@@ -1,8 +1,9 @@
 const outInvader = {
-    target: function(creep) {
+    run: function(creep: any) {
         const invaderCores = creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => structure.structureType === STRUCTURE_INVADER_CORE
         });
+
         let targets = invaderCores;
         if (targets.length === 0) {
             const hostileCreeps = creep.room.find(FIND_HOSTILE_CREEPS);
@@ -19,18 +20,20 @@ const outInvader = {
             else {
                 creep.moveTo(target);
             }
-            return false;
+            return;
         }
 
         if (creep.room.name != creep.memory.targetRoom || creep.pos.isRoomEdge()) {
             creep.moveToRoom(creep.memory.targetRoom);
-            return false;
+            return;
         }
 
-        return false;
-    },
-    source: function(creep) {
-        return true;
+        if (targets.length === 0) {
+            creep.memory['suicideCount'] = (creep.memory['suicideCount']||0) + 1;
+            if (creep.memory['suicideCount'] >= 10) creep.suicide();
+        }
+
+        return;
     }
 }
 

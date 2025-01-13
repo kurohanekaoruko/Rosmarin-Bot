@@ -1,7 +1,7 @@
 const RepairRampart = function (creep: Creep) {
     if (creep.memory.cache.buildRampartId) {
         const rampart = Game.getObjectById(creep.memory.cache.buildRampartId) as StructureRampart;
-        if (!rampart || rampart.hits >= 2000) {
+        if (!rampart || rampart.hits >= 5000) {
             delete creep.memory.cache.buildRampartId;
             return false;
         } else {

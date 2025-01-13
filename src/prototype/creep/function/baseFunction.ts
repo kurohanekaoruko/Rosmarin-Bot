@@ -99,11 +99,10 @@ export default class BaseFunction extends Creep {
         const harvestEnergy = () => {
             // if (this.room.level > 4) return false;
             if (!this.memory.cache.targetSourceId) {
-                const targetSources = this.room.source.filter((source) => source.energy > 0);
-                const targetSource = this.pos.findClosestByRange(targetSources);
+                let targetSource = this.room.closestSource(this);
                 if (targetSource) {
                     this.memory.cache.targetSourceId = targetSource.id;
-                } else return false;
+                }
             }
 
             const targetSource = Game.getObjectById(this.memory.cache.targetSourceId) as Source;

@@ -31,13 +31,13 @@ function UpdateEnergyMission(room: Room) {
     if(terminal && storage) {
         storageOrTerminal = terminal.store[RESOURCE_ENERGY] > storage.store[RESOURCE_ENERGY] ? terminal : storage;
     } else {
-        storageOrTerminal = terminal || storage;
+        storageOrTerminal = storage || terminal;
     }
 
     if (!storageOrTerminal) return;
 
     // 检查spawn和扩展是否需要填充能量
-    if(room.spawn) {
+    if(room.spawn && room.energyAvailable < room.energyCapacityAvailable) {
         const spawnsAndExtensions = (room.spawn?.concat(room.extension||[] as any) ?? [])
             .filter((s: StructureSpawn | StructureExtension) => s && s.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
         spawnsAndExtensions.forEach((s: StructureSpawn | StructureExtension) => {
@@ -102,7 +102,7 @@ function UpdateEnergyMission(room: Room) {
     if (center) centerPos = new RoomPosition(center.x, center.y, room.name);
     // 没设置中心或者powerSpawn不在中心时填充
     if (Game.time % 20 === 0 && room.level == 8 && room.powerSpawn &&
-        (!centerPos || !room.powerSpawn.pos.inRangeTo(centerPos, 2))) {
+        (!centerPos || !room.powerSpawn.pos.inRangeTo(centerPos, 1))) {
         const powerSpawn = room.powerSpawn;
         const amount = powerSpawn.store.getFreeCapacity(RESOURCE_ENERGY);
         if(powerSpawn && powerSpawn.store.getFreeCapacity(RESOURCE_ENERGY) > 400 && energy >= amount) {
@@ -146,8 +146,8 @@ function UpdatePowerMission(room: Room) {
     let center = Memory['RoomControlData'][room.name].center;
     let centerPos: RoomPosition;
     if (center) centerPos = new RoomPosition(center.x, center.y, room.name);
-    if (centerPos && room.powerSpawn.pos.inRangeTo(centerPos, 2)) return;
-    // 在中心附近2格内，不填充
+    if (centerPos && room.powerSpawn.pos.inRangeTo(centerPos, 1)) return;
+    // 在中心附近1格内，不填充
 
     const storage = room.storage;
     const terminal = room.terminal;

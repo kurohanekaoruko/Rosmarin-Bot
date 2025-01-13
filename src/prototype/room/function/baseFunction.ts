@@ -132,7 +132,7 @@ export default class BaseFunction extends Room {
     /* 动态生成角色体型 */
     GetRoleBodys(role: string, upbody?:boolean) {
         let lv = this.level;
-        let body: number[];
+        let body: any[];
 
         if (RoleLevelData[role]) {
             while (lv >= 1) {
@@ -148,7 +148,7 @@ export default class BaseFunction extends Room {
             }
             if (lv === 0) return [];
         } else if (RoleData[role]) {
-            return RoleData[role].ability;
+            return RoleData[role].bodypart;
         } else return [];
 
         if (lv !== 8) return body;
@@ -167,93 +167,98 @@ export default class BaseFunction extends Room {
     }
 
     /* 生成指定体型 */
-    GenerateBodys(bodypart: number[], role='') {
+    GenerateBodys(bodypart: any[], role='') {
         if (!Array.isArray(bodypart)) return []
         if (!bodypart.length) return []
 
+        let [work, carry, move, attack, range_attack, heal, claim, tough] = [0, 0, 0, 0, 0, 0, 0, 0];
         if (bodypart.every(item => typeof item === 'number' && Number.isFinite(item))) {
-            const [work, carry, move, attack, range_attack, heal, claim, tough] = bodypart;
-            let body_list = [];
-            // 生成优先级，越往前越优先
-            if (tough) body_list = AddList(body_list, tough, TOUGH)
-            switch (role) {
-            case 'power-attack':
-                if (move) body_list = AddList(body_list, move - 1, MOVE)
-                if (attack) body_list = AddList(body_list, attack, ATTACK)
-                if (move) body_list = AddList(body_list, 1, MOVE)
-                break;
-            case 'power-carry':
-                if (carry) body_list = AddList(body_list, carry, CARRY)
-                if (move) body_list = AddList(body_list, move, MOVE)
-                body_list = AlternateList(body_list);
-                break;
-            case 'out-carry':
-                let carryCount = Math.min(Math.floor(carry/2), move);
-                for (let i = 0; i < carryCount; i++) {
-                    body_list = AddList(body_list, 2, CARRY)
-                    body_list = AddList(body_list, 1, MOVE)
-                }
-                if (carry-carryCount*2) body_list = AddList(body_list, carry-carryCount*2, CARRY);
-                if (move-carryCount) body_list = AddList(body_list, move-carryCount, MOVE);
-                break;
-            case 'out-car':
-                if (work) body_list = AddList(body_list, work, WORK);
-                let carCount = Math.min(Math.floor(carry/2), move);
-                for (let i = 0; i < carCount; i++) {
-                    body_list = AddList(body_list, 2, CARRY)
-                    body_list = AddList(body_list, 1, MOVE)
-                }
-                if (carry-carCount*2>0) body_list = AddList(body_list, carry-carCount*2, CARRY);
-                if (move-carCount>0) body_list = AddList(body_list, move-carCount, MOVE);
-                break;
-            case 'out-defend':
-                if (move) body_list = AddList(body_list, move - 2, MOVE)
-                if (attack) body_list = AddList(body_list, attack, ATTACK)
-                if (range_attack) body_list = AddList(body_list, range_attack, RANGED_ATTACK)
-                if (heal) body_list = AddList(body_list, heal - 1, HEAL)
-                if (move) body_list = AddList(body_list, 2, MOVE)
-                if (heal) body_list = AddList(body_list, 1, HEAL)
-                break;
-            case 'out-attack':
-                if (move) body_list = AddList(body_list, move-2, MOVE)
-                if (attack) body_list = AddList(body_list, attack, ATTACK)
-                if (heal) body_list = AddList(body_list, heal, HEAL)
-                if (move) body_list = AddList(body_list, 2, MOVE)
-                break;
-            case 'out-renged':
-                if (move) body_list = AddList(body_list, move - 2, MOVE)
-                if (range_attack) body_list = AddList(body_list, range_attack, RANGED_ATTACK)
-                if (heal) body_list = AddList(body_list, heal, HEAL)
-                if (move) body_list = AddList(body_list, 2, MOVE)
-                break;
-            default:
-                if (work) body_list = AddList(body_list, work, WORK)
-                if (attack) body_list = AddList(body_list, attack, ATTACK)
-                if (range_attack) body_list = AddList(body_list, range_attack, RANGED_ATTACK)
-                if (carry) body_list = AddList(body_list, carry, CARRY)
-                if (move) body_list = AddList(body_list, move, MOVE)
-                if (heal) body_list = AddList(body_list, heal, HEAL)
-                if (claim) body_list = AddList(body_list, claim, CLAIM)
-                break;
-            }
-            return body_list
+            [work, carry, move, attack, range_attack, heal, claim, tough] = bodypart;
         }
-        else if (bodypart.every(item => Array.isArray(item))) {
-            let body_list = [];
-            for (let [part, num] of bodypart) {
-                if (![WORK, CARRY, MOVE, ATTACK, RANGED_ATTACK, HEAL, CLAIM, TOUGH].includes(part)) continue;
-                body_list = AddList(body_list, num, part)
+        else if (bodypart.every(item => typeof item[0] == 'string' && Number.isFinite(item[1]))) {
+            for (let body of bodypart) {
+                if(body[0] === WORK) work += body[1];
+                if(body[0] === CARRY) carry += body[1];
+                if(body[0] === MOVE) move += body[1];
+                if(body[0] === ATTACK) attack += body[1];
+                if(body[0] === RANGED_ATTACK) range_attack += body[1];
+                if(body[0] === HEAL) heal += body[1];
+                if(body[0] === CLAIM) claim += body[1];
+                if(body[0] === TOUGH) tough += body[1];
             }
-            return body_list;
         }
+        else return [];
 
-        return []
+        let body_list = [];
+        // 生成优先级，越往前越优先
+        if (tough) body_list = AddList(body_list, tough, TOUGH)
+        switch (role) {
+        case 'power-attack':
+            if (move) body_list = AddList(body_list, move - 1, MOVE)
+            if (attack) body_list = AddList(body_list, attack, ATTACK)
+            if (move) body_list = AddList(body_list, 1, MOVE)
+            break;
+        case 'power-carry':
+            if (carry) body_list = AddList(body_list, carry, CARRY)
+            if (move) body_list = AddList(body_list, move, MOVE)
+            body_list = AlternateList(body_list);
+            break;
+        case 'out-carry':
+            let carryCount = Math.min(Math.floor(carry/2), move);
+            for (let i = 0; i < carryCount; i++) {
+                body_list = AddList(body_list, 2, CARRY)
+                body_list = AddList(body_list, 1, MOVE)
+            }
+            if (carry-carryCount*2) body_list = AddList(body_list, carry-carryCount*2, CARRY);
+            if (move-carryCount) body_list = AddList(body_list, move-carryCount, MOVE);
+            break;
+        case 'out-car':
+            if (work) body_list = AddList(body_list, work, WORK);
+            let carCount = Math.min(Math.floor(carry/2), move);
+            for (let i = 0; i < carCount; i++) {
+                body_list = AddList(body_list, 2, CARRY)
+                body_list = AddList(body_list, 1, MOVE)
+            }
+            if (carry-carCount*2>0) body_list = AddList(body_list, carry-carCount*2, CARRY);
+            if (move-carCount>0) body_list = AddList(body_list, move-carCount, MOVE);
+            break;
+        case 'out-defend':
+            if (move) body_list = AddList(body_list, move - 2, MOVE)
+            if (attack) body_list = AddList(body_list, attack, ATTACK)
+            if (range_attack) body_list = AddList(body_list, range_attack, RANGED_ATTACK)
+            if (heal) body_list = AddList(body_list, heal - 1, HEAL)
+            if (move) body_list = AddList(body_list, 2, MOVE)
+            if (heal) body_list = AddList(body_list, 1, HEAL)
+            break;
+        case 'out-attack':
+            if (move) body_list = AddList(body_list, move-2, MOVE)
+            if (attack) body_list = AddList(body_list, attack, ATTACK)
+            if (heal) body_list = AddList(body_list, heal, HEAL)
+            if (move) body_list = AddList(body_list, 2, MOVE)
+            break;
+        case 'out-renged':
+            if (move) body_list = AddList(body_list, move - 2, MOVE)
+            if (range_attack) body_list = AddList(body_list, range_attack, RANGED_ATTACK)
+            if (heal) body_list = AddList(body_list, heal, HEAL)
+            if (move) body_list = AddList(body_list, 2, MOVE)
+            break;
+        default:
+            if (work) body_list = AddList(body_list, work, WORK)
+            if (attack) body_list = AddList(body_list, attack, ATTACK)
+            if (range_attack) body_list = AddList(body_list, range_attack, RANGED_ATTACK)
+            if (carry) body_list = AddList(body_list, carry, CARRY)
+            if (move) body_list = AddList(body_list, move, MOVE)
+            if (heal) body_list = AddList(body_list, heal, HEAL)
+            if (claim) body_list = AddList(body_list, claim, CLAIM)
+            break;
+        }
+        return body_list
     }
 
     /* 计算孵化所需能量 */
-    CalculateEnergy(abilityList: any[]) {
+    CalculateEnergy(bodypartList: any[]) {
         var num = 0
-        for (var part of abilityList) {
+        for (var part of bodypartList) {
         if (part == WORK) num += 100
         if (part == CARRY) num += 50
         if (part == MOVE) num += 50
@@ -264,21 +269,6 @@ export default class BaseFunction extends Room {
         if (part == TOUGH) num += 10
         }
         return num
-    }
-
-    /** 计算角色的孵化所需能量 */
-    CalculateRoleEnergy(role: string, lv: number) {
-        const bodypart = RoleLevelData[role] ? RoleLevelData[role][lv].bodypart : RoleData[role].ability;
-        let energy = 0;
-        energy += bodypart[0] * 100;
-        energy += bodypart[1] * 50;
-        energy += bodypart[2] * 50;
-        energy += bodypart[3] * 80;
-        energy += bodypart[4] * 150;
-        energy += bodypart[5] * 250;
-        energy += bodypart[6] * 600;
-        energy += bodypart[7] * 10;
-        return energy;
     }
 
     /** 给lab分配boost任务 */
@@ -321,8 +311,11 @@ export default class BaseFunction extends Room {
         if  (!boostmem['boostRes']) return ERR_NOT_FOUND;
         const lab = this.lab.find(lab => boostmem['boostRes'][lab.id] &&
             boostmem['boostRes'][lab.id].mineral === mineral);
-        if (lab) {
-            boostmem['boostRes'][lab.id].amount -= amount;
+        if (!lab) return OK;
+        
+        boostmem['boostRes'][lab.id].amount -= amount;
+        if (boostmem['boostRes'][lab.id].amount <= 0) {
+            delete boostmem['boostRes'][lab.id];
         }
         return OK;
     }

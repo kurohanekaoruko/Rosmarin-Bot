@@ -1,4 +1,4 @@
-const outMiner = {
+const outMineral = {
     source: function (creep: Creep) {
         if (creep.room.name != creep.memory.targetRoom || creep.pos.isRoomEdge()) {
             creep.moveToRoom(creep.memory.targetRoom);
@@ -104,4 +104,4 @@ const outMiner = {
     }
 }
 
-export default outMiner
+export default outMineral

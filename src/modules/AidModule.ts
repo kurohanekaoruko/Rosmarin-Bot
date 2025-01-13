@@ -22,17 +22,9 @@ const AidModule = {
             if (spupFlag && ((Game.time - (spupFlagMemory['lastTime']||0)) >= (spupFlag[2] ? 1500/parseInt(spupFlag[2]) : 500))) {
                 const room = Game.rooms[spupFlag[1]];
                 if (!room.controller || !room.controller.my) continue;
-                const targetRoom = Game.flags[flagName].room;
-                if (targetRoom && targetRoom.level < 6) {
-                    room.SpawnMissionAdd('', [15, 15, 15, 0, 0, 0, 0, 0], 12, 'speedup-upgrade', {
-                        home: Game.flags[flagName].pos.roomName
-                    } as any);
-                }
-                else if (targetRoom && targetRoom.level >= 6) {
-                    room.SpawnMissionAdd('', [], 12, 'speedup-upgrade', {
-                        home: Game.flags[flagName].pos.roomName
-                    } as any);
-                }
+                room.SpawnMissionAdd('', [], 12, 'speedup-upgrade', {
+                    home: Game.flags[flagName].pos.roomName
+                } as any);
                 spupFlagMemory['lastTime'] = Game.time;
                 continue;
             }

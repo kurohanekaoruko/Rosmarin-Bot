@@ -18,6 +18,7 @@ const outRanged = {
                     creep.rangedMassAttack();
                 } else if (creep.pos.inRangeTo(target, 3)) {
                     creep.rangedAttack(target);
+                    creep.moveTo(target);
                 } else {
                     creep.moveTo(target);
                 }

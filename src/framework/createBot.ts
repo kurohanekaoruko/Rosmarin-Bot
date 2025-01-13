@@ -4,7 +4,7 @@ import { BaseConfig } from '@/constant/config.js'
 /**
  * 基本框架，用于管理游戏循环，挂载各种模块
  */
-export const createApp = () => {
+export const createBot = () => {
     const name = BaseConfig.BOT_NAME;
     const events = {init: [], tickStart: [], tick: [], tickEnd: []}
     
@@ -34,7 +34,13 @@ export const createApp = () => {
     }
 
     const on = (callbacks: any) => {
+        if (!callbacks || typeof callbacks !== 'object') return;
+        if (Array.isArray(callbacks)) {
+            callbacks.forEach(cbs => on(cbs));
+            return;
+        }
         Object.keys(callbacks).forEach(type => {
+            if (!events[type]) return;
             events[type].push(callbacks[type])
         })
     };

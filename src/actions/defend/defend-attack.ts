@@ -99,10 +99,9 @@ const flagDefend = function (creep: Creep, flag: Flag) {
 const defend_attack = {
     run: function (creep: Creep) {
         if (!creep.memory.boosted) {
-            const boosts = ['XUH2O', 'UH2O', 'UH', 'XZHO2', 'ZHO2', 'ZO'];
-            let must = creep.room['XUH2O'] >= 3000 &&
-                        creep.room['XZHO2'] >= 3000
-            creep.memory.boosted = creep.goBoost(boosts, must, true);
+            const boosts = creep.memory['mustBoost'] ? ['XUH2O', 'XZHO2'] : 
+                        ['XUH2O', 'UH2O', 'UH', 'XZHO2', 'ZHO2', 'ZO'];
+            creep.memory.boosted = creep.goBoost(boosts, creep.memory['mustBoost'], creep.memory['mustBoost']);
             return
         }
         const name = creep.name.match(/#(\w+)/)?.[1] ?? creep.name;

@@ -38,16 +38,15 @@ export const creepControl = function (creep: Creep) {
     }
     else return;
 
-    // --------------------------------------------------------------
+    // ----------------------Creep随机说话----------------------------------
     
-    // Creep随机说话
     if (creep.memory.sayText && creep.memory.sayText.length > 0) {
         const text = creep.memory.sayText.shift();
         if(text) creep.say(text, true);
         return;
     }
 
-    if (Math.random() > 0.01) return;
+    if (Math.random() > 0.007) return;
     creep.memory.sayText = [];
 
     let text = null;
@@ -66,4 +65,5 @@ export const creepControl = function (creep: Creep) {
         })
         creep.memory.sayText.push('');
     }
+    
 }

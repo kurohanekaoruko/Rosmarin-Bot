@@ -16,9 +16,9 @@ interface Room {
     // 检查是否有相同任务
     checkSameMissionInPool(type: Task["type"], data: Task["data"]): Task['id'] | null;
     // 检查任务池中是否存在任务
-    checkMissionInPool(type: Task["type"]): boolean;
-    // 检查任务池中的任务数量
-    getMissionNumInPool(type: Task["type"]): number;
+    checkMissionInPool(PoolName: string): boolean;
+    // 获取任务池中的任务数量
+    getMissionNumInPool(PoolName: string): number;
     // 锁定任务池中的任务
     lockMissionInPool(type: Task["type"], id: Task["id"], creepid: Id<Creep>): OK | void;
     // 解锁任务池中的任务
@@ -43,7 +43,7 @@ interface Room {
     // 添加资源发送任务
     SendMissionAdd(target: string, resourceType: string | ResourceConstant, amount: number): OK | void;
     // 添加孵化任务
-    SpawnMissionAdd(name: string, body: number[], level: number, role: string, memory?: CreepMemory): OK | -1;
+    SpawnMissionAdd(name: string, body: any[], level: number, role: string, memory?: CreepMemory): OK | -1;
 
     // 获取运输任务
     getTransportMission(creep: Creep): Task | null;
@@ -56,7 +56,7 @@ interface Room {
     // 获取发送任务的总发送数量
     getSendMissionTotalAmount(): {[type: string]: number};
     // 获取孵化任务
-    getSpawnMission(spawnEnergy?: number): Task | null;
+    getSpawnMission(): Task | null;
     // 获取孵化任务的数量
     getSpawnMissionAmount(): {[type: string]: number};
     // 根据roles获取孵化任务的总数量
@@ -124,7 +124,7 @@ interface SendTask {
 
 interface SpawnTask {
     name: string,
-    body: number[],
+    body: any[],
     memory: CreepMemory,
     energy: number,
     upbody?: boolean,

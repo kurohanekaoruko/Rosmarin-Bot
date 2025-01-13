@@ -99,7 +99,7 @@ const withdraw = (creep) => {
 
     // 收集掉落的资源
     const droppedResource = pos.findClosestByRange(FIND_DROPPED_RESOURCES, {
-        filter: r => r.resourceType !== RESOURCE_ENERGY || r.amount >= 200
+        filter: r => r.resourceType !== RESOURCE_ENERGY || r.amount >= 500
     });
     if (droppedResource && creep.room.storage) {
         memory.dropWithdraw = true;

@@ -4,10 +4,15 @@ import { signConstant } from "@/constant/signConstant";
 export default {
     room: {
         // 添加房间
-        add(roomName: string, mode?: string, layout?: string, x?: number, y?: number) {
+        add(roomName: string, layout?: string, x?: number, y?: number) {
+            if (!roomName) return Error('请输入房间名。');
+            if (!roomName.match(/^[EW][0-9]+[NS][0-9]+$/)) return Error('房间名格式不正确。');
+
             const BotMemRooms =  Memory['RoomControlData'];
             if(!BotMemRooms[roomName]) BotMemRooms[roomName] = {};
-            BotMemRooms[roomName]['mode'] = mode ?? 'main';
+            if(!BotMemRooms[roomName]['mode']) {
+                BotMemRooms[roomName]['mode'] = 'main';
+            }
             global.log(`已添加房间${roomName}。`);
             if(layout) {
                 BotMemRooms[roomName]['layout'] = layout;
@@ -16,14 +21,37 @@ export default {
             if(x && y) {
                 BotMemRooms[roomName]['center'] = {x, y};
                 global.log(`已设置 ${roomName} 的布局中心为 (${x},${y})。`);
+            } else {
+                let PosFlag = Game.flags.storagePos || Game.flags.centerPos;
+                if(PosFlag && PosFlag.room.name === roomName) {
+                    BotMemRooms[roomName]['center'] = {x: PosFlag.pos.x, y: PosFlag.pos.y};
+                    global.log(`已设置 ${roomName} 的布局中心为 (${PosFlag.pos.x},${PosFlag.pos.y})。`);
+                }
             }
             Game.rooms[roomName].init();
             return OK;
         },
         // 删除房间
         remove(roomName: string) {
+            if (!roomName) return Error('请输入房间名。');
+            if (!roomName.match(/^[EW][0-9]+[NS][0-9]+$/)) return Error('房间名格式不正确。');
+            let room = Game.rooms[roomName];
+            if (room && room.my && room.level >= 6 && !Game.flags[`remove-${roomName}`]) {
+                return Error(`房间 ${roomName} 等级大于等于6, 为避免误删除, 请放置一个名为 "remove-${roomName}" 的flag来确认删除。`);
+            }
+            if (Game.flags[`remove-${roomName}`]) Game.flags[`remove-${roomName}`].remove();
+
+            delete Memory['rooms'][roomName];
             delete Memory['RoomControlData'][roomName];
-            global.log(`已从控制列表删除房间${roomName}。`);
+            delete Memory['StructControlData'][roomName];
+            delete Memory['LayoutData'][roomName];
+            delete Memory['OutMineData'][roomName];
+            delete Memory['AutoData']['AutoMarketData'][roomName];
+            delete Memory['AutoData']['AutoLabData'][roomName];
+            delete Memory['AutoData']['AutoFactoryData'][roomName];
+            delete Memory['ResourceManage'][roomName];
+            delete Memory['MissionPools'][roomName];
+            global.log(`已从控制列表删除房间${roomName}并清空相关Memory。`);
             return OK;
         },
         // 查看房间列表
@@ -33,6 +61,10 @@ export default {
         },
         // 设置房间模式
         mode(roomName: string, mode: string='main') {
+            if (!roomName) return Error('请输入房间名。');
+            if (!roomName.match(/^[EW][0-9]+[NS][0-9]+$/)) return Error('房间名格式不正确。');
+            if (!['main', 'stop', 'low'].includes(mode)) return Error('仅支持main、stop、low模式。');
+
             const room = Game.rooms[roomName];
             const BotMemRooms =  Memory['RoomControlData'];
             if(!room || !room.my || !BotMemRooms[roomName]) {
@@ -44,6 +76,9 @@ export default {
         },
         // 设置房间中心
         setcenter(roomName: string, x: number, y: number) {
+            if (!roomName) return Error('请输入房间名。');
+            if (!roomName.match(/^[EW][0-9]+[NS][0-9]+$/)) return Error('房间名格式不正确。');
+
             const room = Game.rooms[roomName];
             const BotMemRooms = Memory['RoomControlData'];
             if(!room || !room.my || !BotMemRooms[roomName]) {
@@ -54,6 +89,9 @@ export default {
             return OK;
         },
         defendmode(roomName: string, mode: number=0) {
+            if (!roomName) return Error('请输入房间名。');
+            if (!roomName.match(/^[EW][0-9]+[NS][0-9]+$/)) return Error('房间名格式不正确。');
+
             const room = Game.rooms[roomName];
             const BotMemRooms = Memory['RoomControlData'];
             if(!room || !room.my || !BotMemRooms[roomName]) {
@@ -65,6 +103,9 @@ export default {
         },
         // 设置签名
         sign(roomName: string, text?: string) {
+            if (!roomName) return Error('请输入房间名。');
+            if (!roomName.match(/^[EW][0-9]+[NS][0-9]+$/)) return Error('房间名格式不正确。');
+
             const room = Game.rooms[roomName];
             if(!room || !room.my) {
                 return Error(`房间 ${roomName} 不存在或未拥有。`);
@@ -76,6 +117,9 @@ export default {
         },
         // 设置刷墙上限
         setram(roomName: string, hits: number) {
+            if (!roomName) return Error('请输入房间名。');
+            if (!roomName.match(/^[EW][0-9]+[NS][0-9]+$/)) return Error('房间名格式不正确。');
+
             const botMem = Memory['StructControlData'][roomName];
             if (hits <= 0) {
                 console.log(`输入的数值必须大于0.`);
@@ -92,6 +136,9 @@ export default {
         },
         // 开启常驻升级
         upgrade(roomName: string) {
+            if (!roomName) return Error('请输入房间名。');
+            if (!roomName.match(/^[EW][0-9]+[NS][0-9]+$/)) return Error('房间名格式不正确。');
+
             const room = Game.rooms[roomName];
             if(!room || !room.my) return Error(`房间 ${roomName} 不存在或未拥有。`);
             const botMem = Memory['RoomControlData'][roomName];
@@ -101,6 +148,9 @@ export default {
         },
         // 开启冲级
         spup(roomName: string, num?: number) {
+            if (!roomName) return Error('请输入房间名。');
+            if (!roomName.match(/^[EW][0-9]+[NS][0-9]+$/)) return Error('房间名格式不正确。');
+
             const room = Game.rooms[roomName];
             if(!room || !room.my) return Error(`房间 ${roomName} 不存在或未拥有。`);
             const botMem = Memory['RoomControlData'][roomName];
@@ -111,6 +161,9 @@ export default {
         },
         // 加速刷墙
         spre(roomName: string, num?: number) {
+            if (!roomName) return Error('请输入房间名。');
+            if (!roomName.match(/^[EW][0-9]+[NS][0-9]+$/)) return Error('房间名格式不正确。');
+
             const room = Game.rooms[roomName];
             if(!room || !room.my) return Error(`房间 ${roomName} 不存在或未拥有。`);
             const botMem = Memory['RoomControlData'][roomName];
@@ -145,68 +198,123 @@ export default {
         },
         // 查看房间工作状态
         info(roomName?: string) {
-            if(roomName) {
-                const room = Game.rooms[roomName];
-                if(!room || !room.my) return Error(`房间 ${roomName} 不存在或未拥有。`);
-                const roomMem = Memory['RoomControlData'][roomName];
-                const structMem = Memory['StructControlData'][roomName];
-                console.log(`<b>房间 ${roomName} 状态:</b>`);
-                if (room.nuker) {
-                    console.log(`   - <b>核弹</b>: ${room.nuker.cooldown ?
-                                                    colorText('冷却中', '#D9C07B') :
-                                                    room.nuker.store['energy'] < 300e3 || room.nuker.store['G'] < 5000 ?
-                                                    colorText('资源不足', '#D9C07B') :
-                                                    colorText('可发射', '#62BE78')}`);
-                }
-                if (roomMem.spup) {
-                    console.log(`   - <b>冲级</b>: ${colorText(`${roomMem.spup}个工作中`, '#62BE78')}`);
-                }
-                if (roomMem.spre) {
-                    console.log(`   - <b>刷墙</b>: ${colorText(`${roomMem.spre}个工作中`, '#62BE78')}`);
-                }
-                if (roomMem.outminePower || roomMem.outmineDeposit) {
-                    console.log(`   - <b>过道</b>: power:${roomMem.outminePower ? colorText('开启', '#62BE78') : colorText('关闭', '#EF4E4E')} deposit:${roomMem.outmineDeposit ? colorText('开启', '#62BE78') : colorText('关闭', '#EF4E4E')}`);
-                }
-                if (!structMem['powerSpawn']) {
-                    console.log(`   - <b>PowerSpawn</b>: ${colorText('已关闭', '#EF4E4E')}`);
-                } else if (
-                    room.powerSpawn.store[RESOURCE_ENERGY] < 50 ||
-                    room.powerSpawn.store[RESOURCE_POWER] < 1) {
-                    console.log(`   - <b>PowerSpawn</b>: ${colorText('资源不足', '#D9C07B')}`);
-                } else {
-                    console.log(`   - <b>PowerSpawn</b>: ${colorText('工作中', '#62BE78')}`);
-                }
-
-                if (!structMem['lab']) {
-                    console.log(`   - <b>Lab</b>: ${colorText('已关闭', '#EF4E4E')}`);
-                } else if (!structMem['labAtype'] || !structMem['labBtype']) {
-                    console.log(`   - <b>Lab</b>: ${colorText('闲置中', '#D9C07B')}`);
-                } else {
-                    const labAtype = structMem['labAtype'];
-                    const labBtype = structMem['labBtype'];
-                    const product = REACTIONS[labAtype][labBtype];
-                    console.log(`   - <b>Lab</b>: ${colorText(`${labAtype}/${labBtype} -> ${product}`, '#62BE78')}`);
-                }
-
-                if (!structMem['factory']) {
-                    console.log(`   - <b>Factory</b>: ${colorText('已关闭', '#EF4E4E')}`);
-                } else if (!structMem['factoryProduct']) {
-                    console.log(`   - <b>Factory</b>: ${colorText('闲置中', '#D9C07B')}`);
-                } else {
-                    const product = structMem['factoryProduct'];
-                    const components = COMMODITIES[product]?.components;
-                    console.log(`   - <b>Factory</b>: ${colorText(`正在生产 ${product}`, '#62BE78')}`);
-                }
-            } else {
-                for(const roomName in Memory['RoomControlData']) {
-                    this.info(roomName);
-                }
-            }
-            return OK;
+            roomInfo(roomName)
+            return ''
         }
     },
 }
 
+const roomInfo = function (roomName: string) {
+    let str = `<b>房间状态:</b><br>`;
+    str += '<table style="text-align: center;"><tr><thead align="center"><th> </th>'
+    str += '<th style="text-align: center;"> Spawn </th>'
+    str += '<th style="text-align: center;"> Lab </th>'
+    str += '<th style="text-align: center;"> Factory </th>'
+    str += '<th style="text-align: center;"> PowerSpawn </th>'
+    str += '<th style="text-align: center;"> Nuker </th>'
+    str += '<th style="text-align: center;"> Energy </th>'
+    str += '</tr></thead><tbody>'
+
+    if(roomName) {
+        const room = Game.rooms[roomName];
+        if(!room || !room.my)
+            return Error(`房间 ${roomName} 不存在或未拥有。`);
+        str += showRoomInfo(roomName)
+    } else {
+        for(const roomName in Memory['RoomControlData']) {
+            str += showRoomInfo(roomName)
+        }
+    }
+
+    str += `</tbody></table>`;
+    console.log(str);
+}
+
 const colorText = function (text: string, color: string) {
-    return `<span style="color: ${color};">${text}</span>`;
+    return `<font style="color: ${color};">${text}</font>`;
+}
+
+const showRoomInfo = function (roomName: string) {
+    const room = Game.rooms[roomName];
+    if(!room || !room.my) return '';
+    const roomMem = Memory['RoomControlData'][roomName];
+    const structMem = Memory['StructControlData'][roomName];
+
+    let str = `<tr><td><b>${roomName}:  </b></td>`;
+
+    if (room.spawn && room.spawn.length > 0) {
+        str += `<td>${colorText(`${room.getMissionNumInPool('spawn')}`, '#62BE78')}</td>`;
+    } else {
+        str += `<td>${colorText('未建造', '#8E8E8E')}</td>`;
+    }
+
+    if (room.lab && room.lab.length > 0) {
+        if (!structMem['lab']) {
+            str += `<td>${colorText('已关闭', '#EF4E4E')}</td>`;
+        } else if (!structMem['labAtype'] || !structMem['labBtype']) {
+            str += `<td>${colorText('闲置中', '#D9C07B')}</td>`;
+        } else {
+            const labAtype = structMem['labAtype'];
+            const labBtype = structMem['labBtype'];
+            const product = REACTIONS[labAtype][labBtype];
+            str += `<td> ${colorText(`${labAtype}/${labBtype}->${product}`, '#62BE78')} </td>`
+        }
+    } else {
+        str += `<td>${colorText('未建造', '#8E8E8E')}</td>`;
+    }
+
+    if (room.factory) {
+        if (!structMem['factory']) {
+            str += `<td>${colorText('已关闭', '#EF4E4E')}</td>`;
+        } else if (!structMem['factoryProduct']) {
+            str += `<td>${colorText('闲置中', '#D9C07B')}</td>`;
+        } else {
+            const product = structMem['factoryProduct'];
+            const components = COMMODITIES[product]?.components;
+            str += `<td> ${colorText(`${product}`, '#62BE78')} </td>`;
+        }
+    } else {
+        str += `<td>${colorText('未建造', '#8E8E8E')}</td>`;
+    }
+    
+    if (room.powerSpawn) {
+        const powerSpawn = room.powerSpawn;
+        const effect = powerSpawn.effects?.find(e => e.effect == PWR_OPERATE_POWER);
+        let speed = 1 + effect?.['level'] || 1;
+        // 结果为: (1 + level) 或
+        // (1 + undefined || 1) = (NaN || 1) = 1
+    
+        if (!structMem['powerSpawn']) {
+            str += `<td>${colorText('已关闭', '#EF4E4E')}</td>`;
+        } else if (
+            room.powerSpawn.store[RESOURCE_ENERGY] < 50 ||
+            room.powerSpawn.store[RESOURCE_POWER] < 1) {
+            str += `<td>${colorText('资源不足', '#D9C07B')}</td>`;
+        } else {
+            str += `<td>${colorText(`${speed}速工作中`, '#62BE78')}</td>`;
+        }
+    } else {
+        str += `<td>${colorText('未建造', '#8E8E8E')}</td>`;
+    }
+
+    if (room.nuker) {
+        if (room.nuker.cooldown) {
+            str += `<td> ${colorText('冷却中', '#D9C07B')} </td>`;
+        } else if (room.nuker.store['energy'] < 300e3 || room.nuker.store['G'] < 5000) {
+            str += `<td> ${colorText('资源不足', '#D9C07B')} </td>`;
+        } else {
+            str += `<td> ${colorText('☢已就绪☢', '#62BE78')} </td>`;
+        }
+    } else {
+        str += `<td> ${colorText('未建造', '#8E8E8E')} </td>`;
+    }
+
+    if (room[RESOURCE_ENERGY]) {
+        str += `<td>${colorText(`${room[RESOURCE_ENERGY]}`, '#FDE67B')}</td>`;
+    } else {
+        str += `<td>${colorText('0', '#8E8E8E')}</td>`;
+    }
+    
+
+    return str + '</tr>';
 }

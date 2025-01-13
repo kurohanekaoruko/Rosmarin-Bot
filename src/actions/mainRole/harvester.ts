@@ -44,22 +44,28 @@ const HarvesterAction = {
         if (!creep.room.source ||
             creep.room.source.length == 0) return false;
         let targetSource = creep.room.closestSource(creep);
+        if (!targetSource) return false;
         creep.memory.targetSourceId = targetSource.id;
         return true;
     },
     harvest: function (creep: Creep) {
-        if (creep.store.getFreeCapacity() === 0) creep.memory.action = '';
+        if (creep.store.getFreeCapacity() === 0) {
+            this.switch(creep);
+            return;
+        }
         const targetSource = Game.getObjectById(creep.memory.targetSourceId) as Source;
         if (!targetSource) {
             creep.memory.ready = false;
             return;
         }
         if (targetSource.energy === 0) {
-            creep.memory.action = '';
+            this.switch(creep);
             return;
         }
         let result = creep.goHaverst(targetSource);
         if (!result) return;
+        if (creep.store.getCapacity() == 0) return;
+
         let energy = 0;
         for (const part of creep.body) {
             if (part.type !== WORK) continue;
@@ -67,19 +73,24 @@ const HarvesterAction = {
             if (!part.boost) energy += 2;
             else energy += 2 * (BOOSTS.work[part.boost]['harvest'] || 1);
         }
-        if (creep.store.getFreeCapacity() > energy) return;
-        creep.memory.action = '';
+        if (creep.store.getFreeCapacity() <= energy) {
+            this.switch(creep);
+        }
     },
     transfer: function (creep: Creep) {
         const target = GetContainer['link'](creep) || GetContainer['container'](creep);
-        if (!target) return;
+        if (!target) {
+            creep.drop(RESOURCE_ENERGY);
+            this.switch(creep);
+            return;
+        }
         let result = creep.goTransfer(target, RESOURCE_ENERGY);
         if (!result) return;
-        creep.memory.action = '';
+        this.switch(creep);
     },
     build: function (creep: Creep) {
         if (creep.store[RESOURCE_ENERGY] === 0) {
-            creep.memory.action = '';
+            this.switch(creep);
             return;
         }
 
@@ -96,7 +107,7 @@ const HarvesterAction = {
             filter: s => s.structureType === STRUCTURE_CONTAINER
         }).find(c => creep.pos.inRangeTo(c, 2));
         if (container) {
-            creep.memory.action = '';
+            this.switch(creep);
             return;
         }
 
@@ -105,7 +116,7 @@ const HarvesterAction = {
             filter: s => s.structureType === STRUCTURE_LINK
         }).find(l => l.pos.inRangeTo(creep.pos, 2));
         if (link) {
-            creep.memory.action = '';
+            this.switch(creep);
             return;
         }
 
@@ -117,20 +128,21 @@ const HarvesterAction = {
             return false;
         }
 
-        creep.room.createConstructionSite(creep.pos, STRUCTURE_CONTAINER);
-        creep.memory.action = '';
+        let result = creep.room.createConstructionSite(creep.pos, STRUCTURE_CONTAINER);
+        if (result !== OK) creep.drop(RESOURCE_ENERGY);
+
+        this.switch(creep);
         return;
     },
     switch: function (creep: Creep) {
+        creep.memory.action = '';
         if (creep.store[RESOURCE_ENERGY] > 0) {
             const link = creep.room.link.find(l => l.pos.inRangeTo(creep.pos, 2));
             const container = creep.room.container.find(c => c.pos.inRangeTo(creep.pos, 2));
             if (!link && !container) {
                 creep.memory.action = 'build';
-                this.build(creep);
             } else {
                 creep.memory.action = 'transfer';
-                this.transfer(creep);
             }
             return;
         } else {
@@ -146,7 +158,6 @@ const HarvesterAction = {
                 creep.goWithdraw(container, RESOURCE_ENERGY);
             } else {
                 creep.memory.action = 'harvest';
-                this.harvest(creep);
             }
             return;
         }

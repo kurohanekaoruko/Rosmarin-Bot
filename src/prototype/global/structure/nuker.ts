@@ -8,12 +8,6 @@ export default {
                 // 获取目标
                 const targetPos = Game.flags[flagName].pos;
                 const targetRoomName = targetPos.roomName;
-                // const targetRoom = Game.rooms[targetRoomName];
-                // // 不打自己房间
-                // if (targetRoom?.controller?.my) {
-                //     Game.flags[flagName].remove();
-                //     break;
-                // }
                 // 获取符合发射条件的房间
                 if(!rooms || rooms.length === 0) rooms = Object.keys(Game.rooms);
                 const nearbyRooms = rooms.filter(room =>

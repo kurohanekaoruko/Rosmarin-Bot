@@ -3,7 +3,7 @@ export default class WorkFunction extends Creep {
      * 采集资源
     */
     goHaverst(target: Source | Mineral) {
-        if (!target) return false; // 如果没有目标，返回 false
+        if (!target) return;
         if (this.pos.isNearTo(target)) {
             this.harvest(target);
             return true;
@@ -20,7 +20,7 @@ export default class WorkFunction extends Creep {
      * 从指定结构中提取资源
      */
     goWithdraw(target: any, resourceType?: ResourceConstant, ...args: any[]): boolean {
-        if (!target) return false; // 如果没有目标，返回 false
+        if (!target) return;
         if (this.pos.isNearTo(target)) {
             if (!resourceType) resourceType = Object.keys(target.store)[0] as ResourceConstant;
             this.withdraw(target, resourceType, ...args);

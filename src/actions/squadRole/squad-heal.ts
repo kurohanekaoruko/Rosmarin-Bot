@@ -1,4 +1,4 @@
-const quad_heal = {
+const squad_heal = {
     run: function (creep: Creep) {
         // 归队
         if (!creep.memory['rejoin']) {
@@ -14,4 +14,4 @@ const quad_heal = {
     }
 }
 
-export default quad_heal;
+export default squad_heal;

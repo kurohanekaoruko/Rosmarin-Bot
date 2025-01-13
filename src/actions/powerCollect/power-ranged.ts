@@ -63,18 +63,17 @@ const power_ranged = {
                 let healTarget = creep.pos.findClosestByRange(myCreeps);
                 if(!moveOK) creep.moveTo(healTarget,{ignoreCreeps: false});
                 if(!rangedOK && creep.pos.isNearTo(healTarget)) creep.rangedHeal(healTarget);
-            } else {
-                if(!healOK) creep.heal(creep);
             }
         }
 
-        if (rangedOK || moveOK) return;
+        if (rangedOK || moveOK || healOK) return;
 
         const powerBank = creep.room.powerBank?.[0] ?? creep.room.find(FIND_STRUCTURES, 
             {filter: (s) => s.structureType == STRUCTURE_POWER_BANK})[0];
         if (powerBank) {
             if (creep.pos.inRangeTo(powerBank, 3)) {
                 creep.rangedAttack(powerBank);
+                creep.heal(creep);
             } else {
                 creep.moveTo(powerBank, {range: 3, ignoreCreeps: false});
             }

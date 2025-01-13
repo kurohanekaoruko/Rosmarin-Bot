@@ -1,51 +1,49 @@
 export default {
     // 创建市场订单
     order: {
-        buy(data: { roomName: any; type: any; amount: any; price: any; show: any; }) {
-            const {roomName, type, amount, price, show} = data;
+        buy(data: { roomName: any; type: any; amount: any; price: any; maxPrice: any; }) {
+            let {roomName, type, amount, price, maxPrice} = data;
 
             // 如果没有提供价格，获取市场订单并设置最优价格
-            let finalPrice = price;
-            if (!finalPrice) {
-                finalPrice = this.getPrice(type, ORDER_BUY);
+            if (!price) {
+                price = this.getPrice(type, ORDER_BUY);
             }
+
+            if (maxPrice && price > maxPrice) {
+                price = maxPrice;
+            }
+
             // 创建购买订单
             const result = Game.market.createOrder({
                 type: ORDER_BUY,
                 resourceType: type,
-                price: finalPrice,
+                price: price,
                 totalAmount: amount,
                 roomName: roomName
             });
-            if (result === OK && show) {
-                console.log(`成功创建购买订单：房间 ${roomName}，资源 ${type}，数量 ${amount}，价格 ${finalPrice}`);
-            } else if (show) {
-                console.log(`创建购买订单失败，错误代码：${result}`);
-            }
 
             return result;
         },
-        sell(data: { roomName: any; type: any; amount: any; price: any; show: any; }) {
-            const {roomName, type, amount, price, show} = data;
+        sell(data: { roomName: any; type: any; amount: any; price: any; minPrice: any; }) {
+            let {roomName, type, amount, price, minPrice} = data;
 
             // 如果没有提供价格，获取市场订单并设置最优价格
-            let finalPrice = price;
-            if (!finalPrice) {
-                finalPrice = this.getPrice(type, ORDER_SELL);
+            if (!price) {
+                price = this.getPrice(type, ORDER_SELL);
             }
+
+            if (minPrice && price < minPrice) {
+                price = minPrice;
+            }
+
             // 创建销售订单
             const result = Game.market.createOrder({
                 type: ORDER_SELL,
                 resourceType: type,
-                price: finalPrice,
+                price: price,
                 totalAmount: amount,
                 roomName: roomName
             });
-            if (result === OK && show !== false && show !== 0) {
-                console.log(`成功创建出售订单：房间 ${roomName}，资源 ${type}，数量 ${amount}，价格 ${finalPrice}`);
-            } else if (show !== false && show !== 0) {
-                console.log(`创建出售订单失败，错误代码：${result}`);
-            }
 
             return result;
         },
@@ -268,7 +266,7 @@ export default {
                         console.log(`房间 ${roomName} 的自动交易列表：`);
                     }
                     for(const item of autoMarket) {
-                        console.log(` - ${item.type}，触发阈值${item.amount}，订单类型${item.orderType}`);
+                        console.log(` - ${item.resourceType}，触发阈值${item.amount}，订单类型${item.orderType}`);
                     }
                     return OK;
                 }
@@ -283,81 +281,86 @@ export default {
                     }
                     console.log(`房间 ${room} 的自动交易列表：`);
                     for(const item of autoMarket[room]) {
-                        console.log(` - ${item.type}，触发阈值${item.amount}，订单类型${item.orderType}`);
+                        console.log(` - ${item.resourceType}，触发阈值${item.amount}，订单类型${item.orderType}`);
                     }
                 }
                 return OK;
             },
-            remove(roomName: string, type: string, orderType: string) {
+            remove(roomName: string, resourceType: string, orderType: string) {
                 if(!Memory['AutoData']['AutoMarketData'][roomName]) {
                     console.log(`房间 ${roomName} 没有开启自动交易`);
                     return OK;
                 }
                 const autoMarket = Memory['AutoData']['AutoMarketData'][roomName];
-                const index = autoMarket.findIndex((item: any) => item.type === type && item.orderType === orderType);
+                const index = autoMarket.findIndex((item: any) => item.resourceType === resourceType && item.orderType === orderType);
                 if(index === -1) {
-                    console.log(`房间 ${roomName} 没有开启自动交易：${orderType} - ${type}`);
+                    console.log(`房间 ${roomName} 没有开启自动交易：${orderType} - ${resourceType}`);
                     return OK;
                 }
                 autoMarket.splice(index, 1);
-                console.log(`已关闭房间 ${roomName} 自动交易：${orderType} - ${type}`);
+                console.log(`已关闭房间 ${roomName} 自动交易：${orderType} - ${resourceType}`);
                 return OK;
             },
-            buy(roomName: any, type: any, amount: any, maxPrice?: number) {
+            buy(roomName: any, type: 'create'|'deal', resourceType: any, amount: any, price?: number) {
                 if(!Memory['AutoData']['AutoMarketData'][roomName]) {
                     Memory['AutoData']['AutoMarketData'][roomName] = [];
                 }
                 const autoMarket = Memory['AutoData']['AutoMarketData'][roomName];
-                const autoOrder = autoMarket.find((item: any) => item.type === type && item.orderType === 'buy');
-                if(!autoOrder) {
-                    const item = {type, amount, orderType: 'buy', price: maxPrice};
-                    autoMarket.push(item);
-                    console.log(`已在房间 ${roomName} 开启自动求购${type}, 购买阈值${amount}`);
-                } else {
-                    autoOrder['amount'] = amount;
-                    console.log(`房间 ${roomName} 已存在自动求购${type}, 已修改为: 购买阈值${amount}`);
+                if (type === 'create') {
+                    const autoOrder = autoMarket.find((item: any) => item.resourceType === resourceType && item.orderType === 'buy');
+                    if(!autoOrder) {
+                        const item = {resourceType, amount, orderType: 'buy', price};
+                        autoMarket.push(item);
+                        console.log(`已在房间 ${roomName} 开启自动求购${resourceType}, 购买阈值${amount}`);
+                    } else {
+                        autoOrder['amount'] = amount;
+                        autoOrder['price'] = price;
+                        console.log(`房间 ${roomName} 已存在自动求购${resourceType}, 已修改为: 购买阈值:${amount} 价格限制:${price ?? '无'}`);
+                    }
+                } else if (type === 'deal') {
+                    const autoOrder = autoMarket.find((item: any) => item.resourceType === resourceType && item.orderType === 'dealbuy');
+                    if(!autoOrder) {
+                        const item = {resourceType, amount, orderType: 'dealbuy', price};
+                        autoMarket.push(item);
+                        console.log(`已在房间 ${roomName} 开启自动Deal买 ${resourceType}，购买阈值${amount}, 价格限制:${price}`);
+                    } else {
+                        autoOrder['amount'] = amount;
+                        autoOrder['price'] = price;
+                        console.log(`房间 ${roomName} 已存在自动Deal买 ${resourceType}，已修改为: 购买阈值:${amount} 价格限制:${price ?? '无'}`);
+                    }
                 }
                 return OK;
             },
-            sell(roomName: any, type: any, amount: any, minPrice?: number) {
+            sell(roomName: any, type: 'create'|'deal', resourceType: any, amount: any, price?: number) {
                 if(!Memory['AutoData']['AutoMarketData'][roomName]) {
                     Memory['AutoData']['AutoMarketData'][roomName] = [];
                 }
                 const autoMarket = Memory['AutoData']['AutoMarketData'][roomName];
-                if(!autoMarket.find((item: any) => item.type === type && item.orderType === 'sell')) {
-                    autoMarket.push({type, amount, orderType: 'sell', price: minPrice});
-                    console.log(`已在房间 ${roomName} 开启自动出售${type}，出售阈值${amount}`);
-                } else {
-                    console.log(`房间 ${roomName} 已存在自动出售${type}, 已修改为: 购买阈值${amount}`);
+                if (type === 'create') {
+                    const autoOrder = autoMarket.find((item: any) => item.resourceType === resourceType && item.orderType === 'sell')
+                    if(!autoOrder) {
+                        autoMarket.push({resourceType, amount, orderType: 'sell', price});
+                        console.log(`已在房间 ${roomName} 开启自动出售${resourceType}，出售阈值${amount}`);
+                    } else {
+                        autoOrder['amount'] = amount;
+                        autoOrder['price'] = price;
+                        console.log(`房间 ${roomName} 已存在自动出售${resourceType}, 已修改为: 购买阈值${amount}`);
+                    }
+                } else if (type === 'deal') {
+                    const autoMarket = Memory['AutoData']['AutoMarketData'][roomName];
+                    if(!autoMarket.find((item: any) => item.resourceType === resourceType && item.orderType === 'dealsell')) {
+                        autoMarket.push({resourceType, amount, orderType: 'dealsell', price});
+                        console.log(`已在房间 ${roomName} 开启自动Deal卖${resourceType}，出售阈值:${amount}, 价格限制:${price ?? '无限制'}`);
+                    } else {
+                        const index = autoMarket.findIndex((item: any) => item.resourceType === resourceType && item.orderType === 'dealsell');
+                        autoMarket[index]['amount'] = amount;
+                        autoMarket[index]['price'] = price;
+                        console.log(`房间 ${roomName} 已存在自动Deal卖${resourceType}，已修改为: 出售阈值:${amount} 价格限制:${price ?? '无限制'}`);
+                    }
                 }
+                
                 return OK;
             },
-            dealbuy(roomName: string, type: string, amount: number, price: number) {
-                const autoMarket = Memory['AutoData']['AutoMarketData'][roomName];
-                if(!autoMarket.find((item: any) => item.type === type && item.orderType === 'dealbuy')) {
-                    autoMarket.push({type, amount, orderType: 'dealbuy', price});
-                    console.log(`已在房间 ${roomName} 开启自动deal购买 ${type}，购买阈值${amount}, 价格限制:${price}`);
-                } else {
-                    const index = autoMarket.findIndex((item: any) => item.type === type && item.orderType === 'dealbuy');
-                    autoMarket[index]['amount'] = amount;
-                    autoMarket[index]['price'] = price;
-                    console.log(`房间 ${roomName} 已存在自动deal购买 ${type}，已修改为: 购买阈值${amount} 价格限制:${price}`);
-                }
-                return OK;
-            },
-            dealsell(roomName: string, type: string, amount: number, price: number) {
-                const autoMarket = Memory['AutoData']['AutoMarketData'][roomName];
-                if(!autoMarket.find((item: any) => item.type === type && item.orderType === 'dealsell')) {
-                    autoMarket.push({type, amount, orderType: 'dealsell', price});
-                    console.log(`已在房间 ${roomName} 开启自动deal出售${type}，出售阈值${amount}, 价格限制:${price}`);
-                } else {
-                    const index = autoMarket.findIndex((item: any) => item.type === type && item.orderType === 'dealsell');
-                    autoMarket[index]['amount'] = amount;
-                    autoMarket[index]['price'] = price;
-                    console.log(`房间 ${roomName} 已存在自动deal出售${type}，已修改为: 出售阈值${amount} 价格限制:${price}`);
-                }
-                return OK;
-            }
         },
     }
 }

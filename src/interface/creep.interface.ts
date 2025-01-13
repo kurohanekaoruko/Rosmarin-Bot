@@ -20,6 +20,7 @@ interface Creep {
     goTransfer(target: Structure, resoureType?: ResourceConstant, amount?: number): boolean;
     goBuild(target: ConstructionSite): boolean;
     goRepair(target: Structure): boolean;
+    goPickup(target: Resource): boolean;
 }
 
 interface CreepMemory {

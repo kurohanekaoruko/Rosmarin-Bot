@@ -1248,7 +1248,6 @@ const ManagerPlanner = {
 			).path.forEach(pos=>{
                 if(costs.get(pos.x,pos.y) != 1){
                     structMap['road'].push([pos.x,pos.y])
-					// roomStructs!.set(pos.x, pos.y, 'road');
                     costs.set(pos.x,pos.y,1)
                 }
             })
@@ -1258,7 +1257,8 @@ const ManagerPlanner = {
 		return {
 			roomName: roomName,
 			structMap: structMap,
-			storagePos: {storageX,storageY}
+			storagePos: {storageX, storageY},
+			labPos: {labX, labY},
 		};
 	}
 };

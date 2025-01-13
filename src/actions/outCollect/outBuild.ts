@@ -84,7 +84,7 @@ const outBuild = {
         
         const targetRoom = Game.rooms[creep.memory.targetRoom];
         const constructionSite = targetRoom.find(FIND_CONSTRUCTION_SITES, {
-            filter: (site) => site.structureType === STRUCTURE_ROAD
+            filter: (site) => site.structureType === STRUCTURE_ROAD || site.structureType === STRUCTURE_CONTAINER
         });
         if (constructionSite.length > 0) {
             const target = creep.pos.findClosestByRange(constructionSite);

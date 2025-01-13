@@ -1,13 +1,25 @@
 const outHarvest = {
     target: function(creep: Creep) {
-        // 尝试将能量传递给附近的运输单位
-        if (this.transferToNearbyCarrier(creep)) return creep.store.getUsedCapacity() == 0;
-
-        // 查找附近的容器
-        let targetContainer = creep.pos.findInRange(FIND_STRUCTURES, 2, {
-            filter: (structure) => structure.structureType == STRUCTURE_CONTAINER
-        })[0];
+        if (creep.store.getUsedCapacity() == 0) return true;
         
+        // 尝试将能量传递给附近的运输单位
+        if (this.transferToNearbyCarrier(creep)) return;
+
+        let targetContainer
+
+        let targetSource = Game.getObjectById(creep.memory.targetSourceId) as Source;
+        if(!targetSource) {
+            // 查找附近的容器
+            targetContainer = creep.pos.findInRange(FIND_STRUCTURES, 1, {
+                filter: (structure) => structure.structureType == STRUCTURE_CONTAINER
+            })[0];
+        } else {
+            // 查找附近的容器
+            targetContainer = targetSource.pos.findInRange(FIND_STRUCTURES, 1, {
+                filter: (structure) => structure.structureType == STRUCTURE_CONTAINER
+            })[0];
+        }
+
         if (!targetContainer) {
             // 没有容器时的处理
             this.handleNoContainer(creep);
@@ -56,9 +68,9 @@ const outHarvest = {
                     c.store.getFreeCapacity(RESOURCE_ENERGY) > 0)
         })[0];
 
-        if (nearbyCarrier){
-            if (creep.transfer(nearbyCarrier, RESOURCE_ENERGY) === OK) return true;
-        }
+        if (!nearbyCarrier) return false;
+
+        if (creep.transfer(nearbyCarrier, RESOURCE_ENERGY) === OK) return true;
 
         return false;
     },
@@ -70,7 +82,11 @@ const outHarvest = {
         })[0];
 
         if (!constructionSite) {
-            creep.room.createConstructionSite(creep.pos, STRUCTURE_CONTAINER);
+            let result = creep.room.createConstructionSite(creep.pos, STRUCTURE_CONTAINER);
+            if (result !== OK) {
+                creep.drop(RESOURCE_ENERGY);
+                return;
+            }
         } else if (creep.pos.inRangeTo(constructionSite, 2)) {
             creep.build(constructionSite);
         } else {
@@ -106,20 +122,6 @@ const outHarvest = {
             return;
         }
 
-        if (creep.pos.x <= 1) {
-            creep.move(RIGHT);
-            return;
-        } else if (creep.pos.x >= 48) {
-            creep.move(LEFT);
-            return;
-        } else if (creep.pos.y <= 1) {
-            creep.move(BOTTOM);
-            return;
-        } else if (creep.pos.y >= 48) {
-            creep.move(TOP);
-            return;
-        }
-
         // 如果还没有绑定采集点，则绑定一个
         if (!creep.memory.targetSourceId) {
             // 从绑定数量最少的采集点中寻找离Creep最近的
@@ -134,9 +136,12 @@ const outHarvest = {
         }
 
         let targetSource = Game.getObjectById(creep.memory.targetSourceId) as Source;
-        if(!targetSource || targetSource.energy == 0) return;
+        if(!targetSource) {
+            return;
+        }
         // 如果离采集点过远，则移动过去
         if (creep.pos.isNear(targetSource.pos)) {
+            if (targetSource.energy == 0) return;
             creep.harvest(targetSource);
         }
         else {
@@ -144,6 +149,9 @@ const outHarvest = {
             creep.moveTo(targetSource, {range: 1, maxRooms: 1, ignoreCreeps: false});
         }
 
+        creep.memory.dontPullMe = false;
+
+        if (creep.store.getCapacity() == 0) return false;
         return creep.store.getFreeCapacity() == 0;
     }
 }

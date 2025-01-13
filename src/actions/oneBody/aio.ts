@@ -7,7 +7,7 @@ const aio = {
     
         if (!creep.memory.boosted) {
             const boost = ['XGHO2', 'XLHO2', 'XKHO2', 'XZHO2'];
-            creep.memory.boosted = creep.goBoost(boost, true);
+            creep.memory.boosted = creep.goBoost(boost, false);
             return
         }
 

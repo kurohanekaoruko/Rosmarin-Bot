@@ -1,4 +1,3 @@
-import { RoleLevelData, RoleData } from '@/constant/CreepConstant';
 import { decompress } from '@/utils';
 
 // 过道观察间隔
@@ -6,7 +5,7 @@ const LookInterval = 10;
 // 沉积物最大冷却
 const DepositMaxCooldown = 100;
 // 最小power数量限制
-const PowerMinAmount = 2000;
+const PowerMinAmount = 3000;
 
 
 /** 外矿采集模块 */
@@ -33,18 +32,45 @@ export default class OutMine extends Room {
                 else scoutSpawn(this, roomName);    // 侦查
                 continue;
             }
+
             // 没有房间视野不孵化
             if (!targetRoom || Game.time % 20 != 2) continue;
-
-            if(Game.time % 100 == 2 && targetRoom.memory['road']?.length > 0) {
-                for(const road of targetRoom.memory['road']) {
-                    const [x, y] = decompress(road);
+            
+            // // 固定路
+            // if (Game.time % 100 == 2 && targetRoom.memory['road']?.length > 0) {
+            //     let siteCount = targetRoom.find(FIND_MY_CONSTRUCTION_SITES).length;
+            //     for(const road of targetRoom.memory['road']) {
+            //         if (siteCount >= 10) break;
+            //         const [x, y] = decompress(road);
+            //         const pos = new RoomPosition(x, y, roomName);
+            //         let result = targetRoom.createConstructionSite(pos, STRUCTURE_ROAD);
+            //         if (result == OK) siteCount++;
+            //         if (result == ERR_FULL) break;
+            //     }
+            // }
+            // 信息素造路
+            const pheromoneMem = Memory[roomName]?.['pheromone'];
+            if (Game.time % 100 == 2 && pheromoneMem) {
+                let siteCount = targetRoom.find(FIND_MY_CONSTRUCTION_SITES).length;
+                for(const p in pheromoneMem) {
+                    // 信息素衰减
+                    pheromoneMem[p] *= 0.9;
+                    // 信息素低于1时清理
+                    if (pheromoneMem[p] < 1) {
+                        delete pheromoneMem[p];
+                        continue;
+                    }
+                    if (pheromoneMem[p] < 5) continue;
+                    // 尝试造路
+                    if (siteCount >= 10) continue;
+                    const [x, y] = decompress(parseInt(p));
                     const pos = new RoomPosition(x, y, roomName);
-                    if (pos.lookFor(LOOK_STRUCTURES).find(s => s.structureType == STRUCTURE_ROAD)) continue;
-                    if (pos.lookFor(LOOK_CONSTRUCTION_SITES).length > 0) continue;
-                    targetRoom.createConstructionSite(pos, STRUCTURE_ROAD);
+                    let result = targetRoom.createConstructionSite(pos, STRUCTURE_ROAD);
+                    if (result == OK) siteCount++;
                 }
             }
+
+            
 
             const sourceNum = targetRoom.source?.length || targetRoom.find(FIND_SOURCES).length || 0;
             if (sourceNum == 0) continue;
@@ -59,9 +85,7 @@ export default class OutMine extends Room {
                 )
             });
 
-            const lv = this.getEffectiveRoomLevel();
-
-            outDefendSpawn(this, targetRoom, lv, hostiles)
+            outDefendSpawn(this, targetRoom, hostiles)
 
             // 有带攻击组件的敌人时不孵化
             if (hostiles.length > 0) continue;
@@ -70,12 +94,20 @@ export default class OutMine extends Room {
             const myUserName = this.controller.owner.username;
             if (controller?.owner) continue;
 
-            outReserverSpawn(this, targetRoom);    // 预定
+            if (this.level >= 3) outReserverSpawn(this, targetRoom);    // 预定
 
-            if (controller.reservation && controller.reservation.username !== myUserName) continue;
+            if (controller.reservation &&
+                controller.reservation.username !== myUserName) continue;
 
-            outHarvesterSpawn(this, targetRoom, sourceNum);    // 采集  
-            outCarrySpawn(this, targetRoom, sourceNum);    // 搬运
+            outHarvesterSpawn(this, targetRoom, sourceNum);    // 采集
+
+            // 外矿加速搬运策略 OutSpeedCarryTactics
+            if (Game.flags[`${this.name}/OSCT`]) {
+                outCarry2Spawn(this, targetRoom, sourceNum * 4);
+            } else {
+                outCarrySpawn(this, targetRoom, sourceNum);
+            }
+            
             outBuilderSpawn(this, targetRoom);    // 建造
         }
     }
@@ -308,7 +340,7 @@ export default class OutMine extends Room {
             // 按照power容量孵化搬运工
             const maxPc = powerBank.power / 1250;
             // 预计搬运工到达时间
-            let TICK = Game.map.getRoomLinearDistance(this.name, targetRoom) * 50 + Math.ceil(maxPc/3)*150 + 50;
+            const TICK = Game.map.getRoomLinearDistance(this.name, targetRoom) * 50 + Math.ceil(maxPc/3)*150 + 50;
             let threshold = TICK * Math.max(1800, mineData.creep*600*(mineData.boostLevel+1));
             if (threshold < 600e3) threshold = 600e3;
             if (threshold > 1.5e6) threshold = 1.5e6;
@@ -382,7 +414,7 @@ const scoutSpawn = function (homeRoom: Room, targetRoomName: string) {
     if (scouts + spawnNum > 0) return false;
 
     const memory = { homeRoom: homeRoom.name, targetRoom: targetRoomName } as CreepMemory;
-    homeRoom.SpawnMissionAdd('OS', [0,0,1,0,0,0,0,0], RoleData['out-scout'].level, 'out-scout', memory);
+    homeRoom.SpawnMissionAdd('OS', [], -1, 'out-scout', memory);
     return true;
 }
 
@@ -425,7 +457,7 @@ const outMineSpawn = function (homeRoom: Room, targetRoom: Room) {
 }
 
 // 防御
-const outDefendSpawn = function (homeRoom: Room, targetRoom: Room, lv: number, hostiles: Creep[]) {
+const outDefendSpawn = function (homeRoom: Room, targetRoom: Room, hostiles: Creep[]) {
     const invaderCore = targetRoom.find(FIND_STRUCTURES, {
         filter: (structure) => structure.structureType === STRUCTURE_INVADER_CORE
     });
@@ -442,7 +474,10 @@ const outDefendSpawn = function (homeRoom: Room, targetRoom: Room, lv: number, h
 
     if(hostiles.length > 0) {
         const spawnNum = global.SpawnMissionNum[homeRoom.name]['out-defend'] || 0;
-        if (outerDefenders + spawnNum >= 1) return false;
+        let maxNum = 1;
+        if (homeRoom.level < 4) maxNum = 3;
+        else if (homeRoom.level < 6) maxNum = 2;
+        if (outerDefenders + spawnNum >= maxNum) return false;
         role = 'out-defend';
         memory = { homeRoom: homeRoom.name, targetRoom: targetRoom.name };
         name = 'OD';
@@ -452,7 +487,11 @@ const outDefendSpawn = function (homeRoom: Room, targetRoom: Room, lv: number, h
     }
     if(invaderCore.length > 0) {
         const spawnNum = global.SpawnMissionNum[homeRoom.name]['out-invader'] || 0;
-        if (outerInvaders + spawnNum >= 2) return false;
+        let maxNum = 1;
+        if (homeRoom.level < 4) maxNum = 4;
+        else if (homeRoom.level < 6) maxNum = 3;
+        else if (homeRoom.level == 6) maxNum = 2;
+        if (outerInvaders + spawnNum >= maxNum) return false;
         role = 'out-invader';
         memory = { homeRoom: homeRoom.name, targetRoom: targetRoom.name };
         name = 'OI';
@@ -504,14 +543,42 @@ const outCarrySpawn = function (homeRoom: Room, targetRoom: Room, num: number) {
         homeRoom.SpawnMissionAdd('OC', [], -1, role, memory);
         return true;
     }
+
+    return false;
+}
+
+// 搬运
+const outCarry2Spawn = function (homeRoom: Room, targetRoom: Room, num: number) {
+    const CreepByTargetRoom = getCreepByTargetRoom(targetRoom.name);
+    const outerCarry = (CreepByTargetRoom['out-carry'] || [])
+                        .filter((c: any) => c.homeRoom == homeRoom.name).length;
+    const outerCar = (CreepByTargetRoom['out-car'] || [])
+                        .filter((c: any) => c.homeRoom == homeRoom.name).length;
     
+    const spawnCarryNum = global.SpawnMissionNum[homeRoom.name]['out-carry'] || 0;
+    const spawnCarNum = global.SpawnMissionNum[homeRoom.name]['out-car'] || 0;
+
+    if (outerCar + spawnCarNum == 0) {
+        const role = 'out-car';
+        const memory = { homeRoom: homeRoom.name, targetRoom: targetRoom.name } as CreepMemory;
+        homeRoom.SpawnMissionAdd('OC', [[WORK, 1], [CARRY, 5], [MOVE, 3]], -1, role, memory);
+        return true;
+    }
+
+    if (outerCarry + spawnCarryNum < num - 1) {
+        const role = 'out-carry';
+        const memory = { homeRoom: homeRoom.name, targetRoom: targetRoom.name } as CreepMemory;
+        homeRoom.SpawnMissionAdd('OC', [[CARRY, 6], [MOVE, 3]], -1, role, memory);
+        return true;
+    }
+
     return false;
 }
 
 // 预定
 const outReserverSpawn = function (homeRoom: Room, targetRoom: Room) {
     if (!targetRoom.controller || targetRoom.controller.my) return false;
-    if(Game.rooms[homeRoom.name].controller.level < 4) return false;
+    if(homeRoom.controller.level < 3) return false;
 
     if (targetRoom.controller.reservation &&
         targetRoom.controller.reservation.username == homeRoom.controller.owner.username &&
@@ -546,13 +613,6 @@ const outBuilderSpawn = function (homeRoom: Room, targetRoom: Room) {
     const memory = { homeRoom: homeRoom.name, targetRoom: targetRoom.name } as CreepMemory;
     homeRoom.SpawnMissionAdd('OB', [], -1, 'out-build', memory);
     return true;
-}
-
-const GetRoleBodys = function (role: string, lv: number): number[] {
-    const bodypart = RoleLevelData[role] ?
-                     RoleLevelData[role][lv].bodypart :
-                     RoleData[role].ability;
-    return bodypart;
 }
 
 const PowerBankCheck = function (room: Room) {
@@ -631,7 +691,7 @@ const PowerMineMissionData = function (room: Room, P_num: number, power: number)
 
     let data = null;
     // 一队T2
-    if (power > 7000 && LO_Amount >= 3000 &&
+    if (power >= 7000 && LO_Amount >= 3000 &&
         GHO2_Amount >= 3000 && UH2O_Amount >= 3000) {
         data = {
             creep: 1,      // creep队伍数
@@ -641,14 +701,14 @@ const PowerMineMissionData = function (room: Room, P_num: number, power: number)
             prMax: 0,     // ranged最大孵化数
         }
     }
-    // 一队T1 + 6个ranged
-    else if (power > 6000 && LO_Amount >= 3000 &&
+    // 一队T1 + 5个ranged
+    else if (power >= 7000 && LO_Amount >= 3000 &&
         GO_Amount >= 3000 && UH_Amount >= 3000) {
         data = {
             creep: 1,
             max: 2,
             boostLevel: 1,
-            prNum: 6,
+            prNum: 5,
             prMax: 8,
         }
     }
@@ -663,23 +723,23 @@ const PowerMineMissionData = function (room: Room, P_num: number, power: number)
             prMax: 6,
         }
     }
-    // 一队T0 + 8个ranged
-    else if (power > 6000) {
+    // 一队T0 + 7个ranged
+    else if (power >= 6500) {
         data = {
             creep: 1,
             max: 2,
             boostLevel: 0,
-            prNum: 8,
+            prNum: 7,
             prMax: 10,
         }
     }
-    // 三队T0, 只有1个位置时补充8个ranged, 2个位置时补充4个ranged
+    // 三队T0, 2个位置以下时补充4个ranged
     else {
         data = {
             creep: P_num,
             max: 6,
             boostLevel: 0,
-            prNum: P_num == 1 ? 8 : P_num == 2 ? 4 : 0,
+            prNum: P_num <= 2 ? 4 : 0,
             prMax: 10,
         }
     }

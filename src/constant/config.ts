@@ -10,4 +10,3 @@ export const BaseConfig = {
     RESOURCE_ABBREVIATIONS,
     
 }
-

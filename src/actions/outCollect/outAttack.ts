@@ -6,7 +6,7 @@ const outAttack = {
         }
     
         let hostileCreeps = creep.room.find(FIND_HOSTILE_CREEPS, {
-            filter: (c) => c.owner.username == 'Source Keeper' || c.owner.username == 'Invader'
+            filter: (c) => c.owner.username == 'Source Keeper'
         });
         if (hostileCreeps.length > 0) {
             let target = creep.pos.findClosestByRange(hostileCreeps);

@@ -10,10 +10,14 @@ export const roomControl = function (room: Room) {
     // 不运行未加入控制列表的房间
     if (!Memory['RoomControlData'][room.name]) return;
 
-    // 初始化
-    if (!Memory.MissionPools[room.name])
-        room.init();
+    if (Game.time % 100 == 0) {
+        // 分配高复杂度代码的运行帧
+        room.memory['index'] = Math.floor(Math.random() * 100); // 0-99
+    }
 
+    // 初始化
+    if (!Memory.MissionPools[room.name]) room.init();
+    
     // 房间运行
     room.MissionUpdate();    // 更新任务池
     room.StructureWork();    // 处理建筑行为

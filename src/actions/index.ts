@@ -7,11 +7,10 @@ export { default as worker } from './mainRole/worker';
 export { default as mineral } from './mainRole/mineral';
 
 export { default as claimer } from './claimRole/claimer';
-export { default as lclaimer } from './claimRole/lclaimer';
 export { default as aclaimer } from './claimRole/aclaimer';
 
 export { default as logistic } from './otherRole/logistic';
-export { default as harvest_carry } from './mainRole/harvest_carry';
+export { default as universal } from './mainRole/universal';
 export { default as SpeedUpgrader } from './otherRole/spup';
 export { default as SpeedRepair } from './otherRole/spre';
 export { default as dismantle } from './otherRole/dismantle';
@@ -33,7 +32,7 @@ export { default as outDefend } from './outCollect/outDefend';
 export { default as outInvader } from './outCollect/outInvader';
 export { default as outAttack } from './outCollect/outAttack';
 export { default as outRanged } from './outCollect/outRanged';
-export { default as outMiner } from './outCollect/outMiner';
+export { default as outMineral } from './outCollect/outMineral';
 
 export { default as power_attack } from './powerCollect/power-attack';
 export { default as power_heal } from './powerCollect/power-heal';
@@ -52,10 +51,10 @@ export { default as aio } from './oneBody/aio';
 export { default as defend_attack } from './defend/defend-attack';
 export { default as defend_ranged } from './defend/defend-ranged';
 
-export { default as quad_attack } from './quadRole/quad-attack';
-export { default as quad_heal } from './quadRole/quad-heal';
-export { default as quad_dismantle } from './quadRole/quad-dismantle';
-export { default as quad_ranged } from './quadRole/quad-ranged';
+export { default as squad_attack } from './squadRole/squad-attack';
+export { default as squad_heal } from './squadRole/squad-heal';
+export { default as squad_dismantle } from './squadRole/squad-dismantle';
+export { default as squad_ranged } from './squadRole/squad-ranged';
 
 export { default as aid_build } from './aidRole/aid-build';
 export { default as aid_carry } from './aidRole/aid-carry';

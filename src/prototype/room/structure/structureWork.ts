@@ -1,6 +1,4 @@
-import { RoleData } from '@/constant/CreepConstant';
 import { CompoundColor } from '@/constant/ResourceConstant';
-import { genCreepName } from '@/utils';
 
 /**
  * 管理建筑物的工作
@@ -18,76 +16,14 @@ export default class StructureWork extends Room {
     }
 
     SpawnWork() {
+        // 没有spawn时不处理
         if (!this.spawn) return;
 
+        // 可视化孵化状态
         this.VisualSpawnInfo();
 
-        // 处理 Spawn 孵化逻辑
-        if (Game.time % 10) return;
-        if (this.energyAvailable < 250) return;
-        if (!this.checkMissionInPool('spawn')) return;
-
-        let hc = null;
-        let energyAvailable = this.energyAvailable;
- 
-        // 如果有能量，则生产 creep
-        this.spawn.forEach(spawn => {
-            const task = this.getSpawnMission(energyAvailable);
-            if (!task) return;
-            const data = task.data as SpawnTask;
-            let role = data.memory.role;
-            if (!role) {
-                this.deleteMissionFromPool('spawn', task.id);
-                return;
-            }
-            const name = genCreepName(data.name||RoleData[role].code)
-            let body: Number[];
-            if (data.body?.length > 0) {
-                body = data.body;
-            } else {
-                body = this.GetRoleBodys(role, data.upbody);
-            }
-            const bodypart = this.GenerateBodys(body, role);
-            if (!bodypart || bodypart.length == 0) {
-                this.deleteMissionFromPool('spawn', task.id);
-                return;
-            }
-            const cost = this.CalculateEnergy(bodypart);
-            if (cost > this.energyCapacityAvailable) {
-                this.deleteMissionFromPool('spawn', task.id);
-                return;
-            }
-            const result = spawn.spawnCreep(bodypart, name, { memory: data.memory });
-            if (result == OK && cost <= energyAvailable) {
-                energyAvailable -= cost;
-                if (!global.CreepNum) global.CreepNum = {};
-                if (!global.CreepNum[this.name]) global.CreepNum[this.name] = {};
-                global.CreepNum[this.name][role] = (global.CreepNum[this.name][role] || 0) + 1;
-                this.submitSpawnMission(task.id);
-                return;
-            } else {
-                if (Game.time % 20) return;
-                if (hc && hc >= 2) return;
-                if (role !== 'harvester' && role !== 'transport' && role !== 'carrier' && role !== 'manager') return;
-                if (role == 'manager') role = 'transport';
-                const num = this.find(FIND_MY_CREEPS, {filter: c => c.memory.role == role}).length;
-                if (num !== 0) return;
-                if (role !== 'carrier' || (role == 'carrier' && this.level < 4)) {
-                    if (hc == null) {
-                        hc = this.find(FIND_MY_CREEPS, {filter: c => c.memory.role == 'har-car'}).length +
-                            (global.SpawnMissionNum[this.name]?.['har-car'] || 0)
-                    }
-                    if (hc >= 2) return;
-                    spawn.spawnCreep(
-                        this.GenerateBodys(RoleData['har-car'].ability),
-                        genCreepName(RoleData['har-car'].code),
-                        { memory: { role: 'har-car', home: this.name } as CreepMemory }
-                    );
-                    global.log(`房间 ${this.name} 没有且不足以孵化 ${role}，已紧急孵化 har-car。`);
-                    hc++;
-                }
-            }
-        })
+        // 孵化creep
+        this.SpawnCreep();
     }
     
     // 处理 Tower 防御和修复逻辑

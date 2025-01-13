@@ -10,29 +10,23 @@ const dismantle = {
             creep.memory.boosted = creep.goBoost(boosts);
             return
         }
-    
-        if (creep.room.name != creep.memory.targetRoom || creep.pos.isRoomEdge()) {
-            creep.moveToRoom(creep.memory.targetRoom);
-            return
-        }
-    
-        {
-            const name = creep.name.match(/#(\w+)/)?.[1] ?? creep.name;
-            const moveflag = Game.flags[name + '-move'];
-            if(moveflag && !creep.pos.inRangeTo(moveflag.pos, 0)) {
-                if(creep.room.name !== moveflag.pos.roomName) {
-                    creep.memory.targetRoom = moveflag.pos.roomName;
-                }
-                creep.moveTo(moveflag.pos, {
-                    maxRooms: 1,
-                    range: 0,
-                })
+        
+        let name = creep.name.match(/#(\w+)/)?.[1] ?? creep.name;
+        const moveflag = Game.flags[name + '-move'];
+        if(moveflag && !creep.pos.inRangeTo(moveflag.pos, 0)) {
+            if(creep.room.name !== moveflag.pos.roomName) {
+                creep.memory.targetRoom = moveflag.pos.roomName;
             }
-            if (moveflag) return true;
+            creep.moveTo(moveflag.pos, {
+                maxRooms: 1,
+                range: 0,
+            })
         }
+        if (moveflag) return true;
+        
     
         if(creep.room.controller?.my) return false;
-        const name = creep.name.match(/#(\w+)/)?.[1] ?? creep.name;
+        name = creep.name.match(/#(\w+)/)?.[1] ?? creep.name;
         const disflag = Game.flags[name + '-dis'] || Game.flags['dis-' + creep.room.name];
         if(disflag) {
             const enemiesStructures = disflag.pos.lookFor(LOOK_STRUCTURES);
@@ -47,6 +41,11 @@ const dismantle = {
                 });
                 return true;
             }
+        }
+
+        if (creep.room.name != creep.memory.targetRoom || creep.pos.isRoomEdge()) {
+            creep.moveToRoom(creep.memory.targetRoom);
+            return
         }
     }
 }

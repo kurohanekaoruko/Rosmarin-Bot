@@ -3,7 +3,7 @@ const ClaimModule = {
         if (Game.time % 10) return;
         for (const flagName in Game.flags) {
             // 占领
-            const claimFlag = flagName.match(/^r-([EW][1-9]+[NS][1-9]+)[-_]claim(?:[-_].*)?$/);
+            const claimFlag = flagName.match(/^r-([EW][1-9]+[NS][1-9]+)[-_/]claim(?:[-_/].*)?$/);
             if (claimFlag) {
                 const room = Game.rooms[claimFlag[1]];
                 if (!room.controller || !room.controller.my) continue;
@@ -11,6 +11,22 @@ const ClaimModule = {
                 if (!targetRoom || (targetRoom.controller && !targetRoom.controller.my)) {
                     room.SpawnMissionAdd('', [], -1, 'claimer',{
                         homeRoom: claimFlag[1],
+                        targetRoom: Game.flags[flagName].pos.roomName
+                    } as any);
+                }
+                Game.flags[flagName].remove();
+                continue;
+            }
+
+            // 占领
+            const lclaimFlag = flagName.match(/^r-([EW][1-9]+[NS][1-9]+)[-_/]lclaim(?:[-_/].*)?$/);
+            if (lclaimFlag) {
+                const room = Game.rooms[lclaimFlag[1]];
+                if (!room.controller || !room.controller.my) continue;
+                const targetRoom = Game.flags[flagName].room;
+                if (!targetRoom || (targetRoom.controller && !targetRoom.controller.my)) {
+                    room.SpawnMissionAdd('', [], -1, 'lclaimer',{
+                        homeRoom: lclaimFlag[1],
                         targetRoom: Game.flags[flagName].pos.roomName
                     } as any);
                 }
@@ -73,6 +89,7 @@ const ClaimModule = {
                 rSiteFlagMemory['lastTime'] = Game.time;
                 continue;
             }
+
         }
     }
 }

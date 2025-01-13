@@ -88,12 +88,13 @@ export default class MissionGet extends Room {
         return sends;
     }
     // 获取孵化任务
-    getSpawnMission(energyAvailable: number) {
-        const checkFunc = (task: Task) => {
+    getSpawnMission() {
+        const energyAvailable = this.energyAvailable;
+        const filter = (task: Task) => {
             const data = task.data as SpawnTask;
             return (energyAvailable||0) >= (data.energy||0);
         }
-        const task = this.getMissionFromPool('spawn', null, checkFunc);
+        const task = this.getMissionFromPool('spawn', null, filter);
         if(!task) return null;
         return task;
     }

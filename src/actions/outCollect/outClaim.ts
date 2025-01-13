@@ -1,3 +1,5 @@
+import {outSignConstant} from "@/constant/signConstant";
+
 const outClaim = {
     target: function(creep: Creep) {
         if (creep.room.name != creep.memory.targetRoom || creep.pos.isRoomEdge()) {
@@ -6,14 +8,21 @@ const outClaim = {
         }
 
         const controller = creep.room.controller;
-        const ticksToEnd = controller.reservation ? controller.reservation.ticksToEnd : 0;
+        
         if(!controller) return;
         if (creep.pos.inRangeTo(controller, 1)) {
-            if (ticksToEnd >= 4950) return false;
-            creep.reserveController(controller);
-            if (controller.sign &&
-                controller.sign.username != creep.owner.username) {
-                creep.signController(controller, '');
+            if (controller.reservation &&
+                controller.reservation.username != creep.owner.username) {
+                creep.attackController(controller)
+            } else {
+                const ticksToEnd = controller.reservation?.ticksToEnd || 0;
+                if (ticksToEnd >= 4950) return false;
+                creep.reserveController(controller);
+            }
+
+            if (!controller.sign || controller.sign.username != creep.owner.username) {
+                const index = Math.floor(Math.random() * outSignConstant.length);
+                creep.signController(controller, outSignConstant[index]);
             }
         }
         else {

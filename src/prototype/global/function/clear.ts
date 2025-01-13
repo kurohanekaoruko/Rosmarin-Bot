@@ -34,6 +34,6 @@ export default {
             Memory.MissionPools[roomName][type] = [];
             console.log(`已清空房间 ${roomName} 的 ${type} 任务`);
             return OK;
-        },
+        }
     }
 }

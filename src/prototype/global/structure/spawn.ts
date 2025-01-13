@@ -2,6 +2,18 @@ import { RoleData, RoleBodys } from '@/constant/CreepConstant';
 
 export default {
     spawn: {
+        creep(roomName: string, bodypart: any[], role: string, memory?: any) {
+            if (!roomName || !role) return -1;
+            if (!RoleData[role]) return -1;
+            const room = Game.rooms[roomName];
+            if(!memory) memory = {};
+            if (!memory.home && !memory.homeRoom) {
+                memory.homeRoom = roomName;
+            }
+            room.SpawnMissionAdd('', bodypart, -1, role, _.cloneDeep(memory));
+            console.log(`[${roomName}] 即将孵化 ${role}, 体型: ${JSON.stringify(bodypart)} \n memory: ${JSON.stringify(memory)}`);
+            return 0;
+        },
         role(roomName: string, role: string, memory?: any, num?: number) {
             if (!roomName || !role) return -1;
             if (!RoleData[role]) return -1;
@@ -20,7 +32,7 @@ export default {
         onebody(roomName: string, targetRoom: string, type: string, T: string) {
             if (!(['ranged', 'tough'].includes(type))) return Error('没有该一体机类型');
             const room = Game.rooms[roomName];
-            const bodypart = RoleBodys[`one-${type}`]?.[T] || RoleData[`one-${type}`]?.ability;
+            const bodypart = RoleBodys[`one-${type}`]?.[T] || RoleData[`one-${type}`]?.bodypart;
             room.SpawnMissionAdd('', bodypart, -1, `one-${type}`, {targetRoom: targetRoom} as any);
             console.log(`[${roomName}] 即将孵化${type}一体机到${targetRoom}。`);
             if (type == 'tough') {

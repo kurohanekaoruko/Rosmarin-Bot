@@ -1,8 +1,8 @@
 const outDefend = {
-    target: function(creep: Creep) {
+    run: function(creep: Creep) {
         if (creep.room.name != creep.memory.targetRoom || creep.pos.isRoomEdge()) {
             creep.moveToRoom(creep.memory.targetRoom);
-            return false;
+            return;
         }
         const hostileCreeps = creep.room.find(FIND_HOSTILE_CREEPS, {
             filter: (c) => !Memory['whitelist']?.includes(c.owner.username)
@@ -23,6 +23,7 @@ const outDefend = {
             if (creep.getActiveBodyparts(ATTACK) > 0) {
                 if (creep.pos.inRangeTo(target, 1)) {
                     creep.attack(target);
+                    creep.rangedMassAttack();
                 }
                 else if (creep.pos.inRangeTo(target, 3)) {
                     creep.rangedAttack(target);
@@ -31,8 +32,12 @@ const outDefend = {
                     creep.moveTo(target);
                 }
             } else {
-                if (creep.pos.inRangeTo(target, 3)) {
+                if (creep.pos.inRangeTo(target, 1)) {
+                    creep.rangedMassAttack();
+                }
+                else if (creep.pos.inRangeTo(target, 3)) {
                     creep.rangedAttack(target);
+                    creep.moveTo(target);
                 } else {
                     creep.moveTo(target);
                 }
@@ -41,7 +46,7 @@ const outDefend = {
             if (creep.hits < creep.hitsMax) {
                 creep.heal(creep);
             }
-            return false;
+            return;
         }
 
         // 没有敌人时，治疗房间内的受损单位
@@ -61,18 +66,13 @@ const outDefend = {
                 } else {
                     creep.moveTo(closestDamagedCreep);
                 }
-                return false;
+                return;
             }
         }
 
-        if (Game.time % 20 == 0) {
-            creep.suicide();
-        }
 
-        return false;
-    },
-    source: function(creep: Creep) {
-        return true;
+
+        return;
     }
 }
 

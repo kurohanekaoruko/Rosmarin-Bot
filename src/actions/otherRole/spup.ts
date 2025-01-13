@@ -2,7 +2,7 @@ import { compress, decompress} from '@/utils';
 
 const upgrade = function (creep: Creep) {
     if (creep.room.level == 8) {
-        creep.memory.role = 'builder';
+        creep.memory.role = 'worker';
         return false;
     }
 

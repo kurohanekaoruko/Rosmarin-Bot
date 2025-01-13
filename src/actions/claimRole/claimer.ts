@@ -1,8 +1,24 @@
 const claimer = {
-    target: function(creep: Creep) {
+    run: function(creep: Creep) {
         // 如果没有目标房间
         if (!creep.memory.targetRoom) {
             creep.say("🚨 无目标");
+            return;
+        }
+
+        // 如果有治疗组件并且受伤，那么治疗
+        if (creep.getActiveBodyparts(HEAL) > 0 && creep.hits < creep.hitsMax) {
+            creep.heal(creep);
+        }
+
+        // 根据旗帜移动
+        const name = creep.name.match(/#(\w+)/)?.[1];
+        const moveflag = Game.flags[name + '-move'];
+        if(moveflag) {
+            if(creep.room.name !== moveflag.pos.roomName) {
+                creep.memory.targetRoom = moveflag.pos.roomName;
+            }
+            creep.moveTo(moveflag.pos, {visualizePathStyle: {stroke: '#00ff00'}})
             return;
         }
 
@@ -42,9 +58,6 @@ const claimer = {
         }
         
         return false;
-    },
-    source: function(creep: Creep) {
-        return true;
     }
 };
 

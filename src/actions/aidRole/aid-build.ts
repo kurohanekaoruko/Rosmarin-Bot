@@ -32,6 +32,21 @@ const aid_build = {
             return;
         }
 
+        if (creep.store.getFreeCapacity() === 0) {
+            creep.memory.action = '';
+            return;
+        }
+
+        let dropEnergy = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES,
+            { filter: r => r.resourceType == RESOURCE_ENERGY || r.amount >= 500});
+        if (dropEnergy) {
+            creep.goPickup(dropEnergy);
+            if (dropEnergy.amount >= creep.store.getFreeCapacity()) {
+                creep.memory.action = '';
+            }
+            return;
+        }
+
         if (!creep.room.source) {
             if (Game.time % 10 !== 0) return;
             creep.room.update();
@@ -82,7 +97,7 @@ const aid_build = {
         }
 
         let targetSite = creep.pos.findClosestByRange(site, {
-            filter: (s) => s.structureType == STRUCTURE_SPAWN ||
+            filter: (s) => s.structureType == STRUCTURE_ROAD ||
             s.structureType == STRUCTURE_STORAGE || s.structureType == STRUCTURE_TERMINAL
         });
 

@@ -1,4 +1,4 @@
-const quad_attack = {
+const squad_ranged = {
     run: function (creep: Creep) {
         // 归队
         if (!creep.memory['rejoin']) {
@@ -11,10 +11,8 @@ const quad_attack = {
             creep.memory['rejoin'] = true;
         }
 
-        if (creep.memory['free']) {
-
-        }
+        
     }
 }
 
-export default quad_attack;
+export default squad_ranged;

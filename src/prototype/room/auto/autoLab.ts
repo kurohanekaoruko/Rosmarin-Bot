@@ -21,8 +21,8 @@ export default class AutoLab extends Room {
         const LabMineralCheck = labA && labB &&
                                 labA.mineralType === botmem.labAtype &&
                                 labB.mineralType === botmem.labBtype &&
-                                labA.store[botmem.labAtype] >= 5 &&
-                                labB.store[botmem.labBtype] >= 5;
+                                labA.store[botmem.labAtype] >= 15 &&
+                                labB.store[botmem.labBtype] >= 15;
         // 未超限额，原料充足，则不变更任务
         if (botmem.labAtype && botmem.labBtype && labProduct &&
             (amount <= 0 || this.getResAmount(labProduct) < amount) &&

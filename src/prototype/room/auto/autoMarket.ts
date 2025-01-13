@@ -23,9 +23,10 @@ export default class AutoMarket extends Room {
 
 
 function AutoBuy(roomName: string, item: any) {
-    const amount = item.amount, type = item.type;
+    const amount = item.amount;
     const room = Game.rooms[roomName];
-    const resourceType = global.BaseConfig.RESOURCE_ABBREVIATIONS[type] || type;
+    const RES = global.BaseConfig.RESOURCE_ABBREVIATIONS;
+    const resourceType = RES[item.resourceType] || item.resourceType;
 
     // 检查房间资源储备
     const terminal = room.terminal;
@@ -71,7 +72,8 @@ function AutoBuy(roomName: string, item: any) {
     // 如果已有同类型订单未完成，则更新价格
     if (existingOrder) {
         const price = global.order.getPrice(existingOrder.resourceType, ORDER_BUY);
-        if(price > existingOrder.price + 0.1 || price < existingOrder.price - 1) {
+        if (price > item.price) return;
+        if (price > existingOrder.price + 0.1 || price < existingOrder.price - 1) {
             Game.market.changeOrderPrice(existingOrder.id, price);
             return OK;
         }
@@ -83,16 +85,17 @@ function AutoBuy(roomName: string, item: any) {
         roomName: room.name,
         type: resourceType,
         amount: orderAmount,
-        show: false
+        maxPrice: item.price
     });
 
     return result;
 }
 
 function AutoSell(roomName: string, item: any) {
-    const amount = item.amount, type = item.type;
+    const amount = item.amount;
     const room = Game.rooms[roomName];
-    const resourceType = global.BaseConfig.RESOURCE_ABBREVIATIONS[type] || type;
+    const RES = global.BaseConfig.RESOURCE_ABBREVIATIONS;
+    const resourceType = RES[item.resourceType] || item.resourceType;
 
     // 检查房间资源储备
     const terminal = room.terminal;
@@ -130,7 +133,8 @@ function AutoSell(roomName: string, item: any) {
 
     if (existingOrder) {
         const price = global.order.getPrice(existingOrder.resourceType, ORDER_SELL);
-        if(price > existingOrder.price + 0.1 || price < existingOrder.price - 1) {
+        if (price < item.price) return;
+        if (price > existingOrder.price + 0.1 || price < existingOrder.price - 1) {
             Game.market.changeOrderPrice(existingOrder.id, price);
         }
         return OK;
@@ -141,19 +145,19 @@ function AutoSell(roomName: string, item: any) {
         roomName: room.name,
         type: resourceType,
         amount: orderAmount,
-        show: false
+        minPrice: item.price
     });
 
     return result;
 }
 
 function AutoDealBuy(roomName: string, item: any) {
-    let resourceType = item.type;  // 资源类型
     const amount = item.amount; // 资源数量, 自动出售阈值
     const price = item.price;   // 限制价格
     const room = Game.rooms[roomName];
 
-    resourceType = global.BaseConfig.RESOURCE_ABBREVIATIONS[resourceType] || resourceType;
+    const RES = global.BaseConfig.RESOURCE_ABBREVIATIONS;
+    const resourceType = RES[item.resourceType] || item.resourceType;
 
     // 检查房间资源储备
     const terminal = room.terminal;
@@ -166,20 +170,20 @@ function AutoDealBuy(roomName: string, item: any) {
     if (totalAmount >= amount) return;
 
     // 计算需要购买的数量
-    const totalBuyAmount = amount - totalAmount;  // 总购买量
-    if(totalBuyAmount <= 0) return;
+    const buyAmount = Math.min(amount - totalAmount, terminal.store.getFreeCapacity());  // 总购买量
+    if(buyAmount <= 0) return;
 
-    AutoDeal(room.name, resourceType, totalBuyAmount, ORDER_SELL, 10, price)
+    AutoDeal(room.name, resourceType, buyAmount, ORDER_SELL, 10, price)
 
 }
 
 function AutoDealSell(roomName: string, item: any) {
-    let resourceType = item.type;  // 资源类型
     const amount = item.amount; // 资源数量, 自动出售阈值
     const price = item.price;   // 限制价格
     const room = Game.rooms[roomName];
 
-    resourceType = global.BaseConfig.RESOURCE_ABBREVIATIONS[resourceType] || resourceType;
+    const RES = global.BaseConfig.RESOURCE_ABBREVIATIONS;
+    const resourceType = RES[item.resourceType] || item.resourceType;
 
     // 检查房间资源储备
     const terminal = room.terminal;
@@ -202,8 +206,18 @@ function AutoDeal(roomName: string, res: ResourceConstant, amount: number, order
     const room = Game.rooms[roomName];
     if(!room || !room.terminal) return ERR_NOT_FOUND;
 
-    const orders = Game.market.getAllOrders({type: orderType, resourceType: res});
+    let orders = Game.market.getAllOrders({type: orderType, resourceType: res});
     if(orders.length === 0) return ERR_NOT_FOUND;
+
+    if (price) {
+        orders = orders.filter(order => {
+            if (orderType === ORDER_SELL) {
+                return order.price <= price;
+            } else {
+                return order.price >= price;
+            }
+        })
+    }
 
     // 按照单价排序
     orders.sort((a, b) => {
@@ -213,76 +227,79 @@ function AutoDeal(roomName: string, res: ResourceConstant, amount: number, order
             return b.price - a.price;
         }
     });
+    
 
     let ecost = Game.market.getHistory(RESOURCE_ENERGY)[0].avgPrice;
 
     let bestOrder = null;
     let bestCost = (orderType === ORDER_SELL) ? Infinity : 0;
-    let bestDealAmount = 0;
-    let bestTransferEnergyCost = 0;
-    let bestResourceCost = 0;
+    let TotalDealAmount = 0;
+    let TransferEnergyCost = 0;
+    let TotalPrice = 0;
     const maxOrders = Math.min(orders.length, length);
     for (let i = 0; i < maxOrders; i++) {
         const order = orders[i];    // 订单
-        if(orderType === ORDER_SELL && order.price > price) continue;
-        else if(orderType === ORDER_BUY && order.price < price) continue;
 
         let dealAmount = Math.min(amount, order.amount);  // 交易数量
         let transferEnergyCost = Game.market.calcTransactionCost(dealAmount, roomName, order.roomName);  // 交易能量成本
         if (res != RESOURCE_ENERGY && transferEnergyCost > room.terminal.store[RESOURCE_ENERGY]) {
             dealAmount *= room.terminal.store[RESOURCE_ENERGY] / transferEnergyCost;
+            dealAmount = Math.floor(dealAmount);
             transferEnergyCost = Game.market.calcTransactionCost(dealAmount, roomName, order.roomName);
-        } else if (res == RESOURCE_ENERGY && dealAmount + transferEnergyCost > room.terminal.store[RESOURCE_ENERGY]) {
-            dealAmount = room.terminal.store[RESOURCE_ENERGY] - transferEnergyCost;
+        }
+        else if (res == RESOURCE_ENERGY && orderType == ORDER_SELL &&
+            transferEnergyCost > room.terminal.store[RESOURCE_ENERGY]) {
+            dealAmount *= room.terminal.store[RESOURCE_ENERGY] / transferEnergyCost;
+            dealAmount = Math.floor(dealAmount);
+            transferEnergyCost = Game.market.calcTransactionCost(dealAmount, roomName, order.roomName);
+        }
+        else if (res == RESOURCE_ENERGY && (dealAmount + transferEnergyCost) > room.terminal.store[RESOURCE_ENERGY]) {
+            dealAmount *= room.terminal.store[RESOURCE_ENERGY] / (dealAmount + transferEnergyCost);
+            dealAmount = Math.floor(dealAmount);
             transferEnergyCost = Game.market.calcTransactionCost(dealAmount, roomName, order.roomName);
         }
 
-        let resourceCost = dealAmount * order.price;  // 交易金额
+        let totalPrice = dealAmount * order.price;  // 交易金额
 
         let cost = 0;
         const ENERGY_COST_FACTOR = ecost;
         if(res == RESOURCE_ENERGY) {
             if(orderType === ORDER_SELL) {
-                cost = resourceCost / (dealAmount - transferEnergyCost);  // 购买能量：交易金额÷(交易数量-传输消耗)=实际价格
+                cost = totalPrice / (dealAmount - transferEnergyCost);  // 购买能量：交易金额÷(交易数量-传输消耗)=实际价格
             } else {
-                cost = resourceCost / (dealAmount + transferEnergyCost);  // 出售能量：交易金额÷(交易数量+传输消耗)=实际价格
+                cost = totalPrice / (dealAmount + transferEnergyCost);  // 出售能量：交易金额÷(交易数量+传输消耗)=实际价格
             }
         } else {
             if(orderType === ORDER_SELL) {
-                cost = (resourceCost + transferEnergyCost * ENERGY_COST_FACTOR) / dealAmount;  // 购买资源：(交易金额+能量估算成本)÷实际到账数量=实际价格
+                cost = (totalPrice + transferEnergyCost * ENERGY_COST_FACTOR) / dealAmount;  // 购买资源：(交易金额+能量估算成本)÷实际到账数量=实际价格
             } else {
-                cost = (resourceCost - transferEnergyCost * ENERGY_COST_FACTOR) / dealAmount;  // 出售资源：(交易金额-能量估算成本)÷实际消耗数量=实际价格
+                cost = (totalPrice - transferEnergyCost * ENERGY_COST_FACTOR) / dealAmount;  // 出售资源：(交易金额-能量估算成本)÷实际消耗数量=实际价格
             }
         }
 
-        if((orderType === ORDER_SELL && cost < bestCost) || (orderType === ORDER_BUY && cost > bestCost)) {
+        if ((orderType === ORDER_SELL && cost < bestCost) ||
+            (orderType === ORDER_BUY && cost > bestCost)) {
             bestOrder = order;
             bestCost = cost;
-            bestResourceCost = resourceCost;
-            bestDealAmount = dealAmount;
-            bestTransferEnergyCost = transferEnergyCost;
+            TotalPrice = totalPrice;
+            TotalDealAmount = dealAmount;
+            TransferEnergyCost = transferEnergyCost;
         }
     }
 
     if (!bestOrder) return;
 
-    const order = bestOrder;
-    const dealAmount = bestDealAmount;
-    const transferEnergyCost = bestTransferEnergyCost;
-    const resourceCost = bestResourceCost;
-    const id = order.id;
-
-    if (res == RESOURCE_ENERGY && dealAmount < 3000) {
+    if (res == RESOURCE_ENERGY &&
+        TotalDealAmount < 3000) {
         return;
     }
 
-    const result = Game.market.deal(id, dealAmount, roomName);
+    const result = Game.market.deal(bestOrder.id, TotalDealAmount, roomName);
 
     if (result === OK) {
-        console.log(`房间 ${roomName} 成功${orderType === ORDER_SELL ? '从' : '向'} ${order.roomName} ${orderType === ORDER_SELL ? '购买' : '出售'} ${dealAmount} 单位的 ${res}。`);
-        console.log(`交易金额：${resourceCost} 能量成本：${transferEnergyCost} 综合单价：${bestCost}`);
+        console.log(`[AutoMarket] 房间 ${roomName} 成功${orderType === ORDER_SELL ? '从' : '向'} ${bestOrder.roomName} ${orderType === ORDER_SELL ? '购买' : '出售'} ${TotalDealAmount} 单位的 ${res} 交易金额：${TotalPrice.toFixed(3)} 能量成本：${TransferEnergyCost.toFixed(3)} 综合单价：${bestCost.toFixed(3)}`);
     } else {
-        console.log(`房间 ${roomName} ${orderType === ORDER_SELL ? '从' : '向'} ${order.roomName} ${orderType === ORDER_SELL ? '购买' : '出售'} ${res} 失败，错误代码：${result}`);
+        console.log(`[AutoMarket] 房间 ${roomName} ${orderType === ORDER_SELL ? '从' : '向'} ${bestOrder.roomName} ${orderType === ORDER_SELL ? '购买' : '出售'} ${res} 失败，错误代码：${result}`);
     }
 
     return result;

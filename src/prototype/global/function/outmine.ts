@@ -56,10 +56,10 @@ export default {
             // 普通房间
             if(!isCenterRoom && isNotHighway) {
                 if (!Mem['energy']) return ERR_NOT_FOUND;
-                if (Mem['energy'].indexOf(targetRoom) === -1) return ERR_NOT_FOUND;
+                if (Mem['energy'].indexOf(targetRoom) === -1) return Error(`房间 ${targetRoom} 不存在于 ${roomName} 的外矿列表中。`);
                 else {
                     Mem['energy'].splice(Mem['energy'].indexOf(targetRoom), 1);
-                    delete Memory.rooms[targetRoom]['road'];
+                    delete Memory.rooms[targetRoom]?.['road'];
                     console.log(`房间 ${targetRoom} 从 ${roomName} 的外矿列表中删除。`);
                     return OK;
                 }
@@ -97,7 +97,7 @@ export default {
         // 清空外矿road缓存
         clearRoad(roomName: string) {
             delete Memory.rooms[roomName]['road'];
-            console.log(`房间 ${roomName} 的外矿road缓存已清空。`);
+            console.log(`外矿房间 ${roomName} 的Road缓存已清空。`);
             return OK;
         },
         auto(roomName: string, type: 'power' | 'deposit') {
