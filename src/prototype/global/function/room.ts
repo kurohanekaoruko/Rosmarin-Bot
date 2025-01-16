@@ -120,11 +120,12 @@ export default {
             if (!roomName) return Error('请输入房间名。');
             if (!roomName.match(/^[EW][0-9]+[NS][0-9]+$/)) return Error('房间名格式不正确。');
 
-            const botMem = Memory['StructControlData'][roomName];
             if (hits <= 0) {
                 console.log(`输入的数值必须大于0.`);
                 return -1;
             }
+
+            const botMem = Memory['StructControlData'][roomName];
             if (hits <= 1) {
                 botMem['ram_threshold'] = hits;
                 console.log(`已设置 ${roomName} 的刷墙上限比例为 ${hits}。`);
@@ -132,53 +133,6 @@ export default {
                 botMem['ram_threshold'] = hits / 3e8;
                 console.log(`已设置 ${roomName} 的刷墙上限比例为 ${hits / 3e8}。`);
             }
-            return OK;
-        },
-        // 开启常驻升级
-        upgrade(roomName: string) {
-            if (!roomName) return Error('请输入房间名。');
-            if (!roomName.match(/^[EW][0-9]+[NS][0-9]+$/)) return Error('房间名格式不正确。');
-
-            const room = Game.rooms[roomName];
-            if(!room || !room.my) return Error(`房间 ${roomName} 不存在或未拥有。`);
-            const botMem = Memory['RoomControlData'][roomName];
-            botMem['mustUpgrade'] = !botMem['mustUpgrade'];
-            global.log(`已设置 ${roomName} 的常驻升级状态为${botMem['mustUpgrade'] ? '开启' : '关闭'}。`);
-            return OK;
-        },
-        // 开启冲级
-        spup(roomName: string, num?: number) {
-            if (!roomName) return Error('请输入房间名。');
-            if (!roomName.match(/^[EW][0-9]+[NS][0-9]+$/)) return Error('房间名格式不正确。');
-
-            const room = Game.rooms[roomName];
-            if(!room || !room.my) return Error(`房间 ${roomName} 不存在或未拥有。`);
-            const botMem = Memory['RoomControlData'][roomName];
-            botMem['spup'] = Math.floor(num ?? 0);
-            global.log(`已设置 ${roomName} 的冲级状态为 ${botMem['spup'] ? '开启' : '关闭'}。`);
-            if(botMem['spup']) global.log(`冲级数量为 ${botMem['spup']}。`);
-            return OK;
-        },
-        // 加速刷墙
-        spre(roomName: string, num?: number) {
-            if (!roomName) return Error('请输入房间名。');
-            if (!roomName.match(/^[EW][0-9]+[NS][0-9]+$/)) return Error('房间名格式不正确。');
-
-            const room = Game.rooms[roomName];
-            if(!room || !room.my) return Error(`房间 ${roomName} 不存在或未拥有。`);
-            const botMem = Memory['RoomControlData'][roomName];
-            botMem['spre'] = Math.floor(num ?? 0);
-            global.log(`已设置 ${roomName} 的加速刷墙状态为 ${botMem['spre'] ? '开启' : '关闭'}。`);
-            if(botMem['spre']) global.log(`加速刷墙数量为 ${botMem['spre']}。`);
-            return OK;
-        },
-        // 添加中央搬运任务
-        manage(roomName: string, source: 's'|'t'|'f'|'l', target: 's'|'t'|'f'|'l', type: string, amount: number) {
-            const RESOURCE_ABBREVIATIONS = global.BaseConfig.RESOURCE_ABBREVIATIONS;
-            type = RESOURCE_ABBREVIATIONS[type] || type;
-            const room = Game.rooms[roomName];
-            room.ManageMissionAdd(source, target, type, amount);
-            global.log(`[任务模块] 在房间 ${room.name} 添加了中央搬运任务: ${source} -> ${target}, ${amount} ${type}`);
             return OK;
         },
         // 添加发送任务

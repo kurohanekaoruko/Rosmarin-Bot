@@ -11,8 +11,8 @@ export { default as aclaimer } from './claimRole/aclaimer';
 
 export { default as logistic } from './otherRole/logistic';
 export { default as universal } from './mainRole/universal';
-export { default as SpeedUpgrader } from './otherRole/spup';
-export { default as SpeedRepair } from './otherRole/spre';
+export { default as UP_Upgrade } from './otherRole/UP-upgrade';
+export { default as UP_Repair } from './otherRole/UP-repair';
 export { default as dismantle } from './otherRole/dismantle';
 export { default as bigCarry } from './otherRole/bigCarry';
 export { default as cleaner } from './otherRole/cleaner';
@@ -33,6 +33,8 @@ export { default as outInvader } from './outCollect/outInvader';
 export { default as outAttack } from './outCollect/outAttack';
 export { default as outRanged } from './outCollect/outRanged';
 export { default as outMineral } from './outCollect/outMineral';
+export { default as out2Attack } from './outCollect/out2Attack';
+export { default as out2Heal } from './outCollect/out2Heal';
 
 export { default as power_attack } from './powerCollect/power-attack';
 export { default as power_heal } from './powerCollect/power-heal';

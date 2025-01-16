@@ -82,14 +82,16 @@ export default class MissionAdd extends Room {
     }
 
     // 添加孵化任务
-    SpawnMissionAdd(name: string, body: number[], level: number, role: string, memory?: CreepMemory, upbody?: boolean) {
+    SpawnMissionAdd(name: string, body: any[], level: number, role: string, memory?: CreepMemory, upbody?: boolean) {
         if (!RoleData[role]) {
             console.log(`role ${role} 不存在`);
             return -1;
         }
+        
         if(level < 0) level = RoleData[role].level;
         const bodypart = this.GenerateBodys(body, role);
         const energy = this.CalculateEnergy(bodypart);
+
         if(energy > this.energyCapacityAvailable) return -1;
         if(!memory) memory = {} as CreepMemory;
         memory.role = role;

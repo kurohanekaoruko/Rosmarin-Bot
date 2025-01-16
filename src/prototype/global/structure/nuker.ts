@@ -2,7 +2,8 @@ export default {
     nuker: {
         launch(...rooms: string[]) {
             const cpu0 = Game.cpu.getUsed();
-            for (const flagName of Object.keys(Game.flags)) {
+            const flags = Object.keys(Game.flags).filter(flagName => flagName.startsWith('nuke-'));
+            for (const flagName of flags) {
                 const launchNukeMatch = flagName.match(/^nuke[-_](\d+)$/);
                 if (!launchNukeMatch) continue;
                 // 获取目标

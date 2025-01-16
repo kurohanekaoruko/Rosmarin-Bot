@@ -1,4 +1,6 @@
 function withdraw(creep: Creep) {
+    if (!creep.memory.sourceRoom) return;
+    
     if (creep.room.name != creep.memory.sourceRoom) {
         creep.moveToRoom(creep.memory.sourceRoom);
         return;
@@ -6,11 +8,11 @@ function withdraw(creep: Creep) {
 
     const room = creep.room;
     let target = Game.getObjectById(creep.memory.cache.targetId) as any;
-    let restType = creep.memory.cache.restType;
+    let resType = creep.memory.cache.resType;
     let actionType = creep.memory.cache.actionType;
 
     if (!target || ((actionType == 'pickup' && target.amount == 0) ||
-        (actionType == 'withdraw' && target.store[restType] == 0)
+        (actionType == 'withdraw' && target.store[resType] == 0)
     )) {
         const resources = room.find(FIND_DROPPED_RESOURCES, {
             filter: (resource) => resource.amount > 500
@@ -18,16 +20,16 @@ function withdraw(creep: Creep) {
 
         if (resources.length > 0) {
             target = creep.pos.findClosestByRange(resources);
-            restType = target.resourceType;
+            resType = target.resourceType;
             actionType = 'pickup';
             creep.memory.cache.targetId = target.id;
-            creep.memory.cache.restType = restType;
+            creep.memory.cache.resType = resType;
             creep.memory.cache.actionType = actionType;
         }
     }
 
     if (!target || ((actionType == 'pickup' && target.amount == 0) ||
-        (actionType == 'withdraw' && target.store[restType] == 0)
+        (actionType == 'withdraw' && target.store[resType] == 0)
     )) {
         const RUINs = room.find(FIND_RUINS, {
             filter: (ruin) => ruin.store.getUsedCapacity() > 0
@@ -35,61 +37,61 @@ function withdraw(creep: Creep) {
 
         if (RUINs.length > 0) {
             target = creep.pos.findClosestByRange(RUINs);
-            restType = Object.keys(target.store)[0] as ResourceConstant;
+            resType = Object.keys(target.store)[0] as ResourceConstant;
             actionType = 'withdraw';
             creep.memory.cache.targetId = target.id;
-            creep.memory.cache.restType = restType;
+            creep.memory.cache.resType = resType;
             creep.memory.cache.actionType = actionType;
         }
     }
     
     if (!target || ((actionType == 'pickup' && target.amount == 0) ||
-        (actionType == 'withdraw' && target.store[restType] == 0)
+        (actionType == 'withdraw' && target.store[resType] == 0)
     )) {
         if (room.storage && room.storage.store.getUsedCapacity() > 0) {
             target = room.storage;
-            restType = Object.keys(room.storage.store)
+            resType = Object.keys(room.storage.store)
                         .reduce((a, b) => room.storage.store[a] < room.storage.store[b] ? a : b);
             actionType = 'withdraw';
             creep.memory.cache.targetId = target.id;
-            creep.memory.cache.restType = restType;
+            creep.memory.cache.resType = resType;
             creep.memory.cache.actionType = actionType;
         }
     }
 
     if (!target || ((actionType == 'pickup' && target.amount == 0) ||
-        (actionType == 'withdraw' && target.store[restType] == 0)
+        (actionType == 'withdraw' && target.store[resType] == 0)
     )) {
         if (room.terminal && room.terminal.store.getUsedCapacity() > 0) {
             target = room.terminal;
-            restType = Object.keys(room.terminal.store)
+            resType = Object.keys(room.terminal.store)
                         .reduce((a, b) => room.terminal.store[a] < room.terminal.store[b] ? a : b);
             actionType = 'withdraw';
             creep.memory.cache.targetId = target.id;
-            creep.memory.cache.restType = restType;
+            creep.memory.cache.resType = resType;
             creep.memory.cache.actionType = actionType;
         }
     }
 
     if (!target || ((actionType == 'pickup' && target.amount == 0) ||
-        (actionType == 'withdraw' && target.store[restType] == 0)
+        (actionType == 'withdraw' && target.store[resType] == 0)
     )) {
         const container = creep.pos.findClosestByRange(room.container, {
             filter: (container) => container.store.getUsedCapacity() > 0
         })
         if (container) {
             target = container;
-            restType = Object.keys(container.store)
+            resType = Object.keys(container.store)
                         .reduce((a, b) => container.store[a] < container.store[b] ? a : b);
             actionType = 'withdraw';
             creep.memory.cache.targetId = target.id;
-            creep.memory.cache.restType = restType;
+            creep.memory.cache.resType = resType;
             creep.memory.cache.actionType = actionType;
         }
     }
 
     if (!target || ((actionType == 'pickup' && target.amount == 0) ||
-        (actionType == 'withdraw' && target.store[restType] == 0)
+        (actionType == 'withdraw' && target.store[resType] == 0)
     )) {
         creep.memory.working = true;
         return
@@ -109,9 +111,9 @@ function withdraw(creep: Creep) {
         return;
     }
 
-    if (target && actionType == 'withdraw' && target.store[restType] > 0) {
+    if (target && actionType == 'withdraw' && target.store[resType] > 0) {
         if (creep.pos.isNearTo(target)) {
-            creep.withdraw(target, restType);
+            creep.withdraw(target, resType);
         } else {
             creep.moveTo(target, {
                 maxRooms: 1,

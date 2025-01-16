@@ -1,5 +1,19 @@
 export default class ActiveDefend extends Room {
     activeDefend() {
+        // 如果处于安全模式，则不进行主动防御
+        if (this.controller.safeMode) return;
+
+        // 处于防御时, 关键建筑如果受到损坏, 激活安全模式
+        if (this.memory.defend) {
+            let STRUCTURE = [this.storage, this.terminal, ...this.spawn].filter(s => s);
+            if (this.controller.safeModeAvailable > 0 &&
+                this.controller.safeModeCooldown == 0 &&
+                STRUCTURE.some(s => s.hits < s.hitsMax * 0.7)) {
+                this.controller.activateSafeMode();
+                return;
+            }
+        }
+
         // 关于主动防御的检查
         if (Game.time % 5) return;
         const defend_mode = Memory['RoomControlData'][this.name]['defend_mode'];
@@ -27,10 +41,11 @@ export default class ActiveDefend extends Room {
             return;
         }
 
+        // 进入防御状态
+        this.memory.defend = true;
         // 40A红球 或 40R蓝球
         if(!global.Hostiles) global.Hostiles = {};
         global.Hostiles[this.name] = hostiles.map((hostile: Creep) => hostile.id);
-        this.memory.defend = true;    // 进入防御状态
         if (this.level >= 7) {
             const attackDefender = Object.values(Game.creeps)
                 .filter(creep => creep.room.name == this.name &&

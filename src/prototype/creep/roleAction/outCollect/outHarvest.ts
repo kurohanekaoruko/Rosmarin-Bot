@@ -1,7 +1,76 @@
+import { compress } from '@/utils';
+
+const createSite = function(creep: any) {
+    if (Game.rooms[creep.memory.homeRoom].controller.level < 4) return;
+    if (creep.room.name !== creep.memory.targetRoom) return;
+    if (!creep.pos.isRoomEdge()) return;
+    if (creep.room.memory.road && creep.room.memory.road.length > 0) return;
+    creep.room.memory.road = [];
+    const Path = [];
+    const pos = [];
+    const sourcePos = creep.room.find(FIND_SOURCES);
+    for (const source of sourcePos) {
+        pos.push(source.pos);
+    }
+    const isCenterRoom = /^[EW]\d*[456][NS]\d*[456]$/.test(creep.room.name);
+    if (isCenterRoom) {
+        const mineralPos = creep.room.find(FIND_MINERALS)[0];
+        if (mineralPos) pos.push(mineralPos.pos);
+    }
+    const closestPos = creep.pos.findClosestByRange(pos);
+
+    const costs = new PathFinder.CostMatrix();
+    const terrain = new Room.Terrain(creep.room.name);
+    for (let i = 0; i < 50; i++) {
+        for (let j = 0; j < 50; j++) {
+            const te = terrain.get(i, j);
+            costs.set(i, j, te == TERRAIN_MASK_WALL ? 255 : te == TERRAIN_MASK_SWAMP ? 4 : 2);
+        }
+    }
+
+    PathFinder.search(
+        creep.pos,
+        { pos: closestPos, range: 1 },
+        {
+            roomCallback: () => {
+                return costs;
+            },
+            maxRooms: 1
+        }
+    ).path.forEach(pos => {
+        costs.set(pos.x,pos.y,1);
+        Path.push(pos)
+    })
+
+    for (let i = 0; i < pos.length; i++) {
+        for (let j = i+1; j < pos.length; j++) {
+            PathFinder.search(
+                pos[i],
+                { pos: pos[j], range: 1 },
+                {
+                    roomCallback: () => {
+                        return costs;
+                    },
+                    maxRooms: 1
+                }
+            ).path.forEach(pos => {
+                costs.set(pos.x,pos.y,1);
+                Path.push(pos)
+            })
+        }
+    }
+
+    for (const p of Path) {
+        const xy = compress(p.x, p.y);
+        if (creep.room.memory.road.includes(xy)) continue;
+        creep.room.memory.road.push(xy);
+    }
+}
+
 const outHarvest = {
     target: function(creep: Creep) {
         if (creep.store.getUsedCapacity() == 0) return true;
-        
+
         // 尝试将能量传递给附近的运输单位
         if (this.transferToNearbyCarrier(creep)) return;
 
@@ -116,11 +185,19 @@ const outHarvest = {
         }
     },
 
-    source: function(creep) {
+    source: function(creep: Creep) {
+        if (creep.fatigue > 0 &&
+            !Game.rooms[creep.memory.homeRoom].my &&
+            Game.rooms[creep.memory.homeRoom].level > 4) {
+            creep.pos.createConstructionSite(STRUCTURE_ROAD);
+        }
+
         if (creep.room.name != creep.memory.targetRoom || creep.pos.isRoomEdge()) {
-            creep.moveToRoom(creep.memory.targetRoom);
+            creep.moveToRoom(creep.memory.targetRoom, { plainCost: 2, swampCost: 10 });
             return;
         }
+
+        createSite(creep);
 
         // 如果还没有绑定采集点，则绑定一个
         if (!creep.memory.targetSourceId) {
@@ -139,6 +216,12 @@ const outHarvest = {
         if(!targetSource) {
             return;
         }
+        let container = creep.room.container.find((c) => c.pos.isNearTo(targetSource.pos));
+        if (container && !creep.pos.isEqualTo(container)) {
+            creep.moveTo(container, { maxRooms: 1, plainCost: 2, swampCost: 10});
+            return;
+        }
+
         // 如果离采集点过远，则移动过去
         if (creep.pos.isNear(targetSource.pos)) {
             if (targetSource.energy == 0) return;
@@ -146,10 +229,8 @@ const outHarvest = {
         }
         else {
             if(targetSource.pos.findInRange(FIND_HOSTILE_CREEPS, 3).length > 0) return;
-            creep.moveTo(targetSource, {range: 1, maxRooms: 1, ignoreCreeps: false});
+            creep.moveTo(targetSource, {range: 1, maxRooms: 1, plainCost: 2, swampCost: 10});
         }
-
-        creep.memory.dontPullMe = false;
 
         if (creep.store.getCapacity() == 0) return false;
         return creep.store.getFreeCapacity() == 0;

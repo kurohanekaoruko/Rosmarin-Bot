@@ -1,28 +1,28 @@
 import { createBot } from '@/framework/createBot';
 
-import { roomControl } from '@/control/RoomControl'
-import { creepControl } from '@/control/CreepControl'
-import { powerControl } from '@/control/PowerControl'
+import { roomControl } from '@/boot/RoomControl'
+import { creepControl } from '@/boot/CreepControl'
+import { powerControl } from '@/boot/PowerControl'
 
 import { PrototypeExtension } from '@/prototype';
 
 import { GlobalInit } from '@/modules/GlobalInit';
 import { MemoryInit } from '@/modules/MemoryInit';
-import { ClearModule  } from '@/modules/function/ClearModule';
-import { GeneratePixel } from '@/modules/function/Pixel';
-import { Statistics } from '@/modules/function/Statistics'
+import { ClearModule  } from '@/modules/ClearModule';
+import { GeneratePixel } from '@/modules/Pixel';
+import { Statistics } from '@/modules/Statistics'
 
 import { DoubleSquad } from '@/modules/DoubleSquad';
-import { ClaimModule } from '@/modules/ClaimModule';
-import { AidModule } from '@/modules/AidModule';
+import { ClaimModule } from '@/modules/actionModule/ClaimModule';
+import { AidModule } from '@/modules/actionModule/AidModule';
 
 import { ResourceManage } from '@/modules/ResourceManage';
 
 import SquadModule from '@/modules/warSquad/SquadModule';
 
-import '@/modules/function/betterMove';    // 超级移动优化
-import '@/modules/function/structureCache';  // 极致建筑缓存
-import '@/modules/function/helper_roomResource'; // 资源统计
+import '@/modules/wheel/betterMove';    // 超级移动优化
+import '@/modules/wheel/structureCache';  // 极致建筑缓存
+import '@/modules/wheel/helper_roomResource'; // 资源统计
 
 
 const Bot = createBot();
@@ -60,7 +60,7 @@ export const loop = Bot.run;
 
 
 // // 性能开销分析
-// import profiler from './modules/function/screeps-profiler';
+// import profiler from './modules/whell/screeps-profiler';
 // profiler.enable();
 // export const loop = function() {
 //     profiler.wrap(app.run);

@@ -106,8 +106,7 @@ function getPoints(room: Room, structureType: string, layoutArray: any, buildMax
         if (room.level < 4) return [];
     }
 
-    // 默认用当前等级建造上限来限制
-    return layoutArray.slice(0, buildMax);
+    return layoutArray;
 }
 
 // 关键建筑表

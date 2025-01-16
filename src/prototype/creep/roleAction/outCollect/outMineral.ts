@@ -1,5 +1,9 @@
 const outMineral = {
     source: function (creep: Creep) {
+        if (creep.fatigue > 0 && Game.rooms[creep.memory.homeRoom].level > 4) {
+            creep.pos.createConstructionSite(STRUCTURE_ROAD);
+        }
+        
         if (creep.room.name != creep.memory.targetRoom || creep.pos.isRoomEdge()) {
             creep.moveToRoom(creep.memory.targetRoom);
             return;

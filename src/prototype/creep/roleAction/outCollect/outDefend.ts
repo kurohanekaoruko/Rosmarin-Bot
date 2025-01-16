@@ -50,7 +50,7 @@ const outDefend = {
         }
 
         // 没有敌人时，治疗房间内的受损单位
-        if (targets.length == 0) {
+        else {
             const damagedCreeps = creep.room.find(FIND_MY_CREEPS, {
                 filter: (c) => c.hits < c.hitsMax
             });
@@ -67,6 +67,8 @@ const outDefend = {
                     creep.moveTo(closestDamagedCreep);
                 }
                 return;
+            } else {
+                creep.moveTo(new RoomPosition(25, 25, creep.room.name), {range: 5});
             }
         }
 

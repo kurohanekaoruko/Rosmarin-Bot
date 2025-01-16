@@ -2,37 +2,29 @@ const ClaimModule = {
     tickEnd: function () {
         if (Game.time % 10) return;
         for (const flagName in Game.flags) {
-            // 占领
-            const claimFlag = flagName.match(/^r-([EW][1-9]+[NS][1-9]+)[-_/]claim(?:[-_/].*)?$/);
-            if (claimFlag) {
-                const room = Game.rooms[claimFlag[1]];
-                if (!room.controller || !room.controller.my) continue;
-                const targetRoom = Game.flags[flagName].room;
-                if (!targetRoom || (targetRoom.controller && !targetRoom.controller.my)) {
+
+            if (flagName.startsWith('CLAIM/')) {
+                // 孵化房间
+                const spawnRoom = flagName.match(/\/([EW][1-9]+[NS][1-9]+)/)?.[1];
+                const room = Game.rooms[spawnRoom];
+                if (!spawnRoom || !room.my) {
+                    Game.flags[flagName].remove();
+                    continue;
+                }
+                const targetRoom = Game.flags[flagName].pos.roomName;
+                const isNotCenterRoom = !(/^[EW]\d*[456][NS]\d*[456]$/.test(targetRoom)); // 非中间房间
+                const isNotHighway = /^[EW]\d*[1-9][NS]\d*[1-9]$/.test(targetRoom); // 非过道房间
+                if (isNotCenterRoom && isNotHighway &&
+                    (!Game.rooms[targetRoom] || !Game.rooms[targetRoom].my)) {
                     room.SpawnMissionAdd('', [], -1, 'claimer',{
-                        homeRoom: claimFlag[1],
-                        targetRoom: Game.flags[flagName].pos.roomName
+                        targetRoom: targetRoom
                     } as any);
                 }
                 Game.flags[flagName].remove();
                 continue;
             }
 
-            // 占领
-            const lclaimFlag = flagName.match(/^r-([EW][1-9]+[NS][1-9]+)[-_/]lclaim(?:[-_/].*)?$/);
-            if (lclaimFlag) {
-                const room = Game.rooms[lclaimFlag[1]];
-                if (!room.controller || !room.controller.my) continue;
-                const targetRoom = Game.flags[flagName].room;
-                if (!targetRoom || (targetRoom.controller && !targetRoom.controller.my)) {
-                    room.SpawnMissionAdd('', [], -1, 'lclaimer',{
-                        homeRoom: lclaimFlag[1],
-                        targetRoom: Game.flags[flagName].pos.roomName
-                    } as any);
-                }
-                Game.flags[flagName].remove();
-                continue;
-            }
+
             
             // 搜刮资源
             const despoilFlag = flagName.match(/^r-([EW][1-9]+[NS][1-9]+)[-_]despoil(?:[-_].*)?$/);

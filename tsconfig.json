@@ -15,7 +15,7 @@
     "strictNullChecks": false, // 启用严格的 null 检查
     "resolveJsonModule": true, // 允许导入 JSON 模块
     "skipLibCheck": true, // 跳过库文件的类型检查
-    "forceConsistentCasingInFileNames": true, // 强制文件名一致性
+    "forceConsistentCasingInFileNames": false, // 强制文件名一致性
     "allowJs": true, // 允许 JavaScript 文件
     "declaration": false, // 生成声明文件
     "sourceMap": true, // 生成源映射文件

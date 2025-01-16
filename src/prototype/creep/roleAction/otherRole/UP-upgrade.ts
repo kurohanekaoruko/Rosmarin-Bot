@@ -16,7 +16,7 @@ const upgrade = function (creep: Creep) {
     if (creep.pos.inRangeTo(creep.room.controller, 3)) {
         creep.upgradeController(creep.room.controller)
         const botMem = Memory['RoomControlData'][creep.room.name];
-        const sign = botMem?.sign ?? '';
+        const sign = botMem?.sign ?? '𝕽𝖔𝖘𝖒𝖆𝖗𝖎𝖓𝖚𝖘';
         if(creep.room.controller && (creep.room.controller.sign?.text ?? '') != sign) {
             if (creep.pos.inRangeTo(creep.room.controller, 1)) {
                 creep.signController(creep.room.controller, sign);
@@ -100,7 +100,7 @@ const getDistance = function(pos1: RoomPosition, pos2: RoomPosition) {
     return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y);
 }
 
-const speed_upgrader = {
+const UpUpgradeFunction = {
     prepare: function (creep: Creep) {
         return creep.goBoost(['XGH2O', 'GH2O', 'GH']);
     },
@@ -154,7 +154,7 @@ const speed_upgrader = {
             creep.room.lookForAtArea(LOOK_CREEPS,
                 Math.max(0, creep.pos.y - 1), Math.max(0, creep.pos.x - 1),
                 Math.min(49,creep.pos.y + 1), Math.min(49,creep.pos.x + 1), true)
-                .filter(c => c.creep.memory?.role !== 'speedup-upgrade')
+                .filter(c => c.creep.memory?.role !== 'UP-upgrade')
                 .forEach(c => {
                     if (!c.creep.memory) return;
                     c.creep.memory.dontPullMe = false
@@ -200,5 +200,5 @@ const speed_upgrader = {
     },
 }
 
-export default speed_upgrader;
+export default UpUpgradeFunction;
 

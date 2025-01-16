@@ -22,7 +22,12 @@ const aid_build = {
     },
 
     prepare: function (creep: Creep) {
-        return creep.goBoost(['XLH2O', 'LH2O', 'LH']);
+        // if (creep.memory['BOOST']) {
+        //     return creep.goBoost(creep.memory['BOOST'], true, true);
+        // } else {
+            return creep.goBoost(['XLH2O', 'LH2O', 'LH']);
+        // }
+        
     },
 
     harvest: function (creep: Creep) {
@@ -42,6 +47,34 @@ const aid_build = {
         if (dropEnergy) {
             creep.goPickup(dropEnergy);
             if (dropEnergy.amount >= creep.store.getFreeCapacity()) {
+                creep.memory.action = '';
+            }
+            return;
+        }
+
+        let containers = creep.room.container.filter(c => c.store[RESOURCE_ENERGY] > 0) || [];
+        let container = creep.pos.findClosestByRange(containers);
+        if (container) {
+            creep.goWithdraw(container, RESOURCE_ENERGY);
+            if (container.store[RESOURCE_ENERGY] >= creep.store.getFreeCapacity()) {
+                creep.memory.action = '';
+            }
+            return;
+        }
+
+        let storage = creep.room.storage;
+        if (storage && storage.store[RESOURCE_ENERGY] > 0) {
+            creep.goWithdraw(storage, RESOURCE_ENERGY);
+            if (storage.store[RESOURCE_ENERGY] >= creep.store.getFreeCapacity()) {
+                creep.memory.action = '';
+            }
+            return;
+        }
+
+        let terminal = creep.room.terminal;
+        if (terminal && terminal.store[RESOURCE_ENERGY] > 0) {
+            creep.goWithdraw(terminal, RESOURCE_ENERGY);
+            if (terminal.store[RESOURCE_ENERGY] >= creep.store.getFreeCapacity()) {
                 creep.memory.action = '';
             }
             return;
@@ -97,7 +130,7 @@ const aid_build = {
         }
 
         let targetSite = creep.pos.findClosestByRange(site, {
-            filter: (s) => s.structureType == STRUCTURE_ROAD ||
+            filter: (s) => s.structureType == STRUCTURE_ROAD || s.structureType == STRUCTURE_SPAWN ||
             s.structureType == STRUCTURE_STORAGE || s.structureType == STRUCTURE_TERMINAL
         });
 

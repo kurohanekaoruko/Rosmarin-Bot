@@ -1,0 +1,41 @@
+/** 双人小队 进攻小队 */
+const out_double_attack = {
+    run: function (creep: Creep) {
+        if (!creep.memory.notified) {
+            creep.notifyWhenAttacked(false);
+            creep.memory.notified = true;
+        }
+    
+        // 等待绑定
+        if(!creep.memory.bind) return;
+    
+        // 获取绑定的另一个creep
+        const bindcreep = Game.getObjectById(creep.memory.bind) as Creep;
+        if(!bindcreep) {
+            delete creep.memory.bind;
+            return;
+        }
+    
+        // 移动到目标房间.未到达房间不继续行动
+        if (creep.doubleMoveToRoom(creep.memory.targetRoom, '#ff0000')) return;
+        
+        const enemies = creep.room.find(FIND_HOSTILE_CREEPS, {
+            filter: (enemy) => {
+                return !Memory['whitelist']?.includes(enemy.owner.username) &&
+                (enemy.getActiveBodyparts(ATTACK) > 0 ||
+                enemy.getActiveBodyparts(RANGED_ATTACK) > 0 ||
+                enemy.getActiveBodyparts(HEAL) > 0)
+            }
+        });
+        if (enemies.length > 0) {
+            const targetEnemy = creep.pos.findClosestByRange(enemies);
+            if(creep.pos.inRangeTo(targetEnemy, 1)) {
+                creep.attack(targetEnemy);
+            } else {
+                creep.doubleMove(targetEnemy.pos, '#ff0000');
+            }
+        }
+    }
+}
+
+export default out_double_attack

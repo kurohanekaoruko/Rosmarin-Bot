@@ -420,32 +420,20 @@ export default {
     }
 }
 
-import ros from "@/modules/planner/static/ros"
-import clover from "@/modules/planner/static/clover"
-import tea from '@/modules/planner/static/tea';
-import hoho from '@/modules/planner/static/hoho';
 
+import * as Planner from '@/modules/planner/static'
 
 // 构建静态布局
 const BuildStaticPlanner = function (roomName: string, layoutType: string) {
-    let room = Game.rooms[roomName];
-
-    if (!room) {
-        console.log(`房间不存在或无视野: ${roomName}`);
-        return ERR_INVALID_ARGS;
+    let data = Planner[layoutType];
+    if (!data) {
+        console.log(`不支持的布局类型: ${layoutType}`);
+        return;
     }
 
-    let data: any;
-    if (layoutType === 'ros') {
-        data = ros;
-    } else if (layoutType === 'clover') {
-        data = clover;
-    } else if (layoutType === 'tea') {
-        data = tea;
-    } else if (layoutType === 'hoho') {
-        data = hoho;
-    } else {
-        console.log(`不支持的布局类型: ${layoutType}`);
+    let room = Game.rooms[roomName];
+    if (!room) {
+        console.log(`房间不存在或无视野: ${roomName}`);
         return;
     }
 
@@ -550,16 +538,8 @@ const BuildStaticPlanner = function (roomName: string, layoutType: string) {
 }
 
 const VisualStaticPlanner = function (roomName: string, layoutType: string) {
-    let data: any;
-    if (layoutType === 'ros') {
-        data = ros;
-    } else if (layoutType === 'clover') {
-        data = clover;
-    } else if (layoutType === 'tea') {
-        data = tea;
-    } else if (layoutType === 'hoho') {
-        data = hoho;
-    } else {
+    let data = Planner[layoutType];
+    if (!data) {
         console.log(`不支持的布局类型: ${layoutType}`);
         return;
     }

@@ -6,16 +6,18 @@ const outInvader = {
 
         let targets = invaderCores;
         if (targets.length === 0) {
-            const hostileCreeps = creep.room.find(FIND_HOSTILE_CREEPS);
+            const hostileCreeps = creep.room.find(FIND_HOSTILE_CREEPS, {
+                filter: (c: Creep) => !Memory['whitelist']?.includes(c.owner.username) && (
+                    c.getActiveBodyparts(ATTACK) > 0 || c.getActiveBodyparts(RANGED_ATTACK) > 0
+                )});
             targets = hostileCreeps;
         }
         
         if (targets.length > 0) {
             var target = creep.pos.findClosestByRange(targets);
             if (creep.pos.inRangeTo(target, 1)) {
-                if (creep.attack(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target);
-                }
+                creep.attack(target)
+                // creep.moveTo(target)
             }
             else {
                 creep.moveTo(target);

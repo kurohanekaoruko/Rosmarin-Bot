@@ -116,7 +116,7 @@ const WithdrawLink = function (creep: Creep) {
     return false;
 }
 
-const SpeedupRepair = {
+const UpRepairFunction = {
     prepare: function (creep: Creep) {
         return creep.goBoost(['XLH2O', 'LH2O', 'LH']);
     },
@@ -148,4 +148,4 @@ const SpeedupRepair = {
     }
 }
 
-export default SpeedupRepair;
+export default UpRepairFunction;

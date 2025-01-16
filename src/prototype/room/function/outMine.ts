@@ -36,39 +36,40 @@ export default class OutMine extends Room {
             // 没有房间视野不孵化
             if (!targetRoom || Game.time % 20 != 2) continue;
             
-            // // 固定路
-            // if (Game.time % 100 == 2 && targetRoom.memory['road']?.length > 0) {
-            //     let siteCount = targetRoom.find(FIND_MY_CONSTRUCTION_SITES).length;
-            //     for(const road of targetRoom.memory['road']) {
-            //         if (siteCount >= 10) break;
-            //         const [x, y] = decompress(road);
-            //         const pos = new RoomPosition(x, y, roomName);
-            //         let result = targetRoom.createConstructionSite(pos, STRUCTURE_ROAD);
-            //         if (result == OK) siteCount++;
-            //         if (result == ERR_FULL) break;
-            //     }
-            // }
-            // 信息素造路
-            const pheromoneMem = Memory[roomName]?.['pheromone'];
-            if (Game.time % 100 == 2 && pheromoneMem) {
+            // 固定路
+            if (Game.time % 100 == 2 && targetRoom.memory['road']?.length > 0) {
                 let siteCount = targetRoom.find(FIND_MY_CONSTRUCTION_SITES).length;
-                for(const p in pheromoneMem) {
-                    // 信息素衰减
-                    pheromoneMem[p] *= 0.9;
-                    // 信息素低于1时清理
-                    if (pheromoneMem[p] < 1) {
-                        delete pheromoneMem[p];
-                        continue;
-                    }
-                    if (pheromoneMem[p] < 5) continue;
-                    // 尝试造路
-                    if (siteCount >= 10) continue;
-                    const [x, y] = decompress(parseInt(p));
+                for(const road of targetRoom.memory['road']) {
+                    if (siteCount >= 10) break;
+                    const [x, y] = decompress(road);
                     const pos = new RoomPosition(x, y, roomName);
                     let result = targetRoom.createConstructionSite(pos, STRUCTURE_ROAD);
                     if (result == OK) siteCount++;
+                    if (result == ERR_FULL) break;
                 }
             }
+            // 信息素造路
+            // const pheromoneMem = Memory.rooms[roomName]?.['pheromone'];
+            // if (Game.time % 100 == 2 && pheromoneMem) {
+            //     let siteCount = targetRoom.find(FIND_MY_CONSTRUCTION_SITES).length;
+            //     for(const p in pheromoneMem) {
+            //         // 信息素衰减
+            //         pheromoneMem[p] *= 0.5;
+            //         // 信息素低于0.1时清理
+            //         if (pheromoneMem[p] < 0.1) {
+            //             delete pheromoneMem[p];
+            //             continue;
+            //         }
+            //         if (pheromoneMem[p] < 10) continue;
+            //         if (pheromoneMem[p] > 100) pheromoneMem[p] = 100;
+            //         // 尝试造路
+            //         if (siteCount >= 10) continue;
+            //         const [x, y] = decompress(parseInt(p));
+            //         const pos = new RoomPosition(x, y, roomName);
+            //         let result = targetRoom.createConstructionSite(pos, STRUCTURE_ROAD);
+            //         if (result == OK) siteCount++;
+            //     }
+            // }
 
             
 
@@ -85,7 +86,15 @@ export default class OutMine extends Room {
                 )
             });
 
-            outDefendSpawn(this, targetRoom, hostiles)
+            if (hostiles.some(c => {
+                if (c.owner.username === 'Invader') return false;
+                if (c.owner.username === 'Source Keeper') return false;
+                return true;
+            })) {
+                out2DefendSpawn(this, targetRoom, hostiles)
+            } else if (hostiles.length > 0) {
+                outDefendSpawn(this, targetRoom, hostiles)
+            }
 
             // 有带攻击组件的敌人时不孵化
             if (hostiles.length > 0) continue;
@@ -103,7 +112,7 @@ export default class OutMine extends Room {
 
             // 外矿加速搬运策略 OutSpeedCarryTactics
             if (Game.flags[`${this.name}/OSCT`]) {
-                outCarry2Spawn(this, targetRoom, sourceNum * 4);
+                outCarry2Spawn(this, targetRoom, sourceNum * 3);
             } else {
                 outCarrySpawn(this, targetRoom, sourceNum);
             }
@@ -122,8 +131,8 @@ export default class OutMine extends Room {
         for (const roomName of Mem) {
             const targetRoom = Game.rooms[roomName];
             // 如果没有视野, 尝试侦查
-            if (!targetRoom && Game.time % 10 == 0 && !obLookOK) {
-                if (this.observer) {
+            if (!targetRoom && Game.time % 10 == 0) {
+                if (this.observer && !obLookOK) {
                     this.observer.observeRoom(roomName);
                     obLookOK = true;
                 }
@@ -133,13 +142,15 @@ export default class OutMine extends Room {
             // 没有房间视野不孵化
             if (!targetRoom || Game.time % 10 != 1) continue;
 
-            if(Game.time % 100 == 1 && targetRoom.memory['road']?.length > 0) {
+            if (Game.time % 100 == 1 && targetRoom.memory['road']?.length > 0) {
+                let siteCount = targetRoom.find(FIND_MY_CONSTRUCTION_SITES).length;
                 for(const road of targetRoom.memory['road']) {
+                    if (siteCount >= 10) break;
                     const [x, y] = decompress(road);
                     const pos = new RoomPosition(x, y, roomName);
-                    if (pos.lookFor(LOOK_STRUCTURES).find(s => s.structureType == STRUCTURE_ROAD)) continue;
-                    if (pos.lookFor(LOOK_CONSTRUCTION_SITES).length > 0) continue;
-                    targetRoom.createConstructionSite(pos, STRUCTURE_ROAD);
+                    let result = targetRoom.createConstructionSite(pos, STRUCTURE_ROAD);
+                    if (result == OK) siteCount++;
+                    if (result == ERR_FULL) break;
                 }
             }
 
@@ -501,6 +512,22 @@ const outDefendSpawn = function (homeRoom: Room, targetRoom: Room, hostiles: Cre
     }
     
     return false;
+}
+
+const out2DefendSpawn = function (homeRoom: Room, targetRoom: Room, hostiles: Creep[]) {
+    if (hostiles.length == 0) return false;
+
+    const CreepByTargetRoom = getCreepByTargetRoom(targetRoom.name);
+    const out2Attack = (CreepByTargetRoom['out-2Attack'] || []).length || 0;
+    const out2AttackSpawnNum = global.SpawnMissionNum[homeRoom.name]['out-defend'] || 0;
+    if (out2Attack + out2AttackSpawnNum >= 1) return false;
+    const out2Heal = (CreepByTargetRoom['out-2Heal'] || []).length;
+    const out2HealSpawnNum = global.SpawnMissionNum[homeRoom.name]['out-defend'] || 0;
+    if (out2Heal + out2HealSpawnNum >= 1) return false;
+
+    homeRoom.SpawnMissionAdd('', [], -1, 'out-2Attack', { targetRoom: targetRoom.name } as any);
+    homeRoom.SpawnMissionAdd('', [], -1, 'out-2Heal', { targetRoom: targetRoom.name } as any);
+    return true;
 }
 
 // 采集
