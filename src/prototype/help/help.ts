@@ -27,8 +27,8 @@ export default [
         alias: 'helpRoom',
         exec: function () {
             return '###  房间指令列表  ###\n' +
-                'room.add(roomName, mode, layout, x, y): 添加房间到控制列表，列表中的房间才会自动运行。\n' +
-                ' - roomName: 房间名 mode: 运行模式 layout: 布局 x,y: 布局中心\n' +
+                'room.add(roomName, layout, x, y): 添加房间到控制列表，列表中的房间才会自动运行。\n' +
+                ' - roomName: 房间名 layout: 布局 x,y: 布局中心\n' +
                 ' - 后面的参数可以为空。\n' +
                 ' - mode: 决定房间以哪种模式运行, 留空默认为main, 可选项包括 main  (目前只有main, 之后可能会添加: 低负荷模式、挂机矿房模式)\n' +
                 ' - layout: 使用的布局, 留空则不使用\n' +
