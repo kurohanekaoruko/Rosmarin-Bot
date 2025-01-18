@@ -5,7 +5,7 @@ const LookInterval = 10;
 // 沉积物最大冷却
 const DepositMaxCooldown = 100;
 // 最小power数量限制
-const PowerMinAmount = 3000;
+const PowerMinAmount = 2000;
 
 
 /** 外矿采集模块 */
@@ -48,30 +48,6 @@ export default class OutMine extends Room {
                     if (result == ERR_FULL) break;
                 }
             }
-            // 信息素造路
-            // const pheromoneMem = Memory.rooms[roomName]?.['pheromone'];
-            // if (Game.time % 100 == 2 && pheromoneMem) {
-            //     let siteCount = targetRoom.find(FIND_MY_CONSTRUCTION_SITES).length;
-            //     for(const p in pheromoneMem) {
-            //         // 信息素衰减
-            //         pheromoneMem[p] *= 0.5;
-            //         // 信息素低于0.1时清理
-            //         if (pheromoneMem[p] < 0.1) {
-            //             delete pheromoneMem[p];
-            //             continue;
-            //         }
-            //         if (pheromoneMem[p] < 10) continue;
-            //         if (pheromoneMem[p] > 100) pheromoneMem[p] = 100;
-            //         // 尝试造路
-            //         if (siteCount >= 10) continue;
-            //         const [x, y] = decompress(parseInt(p));
-            //         const pos = new RoomPosition(x, y, roomName);
-            //         let result = targetRoom.createConstructionSite(pos, STRUCTURE_ROAD);
-            //         if (result == OK) siteCount++;
-            //     }
-            // }
-
-            
 
             const sourceNum = targetRoom.source?.length || targetRoom.find(FIND_SOURCES).length || 0;
             if (sourceNum == 0) continue;
@@ -92,7 +68,7 @@ export default class OutMine extends Room {
                 return true;
             })) {
                 out2DefendSpawn(this, targetRoom, hostiles)
-            } else if (hostiles.length > 0) {
+            } else {
                 outDefendSpawn(this, targetRoom, hostiles)
             }
 
@@ -112,7 +88,13 @@ export default class OutMine extends Room {
 
             // 外矿加速搬运策略 OutSpeedCarryTactics
             if (Game.flags[`${this.name}/OSCT`]) {
-                outCarry2Spawn(this, targetRoom, sourceNum * 3);
+                let num = sourceNum;
+                if (this.level <= 6) {
+                    num *= 3;
+                } else {
+                    num *= 4;
+                }
+                outCarry2Spawn(this, targetRoom, num);
             } else {
                 outCarrySpawn(this, targetRoom, sourceNum);
             }
@@ -519,10 +501,10 @@ const out2DefendSpawn = function (homeRoom: Room, targetRoom: Room, hostiles: Cr
 
     const CreepByTargetRoom = getCreepByTargetRoom(targetRoom.name);
     const out2Attack = (CreepByTargetRoom['out-2Attack'] || []).length || 0;
-    const out2AttackSpawnNum = global.SpawnMissionNum[homeRoom.name]['out-defend'] || 0;
+    const out2AttackSpawnNum = global.SpawnMissionNum[homeRoom.name]['out-2Attack'] || 0;
     if (out2Attack + out2AttackSpawnNum >= 1) return false;
     const out2Heal = (CreepByTargetRoom['out-2Heal'] || []).length;
-    const out2HealSpawnNum = global.SpawnMissionNum[homeRoom.name]['out-defend'] || 0;
+    const out2HealSpawnNum = global.SpawnMissionNum[homeRoom.name]['out-2Heal'] || 0;
     if (out2Heal + out2HealSpawnNum >= 1) return false;
 
     homeRoom.SpawnMissionAdd('', [], -1, 'out-2Attack', { targetRoom: targetRoom.name } as any);

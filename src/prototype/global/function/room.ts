@@ -181,6 +181,7 @@ const roomInfo = function (roomName: string) {
     }
 
     str += `</tbody></table>`;
+    str = str.replace('\n', '');
     console.log(str);
 }
 

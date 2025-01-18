@@ -186,18 +186,12 @@ const outHarvest = {
     },
 
     source: function(creep: Creep) {
-        if (creep.fatigue > 0 &&
-            !Game.rooms[creep.memory.homeRoom].my &&
-            Game.rooms[creep.memory.homeRoom].level > 4) {
-            creep.pos.createConstructionSite(STRUCTURE_ROAD);
-        }
+        createSite(creep);
 
         if (creep.room.name != creep.memory.targetRoom || creep.pos.isRoomEdge()) {
             creep.moveToRoom(creep.memory.targetRoom, { plainCost: 2, swampCost: 10 });
             return;
         }
-
-        createSite(creep);
 
         // 如果还没有绑定采集点，则绑定一个
         if (!creep.memory.targetSourceId) {

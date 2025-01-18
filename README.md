@@ -1,8 +1,10 @@
-# Rosmarinus
+# Rosmarinus-Bot
 
 ![language-typescript](https://img.shields.io/badge/language-typescript-3178c6)
 
-一个用于 [Screeps](https://screeps.com/) 的 TypeScript 半自动脚本。
+一个用于 [Screeps](https://screeps.com/) 的 TypeScript 半自动Bot。
+
+不同于全自动，本bot的功能需要手动设置相关参数才会自动运行。
 
 ## 注意
 

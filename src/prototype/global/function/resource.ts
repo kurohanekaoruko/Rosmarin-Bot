@@ -68,6 +68,33 @@ export default {
                     return OK;
                 }
             }
+        },
+        transport: {
+            task(roomName: string, source: string, target: string, resource: string, amount: number) {
+                const RESOURCE_ABBREVIATIONS = global.BaseConfig.RESOURCE_ABBREVIATIONS;
+                resource = RESOURCE_ABBREVIATIONS[resource] || resource;
+                const room = Game.rooms[roomName];
+                if (!room) return Error('房间不存在');
+                let sourceId = null;
+                let targetId = null;
+                if (source == 'storage') sourceId = room.storage.id;
+                else if (source == 'terminal') sourceId = room.terminal.id;
+                else if (source == 'factory') sourceId = room.factory.id;
+                if (target == 'storage') targetId = room.storage.id;
+                else if (target == 'terminal') targetId = room.terminal.id;
+                else if (target == 'factory') targetId = room.factory.id;
+
+                if (!sourceId || !targetId) return Error('源或目标不存在');
+                if (sourceId == targetId) return Error('源和目标不能相同');
+
+                room.TransportMissionAdd(2, {
+                    source: sourceId as Id<StructureStorage | StructureTerminal>,
+                    target: targetId as Id<StructureStorage | StructureTerminal>,
+                    resourceType: resource,
+                    amount: amount,
+                    } as any);
+                return OK;
+            }
         }
     }
 }

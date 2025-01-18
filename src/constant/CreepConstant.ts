@@ -268,7 +268,7 @@ export const RoleLevelData = {
         4: { bodypart: [[WORK, 6], [CARRY, 2], [MOVE, 3]], num: 2 },
         5: { bodypart: [[WORK, 6], [CARRY, 2], [MOVE, 3]], num: 2 },
         6: { bodypart: [[WORK, 6], [CARRY, 2], [MOVE, 3]], num: 2 },
-        7: { bodypart: [[WORK, 10], [CARRY, 2], [MOVE, 5]], num: 2 },
+        7: { bodypart: [[WORK, 6], [CARRY, 2], [MOVE, 3]], num: 2 },
         8: {
             bodypart: [[WORK, 20], [CARRY, 4], [MOVE, 10]], num: 2,
             upbodypart: [[WORK, 25], [CARRY, 5], [MOVE, 13]]
@@ -280,7 +280,7 @@ export const RoleLevelData = {
         3: { bodypart: [[CARRY, 7], [MOVE, 7]], num: 2 },
         4: { bodypart: [[CARRY, 10], [MOVE, 10]], num: 2 },
         5: { bodypart: [[CARRY, 12], [MOVE, 12]], num: 2 },
-        6: { bodypart: [[CARRY, 16], [MOVE, 16]], num: 1 },
+        6: { bodypart: [[CARRY, 15], [MOVE, 15]], num: 1 },
         7: { bodypart: [[CARRY, 20], [MOVE, 20]], num: 0 },
         8: { bodypart: [[CARRY, 20], [MOVE, 20]], num: 0 },
     },
@@ -300,7 +300,7 @@ export const RoleLevelData = {
         3: { bodypart: [[CARRY, 2], [MOVE, 2]], num: 0 },
         4: { bodypart: [[CARRY, 2], [MOVE, 2]], num: 0 },
         5: { bodypart: [[CARRY, 10], [MOVE, 5]], num: 1 },
-        6: { bodypart: [[CARRY, 20], [MOVE, 5]], num: 1 },
+        6: { bodypart: [[CARRY, 15], [MOVE, 5]], num: 1 },
         7: { bodypart: [[CARRY, 25], [MOVE, 5]], num: 1 },
         8: { bodypart: [[CARRY, 40], [MOVE, 5]], num: 1 },
     },
@@ -321,8 +321,8 @@ export const RoleLevelData = {
         4: { bodypart: [[WORK, 5], [CARRY, 4], [MOVE, 9]], num: 0 },
         5: { bodypart: [[WORK, 6], [CARRY, 6], [MOVE, 12]], num: 0 },
         6: { bodypart: [[WORK, 10], [CARRY, 10], [MOVE, 10]], num: 0 },
-        7: { bodypart: [[WORK, 10], [CARRY, 20], [MOVE, 15]], num: 0 },
-        8: { bodypart: [[WORK, 15], [CARRY, 18], [MOVE, 17]], num: 0 },
+        7: { bodypart: [[WORK, 16], [CARRY, 10], [MOVE, 13]], num: 0 },
+        8: { bodypart: [[WORK, 20], [CARRY, 10], [MOVE, 15]], num: 0 },
     },
     'mineral': {
         1: { bodypart: [[WORK, 2], [CARRY, 1], [MOVE, 1]], num: 0 },
@@ -362,7 +362,7 @@ export const RoleLevelData = {
         5: { bodypart: [[MOVE, 2], [CLAIM, 2]], num: 0 },
         6: { bodypart: [[MOVE, 2], [CLAIM, 2]], num: 0 },
         7: { bodypart: [[MOVE, 3], [CLAIM, 3]], num: 0 },
-        8: { bodypart: [[MOVE, 10], [CLAIM, 10]], num: 0 },
+        8: { bodypart: [[MOVE, 5], [CLAIM, 5]], num: 0 },
     },
     "out-harvest": {
         1: { bodypart: [[WORK, 2], [MOVE, 2]], num: 0 },
@@ -380,9 +380,9 @@ export const RoleLevelData = {
         3: { bodypart: [[WORK, 3], [CARRY, 3], [MOVE, 6]], num: 1 },
         4: { bodypart: [[WORK, 4], [CARRY, 4], [MOVE, 8]], num: 1 },
         5: { bodypart: [[WORK, 4], [CARRY, 10], [MOVE, 7]], num: 1 },
-        6: { bodypart: [[WORK, 5], [CARRY, 15], [MOVE, 20]], num: 1 },
-        7: { bodypart: [[WORK, 10], [CARRY, 20], [MOVE, 15]], num: 1 },
-        8: { bodypart: [[WORK, 15], [CARRY, 15], [MOVE, 15]], num: 1 },
+        6: { bodypart: [[WORK, 5], [CARRY, 10], [MOVE, 15]], num: 1 },
+        7: { bodypart: [[WORK, 10], [CARRY, 10], [MOVE, 20]], num: 1 },
+        8: { bodypart: [[WORK, 10], [CARRY, 10], [MOVE, 20]], num: 1 },
     },
     "out-car": {
         1: { bodypart: [[WORK, 1], [CARRY, 1], [MOVE, 2]], num: 0 },
@@ -424,7 +424,7 @@ export const RoleLevelData = {
         7: { bodypart: [[MOVE, 15], [ATTACK, 15]], num: 0 },
         8: { bodypart: [[MOVE, 15], [ATTACK, 15]], num: 0 },
     },
-    'out-2attack': {
+    'out-2Attack': {
         1: { bodypart: [[ATTACK, 2], [MOVE, 2]], num: 0 },
         2: { bodypart: [[ATTACK, 4], [MOVE, 4]], num: 0 },
         3: { bodypart: [[ATTACK, 6], [MOVE, 6]], num: 0 },
@@ -434,7 +434,7 @@ export const RoleLevelData = {
         7: { bodypart: [[ATTACK, 25], [MOVE, 25]], num: 0 },
         8: { bodypart: [[ATTACK, 25], [MOVE, 25]], num: 0 },
     },
-    "out-2heal": {
+    "out-2Heal": {
         1: { bodypart: [[MOVE, 1], [HEAL, 1]], num: 0 },
         2: { bodypart: [[MOVE, 1], [HEAL, 1]], num: 0 },
         3: { bodypart: [[MOVE, 2], [HEAL, 2]], num: 0 },

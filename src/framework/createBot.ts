@@ -29,8 +29,8 @@ export const createBot = () => {
 
     const mount = (func: () => void) => {
         func();
-        if (Game.shard.name != 'sim')
-            console.log(`原型拓展已挂载。`)
+        if (Game.shard.name == 'sim') return;
+        console.log(`原型拓展已挂载。`)
     }
 
     const on = (callbacks: any) => {
@@ -54,8 +54,9 @@ export const createBot = () => {
         if (Room.prototype.init) initRun(Game.rooms);
         if (Creep.prototype.init) initRun(Game.creeps);
         if (PowerCreep.prototype.init) initRun(Game.powerCreeps);
-        if (Game.shard.name != 'sim') console.log(`全局初始化完成。`);
         initOK = true;
+        if (Game.shard.name != 'sim') return;
+        console.log(`全局初始化完成。`);
     };
 
     const tickStart = () => {

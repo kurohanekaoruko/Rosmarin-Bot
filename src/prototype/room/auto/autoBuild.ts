@@ -78,8 +78,6 @@ function getPoints(room: Room, structureType: string, layoutArray: any, buildMax
                 if (room.level == 3) return layoutArray.slice(0, 7);
                 if (room.level == 4) return layoutArray.slice(0, 13);
                 if (room.level == 5) return layoutArray.slice(0, 21);
-                if (room.level == 6) return layoutArray.slice(0, 29);
-                if (room.level == 7) return layoutArray.slice(0, 35);
                 break;
             case 'ros':
                 if (room.level < 3) return [];   // 3级以下不建造路
