@@ -15,6 +15,7 @@ import { Statistics } from '@/modules/Statistics'
 import { DoubleSquad } from '@/modules/DoubleSquad';
 import { ClaimModule } from '@/modules/actionModule/ClaimModule';
 import { AidModule } from '@/modules/actionModule/AidModule';
+import { WarSpawnModule } from '@/modules/actionModule/WarSpawnModule';
 
 import { ResourceManage } from '@/modules/ResourceManage';
 
@@ -46,6 +47,8 @@ Bot.on(ResourceManage); // 资源调度管理
 Bot.on(ClaimModule);    // 占领模块
 
 Bot.on(AidModule);      // 援建模块
+
+Bot.on(WarSpawnModule); // 战争孵化
 
 Bot.on(DoubleSquad);    // 双人小队
 

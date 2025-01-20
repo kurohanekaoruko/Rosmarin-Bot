@@ -5,13 +5,22 @@ export default class PowerCreepRun extends PowerCreep {
 
         // 续命
         if(this.ToRenew()) return;
+
         // 移动到指定位置
         const flag = Game.flags[`${name}-move`];
-        if(flag && !this.pos.inRangeTo(flag, 0)) {
+        if (flag && !this.pos.inRangeTo(flag, 0)) {
             this.Generate_OPS();
             this.moveTo(Game.flags[`${name}-move`], {visualizePathStyle: {stroke: '#ff0000'}});
             return;
         }
+        // 移动到工作房间
+        const flagHome = Game.flags[`${name}-home`];
+        if (flagHome && (this.room.name != flagHome.pos.roomName || this.pos.isRoomEdge())) {
+            this.moveTo(flagHome, {visualizePathStyle: {stroke: '#ff0000'}});
+            return;
+        }
+
+
         // 房间开启power
         if(this.PowerEnabled()) return;
         // 生成ops

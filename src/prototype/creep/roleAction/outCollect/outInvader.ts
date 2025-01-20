@@ -1,5 +1,10 @@
 const outInvader = {
     run: function(creep: any) {
+        if (creep.room.name != creep.memory.targetRoom || creep.pos.isRoomEdge()) {
+            creep.moveToRoom(creep.memory.targetRoom);
+            return;
+        }
+
         const invaderCores = creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => structure.structureType === STRUCTURE_INVADER_CORE
         });
@@ -22,11 +27,6 @@ const outInvader = {
             else {
                 creep.moveTo(target);
             }
-            return;
-        }
-
-        if (creep.room.name != creep.memory.targetRoom || creep.pos.isRoomEdge()) {
-            creep.moveToRoom(creep.memory.targetRoom);
             return;
         }
 

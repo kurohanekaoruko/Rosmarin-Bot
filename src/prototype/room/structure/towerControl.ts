@@ -35,7 +35,7 @@ export default class TowerControl extends Room {
     }
 
     /**
-     * 计算tower对某一点的伤害总值
+     * 计算全部tower对某一点的伤害总值
      * @param {RoomPosition} pos 要计算伤害的点
      */
     TowerTotalDamage(pos: RoomPosition) {
@@ -59,33 +59,47 @@ export default class TowerControl extends Room {
         // tower伤害
         let towerDamage = this.TowerTotalDamage(creep.pos) || 0;
         // tough减伤后的伤害
-        let realDamage = 0;
+        let realDamage = 0; // 实际伤害
         creep.body.forEach(part => {
             if (towerDamage <= 0 || part.hits <= 0) return;
-            let partDamage = (part.type == TOUGH && part.boost) ? 
-                Math.min(Math.floor(towerDamage * BOOSTS[TOUGH][part.boost].damage), part.hits) :
-                Math.min(towerDamage, part.hits);
-            towerDamage -= (part.type == TOUGH && part.boost) ?
-                Math.ceil(part.hits / BOOSTS[TOUGH][part.boost].damage) :
-                partDamage;
+            // 对该部件造成的伤害
+            let partDamage = 0;
+            if (part.type == TOUGH && part.boost) {
+                partDamage = Math.min(Math.floor(towerDamage * BOOSTS[TOUGH][part.boost].damage), part.hits);
+            } else {
+                partDamage = Math.min(towerDamage, part.hits);
+            }
+            // 造成该伤害, 需要消耗多少原伤害
+            if (part.type == TOUGH && part.boost) {
+                towerDamage -=  Math.ceil(part.hits / BOOSTS[TOUGH][part.boost].damage)
+            } else {
+                towerDamage -= partDamage;
+            }
             realDamage += partDamage
         });
         if (towerDamage > 0) realDamage += towerDamage;
         // 治疗量
-        const healers = creep.pos.findInRange(FIND_CREEPS, 2, {
-            filter: creep => creep.owner.username == creep.owner.username && creep.body.some(b => b.type == HEAL)
+        const healers = creep.pos.findInRange(FIND_CREEPS, 1, {
+            filter: c => creep.owner.username == c.owner.username && c.body.some(b => b.type == HEAL)
         }) || [];
         let totalHeal = 0;
+        const BOOST_POWER = {
+            'LO': 2,
+            'LHO2': 3,
+            'XLHO2': 4,
+        }
         healers.forEach(c => {
+            if (creep['_h']) {
+                totalHeal += creep['_h'];
+                return;
+            }
             let h = 0;
-            const healBodyPart = c.body.filter(b => b.type == HEAL && b.hits > 0);
-            healBodyPart.forEach(part => {
-                if (!part.boost) h += 12
-                else if (part.boost == 'LO') h += 24
-                else if (part.boost == 'LHO2') h += 36
-                else if (part.boost == 'XLHO2') h += 48
-            });
-            if (creep.pos.getDistance(c.pos)>1) h = Math.floor(h / 3);
+            c.body.forEach(part => {
+                if (part.type !== HEAL || part.hits <= 0) return;
+                else if (!part.boost) h += 12
+                else h += 12 * BOOST_POWER[part.boost];
+            })
+            creep['_heal'] = h
             totalHeal += h;
         })
         return realDamage - totalHeal;

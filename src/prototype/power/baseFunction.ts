@@ -43,7 +43,7 @@ export default class BaseFunction extends PowerCreep {
         return false
     }
     ToRenew(): boolean {
-        if(this.ticksToLive > 300) return false;
+        if(this.ticksToLive > 500) return false;
         if(this.room.controller?.my && this.room.powerSpawn) {
             const powerSpawn = this.room.powerSpawn;
             if(this.pos.isNearTo(powerSpawn)) {
@@ -55,10 +55,26 @@ export default class BaseFunction extends PowerCreep {
         }
         if(!(/^[EW]\d*[1-9][NS]\d*[1-9]$/.test(this.room.name))) {
             const powerBank = this.room.find(FIND_STRUCTURES, {filter: (s) => s.structureType === STRUCTURE_POWER_BANK})[0] as StructurePowerBank;
-            if(this.pos.isNearTo(powerBank)) {
-                this.renew(powerBank);
-            } else {
-                this.moveTo(powerBank);
+            if (powerBank) {
+                if(this.pos.isNearTo(powerBank)) {
+                    this.renew(powerBank);
+                } else {
+                    this.moveTo(powerBank);
+                }
+                return true;
+            }
+        }
+        if (Game.flags[this.name + '-renew']) {
+            const flag = Game.flags[this.name + '-renew'];
+            if(this.pos.roomName !== flag.pos.roomName || this.pos.isRoomEdge()) {
+                this.moveTo(flag);
+            } else if(this.room.powerSpawn) {
+                const powerSpawn = this.room.powerSpawn;
+                if(this.pos.isNearTo(powerSpawn)) {
+                    this.renew(powerSpawn);
+                } else {
+                    this.moveTo(powerSpawn);
+                }
             }
             return true;
         }

@@ -7,6 +7,7 @@ interface Creep {
     doubleMoveToRoom(roomName: string, color?: string): boolean;
 
     withdrawEnergy(pickup?: boolean): void;
+    Boost(BOOST: any): number;
     goBoost(boostTypes: string[], must?: boolean, reserve?: boolean): boolean;
     unboost(): boolean;
     transferOrMoveTo(target: AnyCreep | Structure, resoureType: ResourceConstant, amount?: number): boolean;

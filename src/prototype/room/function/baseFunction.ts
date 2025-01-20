@@ -187,14 +187,16 @@ export default class BaseFunction extends Room {
 
         let body_list = [];
         // 生成优先级，越往前越优先
-        if (tough) body_list = AddList(body_list, tough, TOUGH)
+        
         switch (role) {
         case 'power-attack':
+            if (tough) body_list = AddList(body_list, tough, TOUGH)
             if (move) body_list = AddList(body_list, move - 1, MOVE)
             if (attack) body_list = AddList(body_list, attack, ATTACK)
             if (move) body_list = AddList(body_list, 1, MOVE)
             break;
         case 'power-carry':
+            if (tough) body_list = AddList(body_list, tough, TOUGH)
             while (carry > 0 || move > 0) {
                 if (carry) body_list = AddList(body_list, 1, CARRY)
                 if (move) body_list = AddList(body_list, 1, MOVE)
@@ -202,6 +204,7 @@ export default class BaseFunction extends Room {
             }
             break;
         case 'out-carry':
+            if (tough) body_list = AddList(body_list, tough, TOUGH)
             let carryCount = Math.min(Math.floor(carry/2), move);
             for (let i = 0; i < carryCount; i++) {
                 body_list = AddList(body_list, 2, CARRY)
@@ -211,6 +214,7 @@ export default class BaseFunction extends Room {
             if (move-carryCount) body_list = AddList(body_list, move-carryCount, MOVE);
             break;
         case 'out-car':
+            if (tough) body_list = AddList(body_list, tough, TOUGH)
             if (work) body_list = AddList(body_list, work, WORK);
             let carCount = Math.min(Math.floor(carry/2), move);
             for (let i = 0; i < carCount; i++) {
@@ -221,6 +225,7 @@ export default class BaseFunction extends Room {
             if (move-carCount>0) body_list = AddList(body_list, move-carCount, MOVE);
             break;
         case 'out-defend':
+            if (tough) body_list = AddList(body_list, tough, TOUGH)
             if (move) body_list = AddList(body_list, move - 2, MOVE)
             if (attack) body_list = AddList(body_list, attack, ATTACK)
             if (range_attack) body_list = AddList(body_list, range_attack, RANGED_ATTACK)
@@ -229,12 +234,14 @@ export default class BaseFunction extends Room {
             if (heal) body_list = AddList(body_list, 1, HEAL)
             break;
         case 'out-attack':
+            if (tough) body_list = AddList(body_list, tough, TOUGH)
             if (move) body_list = AddList(body_list, move-2, MOVE)
             if (attack) body_list = AddList(body_list, attack, ATTACK)
             if (heal) body_list = AddList(body_list, heal, HEAL)
             if (move) body_list = AddList(body_list, 2, MOVE)
             break;
         case 'out-renged':
+            if (tough) body_list = AddList(body_list, tough, TOUGH)
             if (move) body_list = AddList(body_list, move - 2, MOVE)
             if (range_attack) body_list = AddList(body_list, range_attack, RANGED_ATTACK)
             if (heal) body_list = AddList(body_list, heal, HEAL)
@@ -272,6 +279,28 @@ export default class BaseFunction extends Room {
         if (part == TOUGH) num += 10
         }
         return num
+    }
+
+    /** 检查资源是否足够BOOST某个体型 */
+    CheckBoostRes(bodypart: any[], BOOST: any) {
+        if (Object.keys(BOOST).length == 0) return true;
+        for (let bp of bodypart) {
+            if (!BOOST[bp[0]]) continue;
+            if (this[BOOST[bp[0]]] < bp[1] * 30) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** 根据体型和boost配置分配boot任务 */
+    AssignBoostTaskByBody(bodypart: any[], BOOST: any = {}) {
+        if (!this.CheckBoostRes(bodypart, BOOST)) return false;
+        for (let bp of bodypart) {
+            if (!BOOST[bp[0]]) continue;
+            this.AssignBoostTask(BOOST[bp[0]], bp[1] * 30)
+        }
+        return true;
     }
 
     /** 给lab分配boost任务 */

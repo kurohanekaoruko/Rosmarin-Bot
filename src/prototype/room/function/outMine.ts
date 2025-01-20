@@ -19,7 +19,7 @@ export default class OutMine extends Room {
     }
 
     EnergyMine() { // 能量矿
-        if (Game.time % 20 > 2 || Game.time % 20 < 1) return;
+        if (Game.time % 20 != 0) return;
         const Mem = Memory['OutMineData'][this.name]?.['energy'];
         if (!Mem || !Mem.length) return;
         // 孵化任务数统计
@@ -27,17 +27,16 @@ export default class OutMine extends Room {
         for (const roomName of Mem) {
             const targetRoom = Game.rooms[roomName];
             // 如果没有视野, 尝试侦查
-            if (!targetRoom && Game.time % 20 == 1) {
-                if (this.observer) this.observer.observeRoom(roomName);
-                else scoutSpawn(this, roomName);    // 侦查
+            if (!targetRoom) {
+                scoutSpawn(this, roomName);    // 侦查
                 continue;
             }
 
             // 没有房间视野不孵化
-            if (!targetRoom || Game.time % 20 != 2) continue;
+            if (!targetRoom) continue;
             
             // 固定路
-            if (Game.time % 100 == 2 && targetRoom.memory['road']?.length > 0) {
+            if (Game.time % 100 == 0 && targetRoom.memory['road']?.length > 0) {
                 let siteCount = targetRoom.find(FIND_MY_CONSTRUCTION_SITES).length;
                 for(const road of targetRoom.memory['road']) {
                     if (siteCount >= 10) break;
@@ -104,27 +103,22 @@ export default class OutMine extends Room {
     }
 
     CenterMine() { // 中央九房
-        if (Game.time % 10 > 1) return;
+        if (Game.time % 10 != 0) return;
         const Mem = Memory['OutMineData'][this.name]?.['centerRoom'];
         if (!Mem || !Mem.length) return;
         // 孵化任务数统计
         global.SpawnMissionNum[this.name] = this.getSpawnMissionAmount() || {};
-        let obLookOK = false;
         for (const roomName of Mem) {
             const targetRoom = Game.rooms[roomName];
             // 如果没有视野, 尝试侦查
-            if (!targetRoom && Game.time % 10 == 0) {
-                if (this.observer && !obLookOK) {
-                    this.observer.observeRoom(roomName);
-                    obLookOK = true;
-                }
-                else scoutSpawn(this, roomName);    // 侦查
+            if (!targetRoom) {
+                scoutSpawn(this, roomName);    // 侦查
                 continue;
             }
             // 没有房间视野不孵化
-            if (!targetRoom || Game.time % 10 != 1) continue;
+            if (!targetRoom) continue;
 
-            if (Game.time % 100 == 1 && targetRoom.memory['road']?.length > 0) {
+            if (Game.time % 100 == 0 && targetRoom.memory['road']?.length > 0) {
                 let siteCount = targetRoom.find(FIND_MY_CONSTRUCTION_SITES).length;
                 for(const road of targetRoom.memory['road']) {
                     if (siteCount >= 10) break;

@@ -22,11 +22,11 @@ const aid_build = {
     },
 
     prepare: function (creep: Creep) {
-        // if (creep.memory['BOOST']) {
-        //     return creep.goBoost(creep.memory['BOOST'], true, true);
-        // } else {
+        if (creep.memory['BOOST']) {
+            return creep.Boost(creep.memory['BOOST']);
+        } else {
             return creep.goBoost(['XLH2O', 'LH2O', 'LH']);
-        // }
+        }
         
     },
 

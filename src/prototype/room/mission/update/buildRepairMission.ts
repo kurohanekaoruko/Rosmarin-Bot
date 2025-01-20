@@ -9,7 +9,7 @@ function UpdateBuildRepairMission(room: Room) {
 
     const NORMAL_STRUCTURE_THRESHOLD = 0.8;     // 普通修复建筑耐久度阈值
     const URGENT_STRUCTURE_THRESHOLD = 0.1;     // 紧急修复建筑耐久度阈值
-    const NORMAL_WALL_HITS = room.level < 6 ? 300e3 : 1e6;               // 普通修复墙耐久度
+    const NORMAL_WALL_HITS = room.level < 7 ? 300e3 : 1e6;               // 普通修复墙耐久度
     const URGENT_WALL_HITS = 3000;              // 紧急修复墙耐久度
 
     // 维修优先级：紧急维修-建筑 > 紧急维修-墙 > 常规维修-建筑 > 常规维修-墙

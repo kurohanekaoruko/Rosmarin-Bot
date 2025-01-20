@@ -16,8 +16,8 @@ export default class ActiveDefend extends Room {
 
         // 关于主动防御的检查
         if (Game.time % 5) return;
-        const defend_mode = Memory['RoomControlData'][this.name]['defend_mode'];
-        if (this.level < 7) return;
+        // const defend_mode = Memory['RoomControlData'][this.name]['defend_mode'];
+
         if (!Memory['whitelist']) Memory['whitelist'] = [];
         let hostiles = this.find(FIND_HOSTILE_CREEPS, {
             filter: hostile => 

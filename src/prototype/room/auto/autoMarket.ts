@@ -196,7 +196,7 @@ function AutoDealSell(roomName: string, item: any) {
 
     // 计算需要出售的数量
     const sellAmount = Math.min(totalAmount - amount, terminalAmount);
-    if (sellAmount <= 10000) return;
+    if (sellAmount <= 5000) return;
 
     AutoDeal(room.name, resourceType, sellAmount, ORDER_BUY, 10, price);
 }

@@ -92,6 +92,10 @@ interface Room {
     GetRoleBodys(role:string, upbody?: boolean): any[];
     // 生成creep body
     GenerateBodys(bodypartList: any[], role?: string): BodyPartConstant[];
+    // 检查boost资源十分足够
+    CheckBoostRes(bodypart: any[], BOOST: any): boolean;
+    // 根据体型和boost配置分配boot任务
+    AssignBoostTaskByBody(bodypart: any[], BOOST: any): boolean;
     // 给lab分配boost任务
     AssignBoostTask(mineral: string, amount: number): void;
     // 提交lab boost任务

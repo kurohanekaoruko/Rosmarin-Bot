@@ -124,6 +124,63 @@ export default class BaseFunction extends Creep {
         else harvestEnergy();    // 采集能量
     }
 
+    /** 根据给定配置boost, 返回OK表示完成 */
+    Boost(BOOST: any) {
+        let bodypast = {}   // 需要强化的部件数量
+        const done = this.body.every(part => {
+            if (!BOOST[part.type]) return true;
+            if (part.boost) return true;
+            if (!bodypast[part.type]) {
+                bodypast[part.type] = 1;
+            } else {
+                bodypast[part.type] += 1;
+            }
+            return false;
+        })
+        if (done) return OK;
+
+        // 检查是否拥有足够资源
+        for (const part in bodypast) {
+            if (this.room[BOOST[part]] < bodypast[part] * 30) {
+                return -1;
+            }
+        }
+
+        // 查找有足够指定资源的lab
+        const labs = this.room.lab?.filter((lab) => 
+            lab.mineralType &&
+            Object.values(BOOST).includes(lab.mineralType) &&
+            lab.store[lab.mineralType] >= 30
+        ) || [];
+
+        // 过滤掉对应部件已强化满的lab
+        const availableLabs = labs.filter(lab => {
+            return this.body.some(part => !part.boost && BOOSTS[part.type] && lab.mineralType in BOOSTS[part.type]);
+        }) || [];
+        // 如果找不到
+        if (availableLabs.length == 0) {
+            return -2;
+        }
+
+        // 找到最近的lab
+        const closestLab = this.pos.findClosestByRange(availableLabs);
+        // 如果creep不在lab旁边，移动到lab
+        if (!this.pos.isNearTo(closestLab)) {
+            this.moveTo(closestLab, { visualizePathStyle: { stroke: '#ffffff' } });
+            return null;
+        }
+
+        // 尝试强化
+        let result = closestLab.boostCreep(this);
+        if (result == OK) {
+            const mineral = closestLab.mineralType;
+            const boostedParts = this.body.filter(part => BOOSTS[part.type] && mineral in BOOSTS[part.type]);
+            const boostAmount = Math.min(boostedParts.length * 30, closestLab.store[mineral] - closestLab.store[mineral] % 30);
+            this.room.SubmitBoostTask(mineral, boostAmount);
+            return null;
+        }
+    }
+
     /**
      *boost creep
      * @param {Array<string>} boostTypes - 强化的资源类型数组

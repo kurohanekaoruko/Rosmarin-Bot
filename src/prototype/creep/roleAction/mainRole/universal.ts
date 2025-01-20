@@ -51,7 +51,7 @@ const harvest = function (creep: Creep) {
         }
     }
     // 如果terminal能量大于storage，则从terminal中取出能量
-    else if (!st && storage && terminal && terminal.store[RESOURCE_ENERGY] > storage.store[RESOURCE_ENERGY]) {
+    else if (st && storage && terminal && terminal.store[RESOURCE_ENERGY] > storage.store[RESOURCE_ENERGY]) {
         if (creep.withdraw(terminal, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
             creep.moveTo(terminal, { maxRooms: 1, range: 1});
         }

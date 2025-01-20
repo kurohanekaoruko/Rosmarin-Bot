@@ -34,6 +34,11 @@ export default {
             Memory.MissionPools[roomName][type] = [];
             console.log(`已清空房间 ${roomName} 的 ${type} 任务`);
             return OK;
+        },
+        roomPath(roomName: string) {
+            global.BetterMove.deletePathInRoom(roomName);
+            console.log(`已清空房间 ${roomName} 的路径缓存`);
+            return OK;
         }
     }
 }

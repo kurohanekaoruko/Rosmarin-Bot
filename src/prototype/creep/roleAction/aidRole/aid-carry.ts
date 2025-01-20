@@ -47,8 +47,13 @@ function transfer(creep: Creep) {
 
     const res = creep.memory['resource'] || RESOURCE_ENERGY;
 
-    const targets = [creep.room.storage, creep.room.terminal, ...creep.room.container].filter((i) => i && i.store.getFreeCapacity(res) > 0);
-    const target = creep.pos.findClosestByRange(targets);
+    
+    let targets = [creep.room.storage, creep.room.terminal].filter((i) => i && i.store.getFreeCapacity(res) > 0) as any;
+    let target = creep.pos.findClosestByRange(targets) as any;
+    if (!target) {
+        targets = [...creep.room.container].filter((i) => i && i.store.getFreeCapacity(res) > 0);
+        target = creep.pos.findClosestByRange(targets);
+    }
 
     if (target) {
         creep.transferOrMoveTo(target, Object.keys(creep.store)[0] as ResourceConstant);
@@ -61,6 +66,13 @@ function transfer(creep: Creep) {
 
 
 const AidCarryFunction = {
+    prepare: function (creep: Creep) {
+        if (!creep.memory['BOOST']) return true;
+        let result = creep.Boost(creep.memory['BOOST']);
+        if (result === OK) return true;
+        else return false;
+    },
+
     source: function (creep: Creep) {
         withdraw(creep);
         return creep.store.getFreeCapacity() === 0;

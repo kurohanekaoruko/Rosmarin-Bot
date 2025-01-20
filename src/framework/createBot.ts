@@ -55,7 +55,7 @@ export const createBot = () => {
         if (Creep.prototype.init) initRun(Game.creeps);
         if (PowerCreep.prototype.init) initRun(Game.powerCreeps);
         initOK = true;
-        if (Game.shard.name != 'sim') return;
+        if (Game.shard.name == 'sim') return;
         console.log(`全局初始化完成。`);
     };
 

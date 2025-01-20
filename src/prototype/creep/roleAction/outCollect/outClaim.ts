@@ -16,7 +16,7 @@ const outClaim = {
                 creep.attackController(controller)
             } else {
                 const ticksToEnd = controller.reservation?.ticksToEnd || 0;
-                if (ticksToEnd >= 4950) return false;
+                if (ticksToEnd >= 4990) return false;
                 creep.reserveController(controller);
             }
 
