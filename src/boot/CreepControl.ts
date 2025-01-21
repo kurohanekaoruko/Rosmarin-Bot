@@ -1,4 +1,3 @@
-import { RoleData } from '@/constant/CreepConstant';
 import { sayConstant } from '@/constant/sayConstant';
 
 /**
@@ -7,36 +6,7 @@ import { sayConstant } from '@/constant/sayConstant';
 export const creepControl = function (creep: Creep) {
     if (!creep || creep.spawning) return;
     // Creep运行
-    const role = creep.memory.role;
-    if(!creep.memory.cache) { creep.memory.cache = {} };
-    
-    const roledata = RoleData[role]
-    if(!roledata) return;
-
-    // 根据状态切换行动
-    if(roledata.work) {
-        const func = roledata.work;
-        if (func.prepare && !creep.memory.ready){
-            creep.memory.ready = func.prepare(creep);
-        }
-
-        let stateChange = false;
-        if (creep.memory.working)
-            stateChange = func.target(creep);
-        else stateChange = func.source(creep);
-
-        if (stateChange) {
-            creep.memory.working = !creep.memory.working;
-            creep.memory.cache = {}; // 清空临时缓存
-        }
-    }
-    else if(roledata.mission) {
-        roledata.mission.run(creep);
-    }
-    else if(roledata.action) {
-        roledata.action.run(creep);
-    }
-    else return;
+    creep.run();
 
     // ----------------------Creep随机说话----------------------------------
     

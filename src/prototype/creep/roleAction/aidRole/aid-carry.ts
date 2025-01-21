@@ -67,7 +67,9 @@ function transfer(creep: Creep) {
 
 const AidCarryFunction = {
     prepare: function (creep: Creep) {
-        if (!creep.memory['BOOST']) return true;
+        if (!creep.memory['BOOST']) {
+            return creep.goBoost(['XKH2O', 'KH2O', 'KH']);
+        }
         let result = creep.Boost(creep.memory['BOOST']);
         if (result === OK) return true;
         else return false;

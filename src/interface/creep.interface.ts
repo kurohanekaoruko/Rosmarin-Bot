@@ -1,5 +1,8 @@
 interface Creep {
+    /** 初始化*/
     init(): void;
+    /** 运行 */
+    run(): void;
 
     moveHomeRoom(): boolean;
     moveToRoom(roomName: string, options?:{[key: string]: any}): any;

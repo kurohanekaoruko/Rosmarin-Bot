@@ -59,12 +59,12 @@ Bot.on(GeneratePixel);  // 搓像素
 Bot.on(Statistics);     // 统计
 
 
-export const loop = Bot.run;
+// export const loop = Bot.run;
 
 
-// // 性能开销分析
-// import profiler from './modules/whell/screeps-profiler';
-// profiler.enable();
-// export const loop = function() {
-//     profiler.wrap(app.run);
-// }
+// 性能开销分析
+import profiler from './modules/wheel/screeps-profiler';
+profiler.enable();
+export const loop = function() {
+    profiler.wrap(Bot.run);
+}
