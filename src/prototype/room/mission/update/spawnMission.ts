@@ -84,11 +84,13 @@ const RoleSpawnCheck = {
         let num = match ? parseInt(match[1]) : 0;
         if (num < 1) return false;
         if (room[RESOURCE_ENERGY] < 100000) return false;
+
         const lv = room.level;
         // 当前等级的最大ext能量容量
         const lvEnergyCapacityAvailable = CONTROLLER_STRUCTURES["spawn"][lv] * 300 +
         CONTROLLER_STRUCTURES['extension'][lv] * EXTENSION_ENERGY_CAPACITY[lv];
         if (room.energyCapacityAvailable < lvEnergyCapacityAvailable) return false;
+        
         return current < num;
     },
     'UP-repair': (room: Room, current: number) => {

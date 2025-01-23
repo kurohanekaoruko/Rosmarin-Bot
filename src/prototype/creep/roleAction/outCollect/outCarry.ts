@@ -1,24 +1,3 @@
-import { compress } from '@/utils';
-
-
-const pheromone = function(creep: Creep) {
-    if (creep.room.name == creep.memory.homeRoom) return;
-    if (Game.rooms[creep.memory.homeRoom].level < 4) return;
-    // if (creep.fatigue == 0) return;
-        
-    const p = compress(creep.pos.x, creep.pos.y);
-    if (!creep.room.memory['pheromone']) {
-        creep.room.memory['pheromone'] = {};
-    }
-    if (!creep.room.memory['pheromone'][p]) {
-        creep.room.memory['pheromone'][p] = 0;
-    }
-    creep.room.memory['pheromone'][p] += 1;
-    if (creep.room.memory['pheromone'][p] > 100) {
-        creep.room.memory['pheromone'][p] = 100;
-    }
-}
-
 
 
 const outCarry = {
@@ -237,14 +216,21 @@ const outCarry = {
                 } else {
                     creep.moveTo(storage, { maxRooms: 1, range: 1, plainCost: 2, swampCost: 10  });
                 }
-            } else if (controller) {
+            } else if (controller && controller.level < 8) {
                 if (creep.pos.inRangeTo(controller, 1)) {
                     creep.drop(Object.keys(creep.store)[0]);
                 } else {
                     creep.moveTo(controller, { maxRooms: 1, range: 1, plainCost: 2, swampCost: 10  });
                 }
-            } else {
-                creep.drop(Object.keys(creep.store)[0]);
+            } 
+            else {
+                const center = Memory['RoomControlData'][creep.room.name]?.center;
+                const centerPos = new RoomPosition(center.x, center.y, creep.room.name);
+                if (centerPos && creep.pos.inRangeTo(centerPos, 1)) {
+                    creep.drop(Object.keys(creep.store)[0]);
+                } else {
+                    creep.moveTo(centerPos, { maxRooms: 1, range: 1, plainCost: 2, swampCost: 10  });
+                }
             }
         }
     },

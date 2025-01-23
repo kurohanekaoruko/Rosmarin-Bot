@@ -92,21 +92,22 @@ export default class SpawnControl extends Room {
         if (Game.time % 10) return;
         if (data.cost > this.energyAvailable) {
             if (role !== 'harvester' && role !== 'transport' && role !== 'carrier' && role !== 'manager') return;
-            if (role == 'manager') role = 'transport';
+            if (role == 'manager') role = 'carrier';
+            if (role == 'transport') role = 'carrier';
             const num = this.find(FIND_MY_CREEPS, {filter: c => c.memory.role == role}).length;
             if (num !== 0) return;
-            if (role !== 'carrier' || (role == 'carrier' && this.level <= 6)) {
-                let univ = this.find(FIND_MY_CREEPS, {filter: c => c.memory.role == 'universal'}).length +
-                    (global.SpawnMissionNum[this.name]?.['universal'] || 0)
-                if (univ >= 2) return;
+            
+            let univ = this.find(FIND_MY_CREEPS, {filter: c => c.memory.role == 'universal'}).length +
+                (global.SpawnMissionNum[this.name]?.['universal'] || 0)
+            if (univ >= 2) return;
 
-                spawn.spawnCreep(
-                    this.GenerateBodys(RoleData['universal'].bodypart),
-                    GenCreepName(RoleData['universal'].code),
-                    { memory: { role: 'universal', home: this.name } as CreepMemory }
-                );
-                global.log(`房间 ${this.name} 没有且不足以孵化 ${role}，已紧急孵化 universal。`);
-            }
+            spawn.spawnCreep(
+                this.GenerateBodys(RoleData['universal'].bodypart),
+                GenCreepName(RoleData['universal'].code),
+                { memory: { role: 'universal', home: this.name } as CreepMemory }
+            );
+            global.log(`房间 ${this.name} 没有且不足以孵化 ${role}，已紧急孵化 universal。`);
+            
         }
     }
 }

@@ -228,7 +228,6 @@ const CarrierFunction = {
     source: (creep: any) => {
         if (!creep.moveHomeRoom()) return;
         if (creep.store.getFreeCapacity() === 0) return true;
-        if (checkAndFillNearbyExtensions(creep)) return;
         if (GoGenerateSafeMode(creep)) return;
         return withdraw(creep);
     },

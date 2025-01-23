@@ -68,8 +68,8 @@ export default {
             Memory['SquadData'][squadName] = {
                 'name': squadName,
                 'state': 'idle',
-                'toward': '↑',
-                'moveState': 'line',
+                'direction': '↑',
+                'formation': 'line',
                 'members': {},
                 'time': Game.time, // 创建时间
             }

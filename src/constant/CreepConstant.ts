@@ -35,11 +35,11 @@ export const RoleData: RoleConfig = {
     'carrier': {
         bodypart: [[CARRY, 3], [MOVE, 3]],
         level: 4, code: 'C', work: RoleAction.carrier
-    },  // 矿点搬运
+    },  // 通用搬运
     'transport': {
         bodypart: [[CARRY, 4], [MOVE, 2]],
         level: 2, code: 'T', mission: RoleAction.transport
-    }, // 资源运输填充
+    }, // 资源搬运
     'manager': {
         bodypart: [[CARRY, 4], [MOVE, 2]],
         level: 1, code: 'M', mission: RoleAction.manager
@@ -161,7 +161,7 @@ export const RoleData: RoleConfig = {
 
     /* 四人队 */
     'squad-attack': {
-        bodypart: [[TOUGH, 15], [ATTACK, 25], [MOVE, 10]],
+        bodypart: [[TOUGH, 12], [ATTACK, 28], [MOVE, 10]],
         level: 10, code: '4A', action: RoleAction.squad_attack
     },
     'squad-dismantle': {
@@ -169,7 +169,7 @@ export const RoleData: RoleConfig = {
         level: 10, code: '4D', action: RoleAction.squad_dismantle
     },
     'squad-heal': {
-        bodypart: [[TOUGH, 15], [RANGED_ATTACK, 1], [MOVE, 10], [HEAL, 24]],
+        bodypart: [[TOUGH, 12], [RANGED_ATTACK, 2], [MOVE, 10], [HEAL, 26]],
         level: 10, code: '4H', action: RoleAction.squad_heal
     },
     'squad-ranged': {
@@ -268,10 +268,8 @@ export const RoleLevelData = {
         5: { bodypart: [[WORK, 6], [CARRY, 2], [MOVE, 3]], num: 0 },
         6: { bodypart: [[WORK, 6], [CARRY, 2], [MOVE, 3]], num: 0 },
         7: { bodypart: [[WORK, 6], [CARRY, 2], [MOVE, 3]], num: 0 },
-        8: {
-            bodypart: [[WORK, 20], [CARRY, 4], [MOVE, 10]], num: 0,
-            upbodypart: [[WORK, 25], [CARRY, 5], [MOVE, 13]]
-        },
+        8: { bodypart: [[WORK, 10], [CARRY, 5], [MOVE, 5]], num: 0,
+             upbodypart: [[WORK, 20], [CARRY, 5], [MOVE, 10]] },
     },
     'carrier': {
         1: { bodypart: [[CARRY, 2], [MOVE, 2]], num: 3 },
@@ -298,10 +296,10 @@ export const RoleLevelData = {
         2: { bodypart: [[CARRY, 1], [MOVE, 1]], num: 0 },
         3: { bodypart: [[CARRY, 2], [MOVE, 2]], num: 0 },
         4: { bodypart: [[CARRY, 2], [MOVE, 2]], num: 0 },
-        5: { bodypart: [[CARRY, 10], [MOVE, 5]], num: 1 },
+        5: { bodypart: [[CARRY, 5], [MOVE, 2]], num: 1 },
         6: { bodypart: [[CARRY, 15], [MOVE, 5]], num: 1 },
         7: { bodypart: [[CARRY, 25], [MOVE, 5]], num: 1 },
-        8: { bodypart: [[CARRY, 40], [MOVE, 5]], num: 1 },
+        8: { bodypart: [[CARRY, 35], [MOVE, 5]], num: 1 },
     },
     'upgrader': {
         1: { bodypart: [[WORK, 1], [CARRY, 1], [MOVE, 2]], num: 3 },

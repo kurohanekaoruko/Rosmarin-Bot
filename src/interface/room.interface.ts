@@ -73,10 +73,10 @@ interface Room {
 
     // 孵化信息可视化
     VisualSpawnInfo(): void;
-    // 获取孵化数据
-    GetSpawnTaskData(): any;
-    // 孵化Creep
-    SpawnCreep(): any;
+    /** 获取孵化任务的相关数据 */
+    GetSpawnTaskData(): { bodypart: BodyPartConstant[], name: string, memory: CreepMemory, taskId: string, cost: number };
+    /** 孵化Creep */
+    SpawnCreep(): void;
 
     // 计算中心点
     CacheCenterPos(): void;

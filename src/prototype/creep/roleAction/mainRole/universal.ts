@@ -128,8 +128,15 @@ const transfer = function (creep) {
             creep.moveTo(target, { maxRooms: 1, range: 1});
         }
     } else {
-        creep.say('🚨');
-        creep.drop(RESOURCE_ENERGY);
+        const sites = creep.room.find(FIND_CONSTRUCTION_SITES, { filter: { structureType: STRUCTURE_CONTAINER } });
+        const site = creep.pos.findClosestByRange(sites);
+        if (site) {
+            if (creep.build(site) === ERR_NOT_IN_RANGE) {
+                creep.moveTo(site, { maxRooms: 1, range: 1});
+            }
+        } else {
+            upgrade(creep);
+        }
     }
 }
 

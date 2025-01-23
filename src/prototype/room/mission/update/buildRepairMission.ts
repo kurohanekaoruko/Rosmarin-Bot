@@ -52,20 +52,20 @@ function UpdateBuildRepairMission(room: Room) {
     for(const site of constructionSites) {
         const posInfo = `${site.pos.x}/${site.pos.y}/${site.pos.roomName}`
         const data = {target: site.id, pos: posInfo};
-        let level = Math.floor((1 - site.progress / site.progressTotal) * 5);
+        let level = Math.round((1 - site.progress / site.progressTotal) * 5);
         if (site.structureType === STRUCTURE_TERMINAL ||
             site.structureType === STRUCTURE_STORAGE ||
             site.structureType === STRUCTURE_SPAWN) {
             level = 0;
-        } else if (site.structureType === STRUCTURE_ROAD && 
-            terrain.get(site.pos.x, site.pos.y) == TERRAIN_MASK_SWAMP) {
-            level = 0;
         } else if (site.structureType === STRUCTURE_EXTENSION ||
-            site.structureType === STRUCTURE_LINK ||
+            (site.structureType === STRUCTURE_ROAD && 
+            terrain.get(site.pos.x, site.pos.y) == TERRAIN_MASK_SWAMP)) {
+            level += site.progress > 0 ? 0 : 1;
+        } else if (site.structureType === STRUCTURE_LINK ||
             site.structureType === STRUCTURE_TOWER) {
-            level += 5;
+            level += site.progress > 0 ? 5 : 6;
         } else {
-            level += 10;
+            level += site.progress > 0 ? 10 : 11;
         }
         room.BuildRepairMissionAdd('build', level, data)
     }

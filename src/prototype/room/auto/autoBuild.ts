@@ -140,7 +140,6 @@ function checkSkipBuild(room: Room, structureType: string, LOOK_STRUCT: Structur
             if (LOOK_STRUCT.length &&
                 LOOK_STRUCT.some(o => o.structureType != STRUCTURE_RAMPART &&
                 o.structureType != STRUCTURE_ROAD)) return true;
-            // 低等级可以造
             if (room.level <= 7) return false;
             // 在控制器旁边的container, 在等级高时不造
             if (Pos.inRangeTo(room.controller, 2)) return true;

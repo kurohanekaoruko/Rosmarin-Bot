@@ -5,7 +5,7 @@ const LookInterval = 10;
 // 沉积物最大冷却
 const DepositMaxCooldown = 100;
 // 最小power数量限制
-const PowerMinAmount = 2000;
+const PowerMinAmount = 0;
 
 
 /** 外矿采集模块 */
@@ -515,7 +515,7 @@ const outHarvesterSpawn = function (homeRoom: Room, targetRoom: Room, sourceNum:
 
     const memory = { homeRoom: homeRoom.name, targetRoom: targetRoom.name } as CreepMemory;
     if (upbody) {
-        homeRoom.SpawnMissionAdd('OH', [16, 6, 8, 0, 0, 0, 0, 0], -1, 'out-harvest', memory);
+        homeRoom.SpawnMissionAdd('OH', [[WORK, 16],[CARRY, 6],[MOVE, 8]], -1, 'out-harvest', memory);
     } else {
         homeRoom.SpawnMissionAdd('OH', [], -1, 'out-harvest', memory);
     }

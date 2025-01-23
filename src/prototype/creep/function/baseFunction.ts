@@ -125,11 +125,13 @@ export default class BaseFunction extends Creep {
     }
 
     /** 根据给定配置boost, 返回OK表示完成 */
-    Boost(BOOST: any) {
-        let bodypast = {}   // 需要强化的部件数量
+    Boost(BOOST: { [part: string]: string }) {
+        let bodypast = {}   // 需要强化的部件及其数量
         const done = this.body.every(part => {
             if (!BOOST[part.type]) return true;
-            if (part.boost) return true;
+            if (part.boost) {
+                return true;
+            }
             if (!bodypast[part.type]) {
                 bodypast[part.type] = 1;
             } else {

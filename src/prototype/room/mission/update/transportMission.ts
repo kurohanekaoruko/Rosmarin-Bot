@@ -119,6 +119,9 @@ function UpdateEnergyMission(room: Room) {
         }
     }
 
+    // 能量缺少时不填充以下的
+    if(room.getResAmount(RESOURCE_ENERGY) < 100000) return;
+
     // 检查nuker是否需要填充能量
     if(Game.time % 20 === 0 && room.level == 8 && room.nuker) {
         const nuker = room.nuker;

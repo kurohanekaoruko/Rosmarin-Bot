@@ -189,13 +189,14 @@ function AutoDealSell(roomName: string, item: any) {
     const terminal = room.terminal;
     if (!terminal || terminal.cooldown > 0) return;
     const terminalAmount = terminal.store[resourceType] || 0;
-    const storageAmount = room.storage ? (room.storage.store[resourceType] || 0) : 0;
+    const storageAmount = room.storage?.store[resourceType] || 0;
     const totalAmount = terminalAmount + storageAmount;
     
     if (totalAmount <= amount) return;
 
     // 计算需要出售的数量
     const sellAmount = Math.min(totalAmount - amount, terminalAmount);
+
     if (sellAmount <= 5000) return;
 
     AutoDeal(room.name, resourceType, sellAmount, ORDER_BUY, 10, price);
@@ -288,7 +289,8 @@ function AutoDeal(roomName: string, res: ResourceConstant, amount: number, order
     }
 
     if (!bestOrder) return;
-    if (TotalPrice >= Game.market.credits) return;
+
+    if (orderType == ORDER_SELL && TotalPrice >= Game.market.credits) return;
 
     if (res == RESOURCE_ENERGY &&
         TotalDealAmount < 5000) {

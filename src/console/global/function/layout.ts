@@ -455,7 +455,7 @@ const BuildStaticPlanner = function (roomName: string, layoutType: string) {
     let minX = 49, maxX = 0, minY = 49, maxY = 0;
     for (const s in data.buildings) {
         if (!layoutMemory[s]) layoutMemory[s] = [];
-        const poss = data.buildings[s].pos;
+        const poss = data.buildings[s];
         for (const pos of poss) {
             const x = pos.x - 25 + center.x;
             const y = pos.y - 25 + center.y;
@@ -578,7 +578,7 @@ const VisualStaticPlanner = function (roomName: string, layoutType: string) {
 
     let minX = 49, maxX = 0, minY = 49, maxY = 0;
     for (const s in data.buildings) {
-        const poss = data.buildings[s].pos;
+        const poss = data.buildings[s];
         for (const pos of poss) {
             const x = pos.x - 25 + center.x;
             const y = pos.y - 25 + center.y;

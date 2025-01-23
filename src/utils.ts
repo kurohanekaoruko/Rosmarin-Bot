@@ -62,7 +62,3 @@ export function getDirection(fromPos, toPos) {
         }
     }
 }
-
-export function genSortNumber() {
-    return (Game.time*36*36 + Math.floor(Math.random()*36*36)).toString(36).slice(-4).toUpperCase();
-}

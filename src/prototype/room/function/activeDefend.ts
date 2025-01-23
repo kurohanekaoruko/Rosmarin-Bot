@@ -1,13 +1,14 @@
 export default class ActiveDefend extends Room {
     activeDefend() {
-        // 如果处于安全模式，则不进行主动防御
+        // 如果处于安全模式，则不进行后续处理
         if (this.controller.safeMode) return;
 
         // 处于防御时, 关键建筑如果受到损坏, 激活安全模式
         if (this.memory.defend) {
             let STRUCTURE = [this.storage, this.terminal, ...this.spawn].filter(s => s);
             if (this.controller.safeModeAvailable > 0 &&
-                this.controller.safeModeCooldown == 0 &&
+                !this.controller.safeModeCooldown &&
+                !this.controller.upgradeBlocked &&
                 STRUCTURE.some(s => s.hits < s.hitsMax * 0.7)) {
                 this.controller.activateSafeMode();
                 return;
@@ -26,8 +27,7 @@ export default class ActiveDefend extends Room {
                 hostile.owner.username != 'Invader' &&
                 (hostile.getActiveBodyparts(ATTACK) > 0 || 
                 hostile.getActiveBodyparts(RANGED_ATTACK) > 0 ||
-                hostile.getActiveBodyparts(HEAL) > 0 ||
-                hostile.getActiveBodyparts(WORK) > 0)
+                hostile.getActiveBodyparts(HEAL) > 0)
         }) as any;
         let power_hostiles = this.find(FIND_HOSTILE_POWER_CREEPS,{
             filter: hostile => !Memory['whitelist'].includes(hostile.owner.username)

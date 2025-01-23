@@ -29,8 +29,6 @@ export const createBot = () => {
 
     const mount = (func: () => void) => {
         func();
-        if (Game.shard.name == 'sim') return;
-        console.log(`原型拓展已挂载。`)
     }
 
     const on = (callbacks: any) => {
