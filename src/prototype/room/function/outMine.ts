@@ -1,16 +1,11 @@
 import { decompress } from '@/utils';
-
-// 过道观察间隔
-const LookInterval = 10;
-// 沉积物最大冷却
-const DepositMaxCooldown = 100;
-// 最小power数量限制
-const PowerMinAmount = 0;
+import { BaseConfig } from '@/constant/config';
 
 
 /** 外矿采集模块 */
 export default class OutMine extends Room {
     outMine() {
+        if (this.memory.defend) return;
         this.EnergyMine();
         this.CenterMine();
         this.LookHighWay();
@@ -88,12 +83,7 @@ export default class OutMine extends Room {
             // 外矿加速搬运策略 OutSpeedCarryTactics
             if (Game.flags[`${this.name}/OSCT`]) {
                 let num = sourceNum;
-                if (this.level <= 6) {
-                    num *= 3;
-                } else {
-                    num *= 4;
-                }
-                outCarry2Spawn(this, targetRoom, num);
+                outCarry2Spawn(this, targetRoom, num * 4);
             } else {
                 outCarrySpawn(this, targetRoom, sourceNum);
             }
@@ -169,20 +159,22 @@ export default class OutMine extends Room {
 
     // 观察过道
     LookHighWay() {
+        // 能量储备不足时不添加过道采集任务
+        if (this[RESOURCE_ENERGY] < 50000) return;
         const outminePower = Memory['RoomControlData'][this.name]['outminePower'];
         const outmineDeposit = Memory['RoomControlData'][this.name]['outmineDeposit'];
         // 没开启自动挖就不找
         if (!outminePower && !outmineDeposit) return;
 
-        if (Game.time % LookInterval > 1) return;
+        if (Game.time % BaseConfig.LookInterval > 1) return;
         // 监控列表
         let lookList = Memory['OutMineData'][this.name]?.['highway'] || [];
         if (lookList.length == 0) return;
         // 观察
-        if (Game.time % LookInterval == 0) {
+        if (Game.time % BaseConfig.LookInterval == 0) {
             if (!this.observer) return;
             // 观察编号
-            let lookIndex = Math.floor(Game.time / LookInterval) % lookList.length;
+            let lookIndex = Math.floor(Game.time / BaseConfig.LookInterval) % lookList.length;
             const roomName = lookList[lookIndex];
             // 没有视野才看
             if (!Game.rooms[roomName]) {
@@ -230,7 +222,7 @@ export default class OutMine extends Room {
     }
 
     PowerMine() {
-        if (Game.time % LookInterval != 1) return;
+        if (Game.time % BaseConfig.LookInterval != 1) return;
         const powerMines = this.memory['powerMine'];
         if (!powerMines || Object.keys(powerMines).length == 0) return;
 
@@ -346,7 +338,7 @@ export default class OutMine extends Room {
     }
 
     DepositMine() {
-        if (Game.time % LookInterval != 1) return;
+        if (Game.time % BaseConfig.LookInterval != 1) return;
         const depositMines = this.memory['depositMine'];
         if (!depositMines || Object.keys(depositMines).length == 0) return;
 
@@ -361,7 +353,7 @@ export default class OutMine extends Room {
                 continue;
             }
             let room = Game.rooms[targetRoom];
-            if (room && Game.time % (LookInterval * 5) == 1) {
+            if (room && Game.time % (BaseConfig.LookInterval * 5) == 1) {
                 D_num = DepositCheck(room);
                 if (D_num > 0) {
                     mineData.num = D_num;
@@ -623,7 +615,7 @@ const PowerBankCheck = function (room: Room) {
         filter: (s) => (s.hits >= s.hitsMax && s.structureType === STRUCTURE_POWER_BANK)
     })[0] as StructurePowerBank;
 
-    if (!powerBank || powerBank.power < PowerMinAmount) return 0;
+    if (!powerBank || powerBank.power < BaseConfig.PowerMinAmount) return 0;
     if (powerBank.hits < powerBank.hitsMax) return 0;
 
     const pos = powerBank.pos;
@@ -654,7 +646,7 @@ const DepositCheck = function (room: Room) {
     let D_num = 0;
 
     for (const deposit of deposits) {
-        if (deposit.lastCooldown >= DepositMaxCooldown) {
+        if (deposit.lastCooldown >= BaseConfig.DepositMaxCooldown) {
             continue;
         }
         const pos = deposit.pos;
@@ -726,16 +718,16 @@ const PowerMineMissionData = function (room: Room, P_num: number, power: number)
             prMax: 6,
         }
     }
-    // 一队T0 + 7个ranged
-    else if (power >= 6500) {
-        data = {
-            creep: 1,
-            max: 2,
-            boostLevel: 0,
-            prNum: 7,
-            prMax: 10,
-        }
-    }
+    // // 一队T0 + 7个ranged
+    // else if (power >= 6500) {
+    //     data = {
+    //         creep: 1,
+    //         max: 2,
+    //         boostLevel: 0,
+    //         prNum: 7,
+    //         prMax: 10,
+    //     }
+    // }
     // 三队T0, 2个位置以下时补充4个ranged
     else {
         data = {

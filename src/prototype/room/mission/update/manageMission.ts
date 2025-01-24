@@ -49,7 +49,8 @@ function CheckTerminalResAmount(room: Room) {
         else if (sendTotal[resourceType]) {
             amount = Math.min(
                 room.storage.store[resourceType],
-                sendTotal[resourceType] - room.terminal.store[resourceType]
+                sendTotal[resourceType] - room.terminal.store[resourceType],
+                10000 - room.terminal.store[resourceType]
             )
         } else {
             if (TerminalClearFlag) break;

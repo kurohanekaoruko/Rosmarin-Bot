@@ -31,7 +31,7 @@ export default class MissionAdd extends Room {
                 {data:{source, target, resourceType, amount} as ManageTask});
         } else {
             // 如果不存在相同任务，添加新任务
-            return this.addMissionToPool('manage', 0, 
+            return this.addMissionToPool('manage', 'manage', 0, 
                 {source, target, resourceType, amount} as ManageTask);
         }
     }
@@ -49,7 +49,7 @@ export default class MissionAdd extends Room {
                 {data:{targetRoom, resourceType, amount} as SendTask});
         } else {
             // 如果不存在相同任务，添加新任务
-            return this.addMissionToPool('send', 0, 
+            return this.addMissionToPool('send', 'send', 0, 
                 {targetRoom, resourceType, amount} as SendTask);
         }
     }
@@ -63,7 +63,7 @@ export default class MissionAdd extends Room {
             return this.updateMissionPool(type, existingTaskId, {level, data});
         } else {
             // 如果不存在相同任务，添加新任务
-            return this.addMissionToPool(type, level, data);
+            return this.addMissionToPool(type, type, level, data);
         }
     }
 
@@ -77,7 +77,7 @@ export default class MissionAdd extends Room {
             return this.updateMissionPool('transport', existingTaskId, {level, data});
         } else {
             // 如果不存在相同任务，添加新任务
-            return this.addMissionToPool('transport', level, data);
+            return this.addMissionToPool('transport', 'transport', level, data);
         }
     }
 
@@ -96,10 +96,10 @@ export default class MissionAdd extends Room {
         if(!memory) memory = {} as CreepMemory;
         memory.role = role;
         if (upbody === undefined) {
-            this.addMissionToPool('spawn', level, {name, body, memory, energy})
+            this.addMissionToPool('spawn', 'spawn', level, {name, body, memory, energy})
         } else {
             upbody = upbody || false;
-            this.addMissionToPool('spawn', level, {name, body, memory, energy, upbody})
+            this.addMissionToPool('spawn', 'spawn', level, {name, body, memory, energy, upbody})
         }
         if (!global.SpawnMissionNum) global.SpawnMissionNum = {};
         if (!global.SpawnMissionNum[this.name]) global.SpawnMissionNum[this.name] = {};

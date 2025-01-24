@@ -8,6 +8,7 @@ let init = () => {
     if(!Memory['AutoData']['AutoMarketData']) Memory['AutoData']['AutoMarketData'] = {};
     if(!Memory['AutoData']['AutoLabData']) Memory['AutoData']['AutoLabData'] = {};
     if(!Memory['AutoData']['AutoFactoryData']) Memory['AutoData']['AutoFactoryData'] = {};
+    if(!Memory['AutoData']['AutoPowerData']) Memory['AutoData']['AutoPowerData'] = {};
     if(!Memory['ResourceManage']) Memory['ResourceManage'] = {};
     if(!Memory['MissionPools']) Memory['MissionPools'] = {};
 }

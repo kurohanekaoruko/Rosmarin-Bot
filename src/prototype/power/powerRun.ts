@@ -10,13 +10,13 @@ export default class PowerCreepRun extends PowerCreep {
         const flag = Game.flags[`${name}-move`];
         if (flag && !this.pos.inRangeTo(flag, 0)) {
             this.Generate_OPS();
-            this.moveTo(Game.flags[`${name}-move`], {visualizePathStyle: {stroke: '#ff0000'}});
+            this.moveTo(Game.flags[`${name}-move`], {visualizePathStyle: {stroke: '#ff0000'}, plainCost: 1, swampCost: 1});
             return;
         }
         // 移动到工作房间
         const flagHome = Game.flags[`${name}-home`];
         if (flagHome && (this.room.name != flagHome.pos.roomName || this.pos.isRoomEdge())) {
-            this.moveTo(flagHome, {visualizePathStyle: {stroke: '#ff0000'}});
+            this.moveTo(flagHome, {visualizePathStyle: {stroke: '#ff0000'}, plainCost: 1, swampCost: 1});
             return;
         }
 
@@ -38,7 +38,7 @@ export default class PowerCreepRun extends PowerCreep {
         const idleFlag = Game.flags[`${name}-idle`];
         if (idleFlag && !this.pos.isEqual(idleFlag.pos) &&
             this.pos.roomName == idleFlag.pos.roomName) {
-            this.moveTo(idleFlag, {visualizePathStyle: {stroke: '#ff0000'}});
+            this.moveTo(idleFlag, {visualizePathStyle: {stroke: '#ff0000'}, plainCost: 1, swampCost: 1});
         }
     }
 }

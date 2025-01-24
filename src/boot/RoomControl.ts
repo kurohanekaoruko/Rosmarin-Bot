@@ -26,6 +26,7 @@ export const roomControl = function (room: Room) {
     room.autoBuild();        // 自动建筑
     room.autoLab();          // 自动Lab合成
     room.autoFactory();      // 自动Factory生产
+    room.autoPower();        // 自动Power处理
     room.outMine();          // 外矿采集
-
+    
 }

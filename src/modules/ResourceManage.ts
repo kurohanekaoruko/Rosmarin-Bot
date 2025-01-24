@@ -87,8 +87,8 @@ export const ResourceManage = {
                 // 不发送非正数
                 if (sendAmount <= 0) {
                     i++; continue;
-                } else if (Goods.includes(res as any) && sendAmount < 10) {
-                    i++; continue;
+                } else if (Goods.includes(res as any)) {
+                    if (sendAmount < 10) { i++; continue; }
                 } else if (res != RESOURCE_ENERGY && sendAmount < 1000) {
                     i++; continue;
                 } else if (res == RESOURCE_ENERGY && sendAmount < 10000) {

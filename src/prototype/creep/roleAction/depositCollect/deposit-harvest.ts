@@ -1,3 +1,5 @@
+import { BaseConfig } from '@/constant/config';
+
 const deposit_harvest = {
     source: function(creep: Creep) {
         if (creep.room.name != creep.memory.targetRoom || creep.pos.isRoomEdge()) {
@@ -10,7 +12,7 @@ const deposit_harvest = {
         if (!creep.memory['targetDeposit']) {
             let deposits = creep.room.find(FIND_DEPOSITS);
             // 筛选
-            let activeDeposits = deposits.filter(d => d.lastCooldown <= 120);
+            let activeDeposits = deposits.filter(d => d.lastCooldown <= BaseConfig.DepositMaxCooldown);
             if (activeDeposits.length > 0) {
                 deposits = activeDeposits;
             }
@@ -43,7 +45,7 @@ const deposit_harvest = {
                 if (creepCount >= 3) return;
                 return true;
             });
-
+            if (!deposit) return;
             creep.memory['targetDeposit'] = deposit.id;
         }
 

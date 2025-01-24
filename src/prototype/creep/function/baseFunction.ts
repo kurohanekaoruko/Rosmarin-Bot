@@ -5,13 +5,13 @@ export default class BaseFunction extends Creep {
     /**
      * 获取能量
      */
-    withdrawEnergy(pickup: boolean = true) {   // builder、upgrader、repairer 的能量获取
+    withdrawEnergy(pickup: boolean = true) {   // worker、upgrader 的能量获取
         const updateTakeTarget = () => {
             if (this.memory.cache.takeTarget) return false;
 
-            const target = (pickup ? findDroppedResourceTarget(500) : null) ||
-                           findStructureTarget() ||
-                           findRuinTarget();
+            const target = (pickup ? findDroppedResourceTarget(1000) : null) ||
+                            findRuinTarget() ||
+                            findStructureTarget();
 
             if (target) {
                 this.memory.cache.takeTarget = target;

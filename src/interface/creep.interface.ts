@@ -3,6 +3,8 @@ interface Creep {
     init(): void;
     /** 运行 */
     run(): void;
+    /** 爬说话 */
+    randomSay(): void;
 
     moveHomeRoom(): boolean;
     moveToRoom(roomName: string, options?:{[key: string]: any}): any;

@@ -212,7 +212,7 @@ const showRoomInfo = function (roomName: string) {
             const labAtype = structMem['labAtype'];
             const labBtype = structMem['labBtype'];
             const product = REACTIONS[labAtype][labBtype];
-            str += `<td> ${colorText(`${labAtype}/${labBtype}->${product}`, '#62BE78')} </td>`
+            str += `<td> ${colorText(`合成中(${labAtype}/${labBtype}->${product})`, '#62BE78')} </td>`
         }
     } else {
         str += `<td>${colorText('未建造', '#8E8E8E')}</td>`;
@@ -226,7 +226,7 @@ const showRoomInfo = function (roomName: string) {
         } else {
             const product = structMem['factoryProduct'];
             const components = COMMODITIES[product]?.components;
-            str += `<td> ${colorText(`${product}`, '#62BE78')} </td>`;
+            str += `<td> ${colorText(`生产中(${product})`, '#62BE78')} </td>`;
         }
     } else {
         str += `<td>${colorText('未建造', '#8E8E8E')}</td>`;
@@ -246,7 +246,7 @@ const showRoomInfo = function (roomName: string) {
             room.powerSpawn.store[RESOURCE_POWER] < 1) {
             str += `<td>${colorText('资源不足', '#D9C07B')}</td>`;
         } else {
-            str += `<td>${colorText(`${speed}速工作中`, '#62BE78')}</td>`;
+            str += `<td>${colorText(`工作中(${speed}速)`, '#62BE78')}</td>`;
         }
     } else {
         str += `<td>${colorText('未建造', '#8E8E8E')}</td>`;
@@ -254,7 +254,7 @@ const showRoomInfo = function (roomName: string) {
 
     if (room.nuker) {
         if (room.nuker.cooldown) {
-            str += `<td> ${colorText('冷却中', '#D9C07B')} </td>`;
+            str += `<td> ${colorText(`冷却中(${room.nuker.cooldown})`, '#D9C07B')} </td>`;
         } else if (room.nuker.store['energy'] < 300e3 || room.nuker.store['G'] < 5000) {
             str += `<td> ${colorText('资源不足', '#D9C07B')} </td>`;
         } else {

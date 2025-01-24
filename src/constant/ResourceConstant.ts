@@ -88,7 +88,7 @@ export const LabMap = {
 
 export const LabRes = ['H', 'O', 'Z', 'K', 'L', 'U', 'X']
 
-// lab合成自动优先级
+// lab合成优先级
 export const LabLevel = {
     'ZK': 1,
     'UL': 1,

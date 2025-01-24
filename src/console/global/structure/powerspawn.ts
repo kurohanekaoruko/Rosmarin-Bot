@@ -49,6 +49,33 @@ export default {
             pc.memory['spawnRoom'] = roomName;
             global.log(`已设置 PowerCreep 【${pcname}】 的孵化房间为 ${roomName}`);
             return OK;
+        },
+        auto: {
+            set(roomName: string, energy: number, power: number) {
+                const room = Game.rooms[roomName];
+                if (!room || !room.my) {
+                    return Error(`房间 ${roomName} 不存在、未拥有或未添加。`);
+                }
+                const BotMem =  Memory['AutoData']['AutoPowerData'];
+                if(!BotMem[roomName]) BotMem[roomName] = {};
+
+                BotMem[roomName]['energy'] = energy;
+                BotMem[roomName]['power'] = power;
+                global.log(`已设置${roomName}的自动烧power的阈值为 ${energy} Energy 和 ${power} Power。`);
+                return OK;
+            },
+            remove(roomName: string) {
+                const room = Game.rooms[roomName];
+                if (!room || !room.my) {
+                    return Error(`房间 ${roomName} 不存在、未拥有或未添加。`);
+                }
+                const BotMem = Memory['AutoData']['AutoPowerData'];
+                if(!BotMem[roomName]) return;
+
+                delete BotMem[roomName];
+                global.log(`已移除${roomName}的自动烧power的阈值。`);
+                return OK;
+            }
         }
     }
 }

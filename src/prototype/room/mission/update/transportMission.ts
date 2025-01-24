@@ -214,6 +214,8 @@ function UpdateLabMission(room: Room) {
     
     const labA = Game.getObjectById(BotMemStructures.labA) as StructureLab;
     const labB = Game.getObjectById(BotMemStructures.labB) as StructureLab;
+    if (!labA || !labB) return; // 没有labA或labB时跳过
+
     const labAtype = BotMemStructures.labAtype;
     const labBtype = BotMemStructures.labBtype;
 

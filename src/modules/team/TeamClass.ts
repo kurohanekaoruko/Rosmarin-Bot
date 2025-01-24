@@ -138,14 +138,14 @@ export default class Team {
         if (this.checkIsQuad()) return OK;
         let { A1, A2, B1, B2 } = this.members;
         if (A1) {
-            if(A2) A2.moveTo(new RoomPosition(A1.pos.x + 1, A1.pos.y, A1.pos.roomName));
-            if(B1) B1.moveTo(new RoomPosition(A1.pos.x, A1.pos.y + 1, A1.pos.roomName));
-            if(B2) B2.moveTo(new RoomPosition(A1.pos.x + 1, A1.pos.y + 1, A1.pos.roomName));
-        } else if(A2) {
-            if(B1) B1.moveTo(new RoomPosition(A2.pos.x - 1, A2.pos.y + 1, A2.pos.roomName));
-            if(B2) B2.moveTo(new RoomPosition(A2.pos.x, A2.pos.y + 1, A2.pos.roomName));
-        } else if(B1) {
-            if(B2) B2.moveTo(new RoomPosition(B1.pos.x + 1, B1.pos.y, B1.pos.roomName));
+            if (A2) A2.moveTo(new RoomPosition(A1.pos.x + 1, A1.pos.y, A1.pos.roomName));
+            if (B1) B1.moveTo(new RoomPosition(A1.pos.x, A1.pos.y + 1, A1.pos.roomName));
+            if (B2) B2.moveTo(new RoomPosition(A1.pos.x + 1, A1.pos.y + 1, A1.pos.roomName));
+        } else if (A2) {
+            if (B1) B1.moveTo(new RoomPosition(A2.pos.x - 1, A2.pos.y + 1, A2.pos.roomName));
+            if (B2) B2.moveTo(new RoomPosition(A2.pos.x, A2.pos.y + 1, A2.pos.roomName));
+        } else if (B1) {
+            if (B2) B2.moveTo(new RoomPosition(B1.pos.x + 1, B1.pos.y, B1.pos.roomName));
         } else {
             return OK;
         }
@@ -169,7 +169,7 @@ export default class Team {
         }
     }
 
-    // 线性队形移动
+    // 线性队形移动到目标
     LineMoveTo(pos: RoomPosition) {
         const creeps = this.members.arr;
         if (creeps.length == 0) return;
@@ -188,17 +188,17 @@ export default class Team {
             creeps[0].pos.isNearTo(creeps[1])) {
             creeps[0].moveTo(pos);
         }
-        for(let i = 1; i < creeps.length; i++) {
+        for (let i = 1; i < creeps.length; i++) {
             if (i < creeps.length - 1 &&
                 !creeps[i].pos.isRoomEdge() &&
-                !creeps[i].pos.isNearTo(creeps[i+1])
+                !creeps[i].pos.isNearTo(creeps[i + 1])
             ) continue;
-            
-            if(creeps[i].pos.isNear(creeps[i-1].pos)) {
-                creeps[i-1].pull(creeps[i]);
-                creeps[i].move(creeps[i-1]);
+
+            if (creeps[i].pos.isNear(creeps[i - 1].pos)) {
+                creeps[i - 1].pull(creeps[i]);
+                creeps[i].move(creeps[i - 1]);
             } else {
-                creeps[i].moveTo(creeps[i-1]);
+                creeps[i].moveTo(creeps[i - 1]);
             }
         }
     }
@@ -214,9 +214,9 @@ export default class Team {
 
 
 
-    
-    
 
-    
+
+
+
 
 }

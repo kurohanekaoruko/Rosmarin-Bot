@@ -107,27 +107,48 @@ export default {
             }
         },
         // 将房间建筑加入布局memory
-        save(roomName: string) {
+        save(roomName: string, struct?: string) {
             const BotMemRooms = Memory['RoomControlData'];
             if (!BotMemRooms[roomName]) {
                 return Error(`房间 ${roomName} 未添加到控制列表。`);
             }
-            let layoutMemory = Memory['LayoutData'][roomName];
-            if (layoutMemory && Object.keys(layoutMemory).length) {
-                return Error(`房间 ${roomName} 的布局memory已存在，请先使用 layout.remove(roomName) 清除。`);
-            }
-            Memory['LayoutData'][roomName] = {};
-            layoutMemory = Memory['LayoutData'][roomName];
-            const room = Game.rooms[roomName];
-            const structList = ['spawn', 'extension', 'link', 'tower', 'road', 'storage', 'terminal', 'factory', 'lab',
-                'nuker', 'observer', 'powerSpawn', 'container', 'extractor'];
-            for (const s of structList) {
+            if (!struct) {
+                let layoutMemory = Memory['LayoutData'][roomName];
+                if (layoutMemory && Object.keys(layoutMemory).length) {
+                    return Error(`房间 ${roomName} 的布局memory已存在，请先使用 layout.remove(roomName) 清除。`);
+                }
+                Memory['LayoutData'][roomName] = {};
+                layoutMemory = Memory['LayoutData'][roomName];
+                const room = Game.rooms[roomName];
+                const structList = ['spawn', 'extension', 'link', 'tower', 'road', 'storage', 'terminal', 'factory', 'lab',
+                    'nuker', 'observer', 'powerSpawn', 'container', 'extractor'];
+                for (const s of structList) {
+                    const PosList = [];
+                    const structs = room[s];
+                    for (const struct of structs) {
+                        PosList.push(compress(struct.pos.x, struct.pos.y));
+                    }
+                    layoutMemory[s] = PosList;
+                }
+            } else {
+                let layoutMemory = Memory['LayoutData'][roomName];
+                if (!layoutMemory) {
+                    Memory['LayoutData'][roomName] = {};
+                    layoutMemory = Memory['LayoutData'][roomName];
+                }
+                const structList = ['spawn', 'extension', 'link', 'tower', 'road', 'storage', 'terminal', 'factory', 'lab',
+                    'nuker', 'observer', 'powerSpawn', 'container', 'extractor', 'rampart', 'constructedWall'];
+                if (!structList.includes(struct)) {
+                    return Error(`不支持的struct类型 ${struct}。`);
+                }
+                const room = Game.rooms[roomName];
                 const PosList = [];
-                const structs = room.find(FIND_STRUCTURES, { filter: (stru) => stru.structureType == s });
+                const structs = room[struct];
                 for (const struct of structs) {
                     PosList.push(compress(struct.pos.x, struct.pos.y));
                 }
-                layoutMemory[s] = PosList;
+                layoutMemory[struct] = PosList;
+                console.log(`房间 ${roomName} 的 ${struct} 布局已更新。`);
             }
             return OK;
         },

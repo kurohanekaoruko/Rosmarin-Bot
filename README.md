@@ -1,4 +1,4 @@
-# Rosmarinus-Bot
+# Rosmarin-Bot / 迷迭香Bot
 
 ![language-typescript](https://img.shields.io/badge/language-typescript-3178c6)
 

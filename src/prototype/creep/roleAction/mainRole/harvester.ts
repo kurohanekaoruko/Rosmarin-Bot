@@ -62,6 +62,12 @@ const HarvesterAction = {
             this.switch(creep);
             return;
         }
+
+        const sourceContainer = creep.room.container.find(c => c.pos.inRangeTo(targetSource, 1));
+        if (sourceContainer && !creep.pos.isEqualTo(sourceContainer)) {
+            creep.moveTo(sourceContainer);
+            return;
+        }
         let result = creep.goHaverst(targetSource);
         if (!result) return;
         if (creep.store.getCapacity() == 0) return;

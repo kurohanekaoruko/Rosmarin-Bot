@@ -51,7 +51,7 @@ const harvest = function (creep: Creep) {
         }
     }
     // 如果terminal能量大于storage，则从terminal中取出能量
-    else if (st && storage && terminal && terminal.store[RESOURCE_ENERGY] > storage.store[RESOURCE_ENERGY]) {
+    else if (!st && storage && terminal && terminal.store[RESOURCE_ENERGY] > storage.store[RESOURCE_ENERGY]) {
         if (creep.withdraw(terminal, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
             creep.moveTo(terminal, { maxRooms: 1, range: 1});
         }
@@ -74,21 +74,14 @@ const transfer = function (creep) {
 
         const targets = [];
 
-        // 如果终端无能量, 优先填充
-        if (creep.room.terminal && creep.room.terminal.store[RESOURCE_ENERGY] < 3000 &&
-            creep.room.terminal.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-            targets.push(creep.room.terminal);
-        }
-
         // 查找未满的 spawn 和 extension
-        if(targets.length === 0) {
-            const spawnExtensions = (creep.room.spawn?.concat(creep.room.extension) ?? []).filter(o => o);
-            for (const spawnExtension of spawnExtensions) {
-                if (spawnExtension.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-                    targets.push(spawnExtension);
-                }
+        const spawnExtensions = (creep.room.spawn?.concat(creep.room.extension) ?? []).filter(o => o);
+        for (const spawnExtension of spawnExtensions) {
+            if (spawnExtension.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+                targets.push(spawnExtension);
             }
         }
+        
 
         // 找tower
         if(targets.length === 0) {

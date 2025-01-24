@@ -23,7 +23,7 @@ import TeamModule from '@/modules/team/TeamModule';
 
 import '@/modules/wheel/betterMove';    // 超级移动优化
 import '@/modules/wheel/structureCache';  // 极致建筑缓存
-import '@/modules/wheel/helper_roomResource'; // 资源统计
+import '@/modules/wheel/roomResource'; // 资源统计
 
 
 const Bot = createBot();

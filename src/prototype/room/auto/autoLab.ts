@@ -14,6 +14,7 @@ export default class AutoLab extends Room {
 
         const labA = Game.getObjectById(botmem.labA) as StructureLab;
         const labB = Game.getObjectById(botmem.labB) as StructureLab;
+        if (!labA || !labB) return;
         // 检查库存是否够合成
         const ResAmountCheck = (this.getResAmount(botmem.labAtype) >= 1000 &&
                                 this.getResAmount(botmem.labBtype) >= 1000)

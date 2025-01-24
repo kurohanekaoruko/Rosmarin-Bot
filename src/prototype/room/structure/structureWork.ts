@@ -135,13 +135,14 @@ export default class StructureWork extends Room {
                   font: '0.24 inter' }
             )
         })
+
         // 每 5 tick 执行一次
         if (Game.time % 5 !== 1) return;
         // lab数量不足时不合成
         if (!this.lab || this.lab.length < 3) return;
 
-        const memory =  Memory['StructControlData'][this.name];
         // lab关停时不合成
+        const memory =  Memory['StructControlData'][this.name];
         if (!memory || !memory.lab || this.memory.defend) return;
         // 没有设置底物lab时不合成
         if (!memory.labA || !memory.labB) return;
@@ -154,7 +155,11 @@ export default class StructureWork extends Room {
         let labA = Game.getObjectById(memory.labA) as StructureLab;
         let labB = Game.getObjectById(memory.labB) as StructureLab;
         // 底物lab不存在时不合成
-        if (!labA || !labB) return;
+        if (!labA || !labB) {
+            memory.labA = undefined;
+            memory.labB = undefined;
+            return;
+        }
         // 检查labA和labB是否有足够的资源
         if (labA.store[labAtype] < 5 || labB.store[labBtype] < 5) {
             return;
@@ -163,19 +168,19 @@ export default class StructureWork extends Room {
         let otherLabs = this.lab
             .filter(lab => lab.id !== memory.labA && lab.id !== memory.labB &&
                     lab && lab.cooldown === 0);
+        // 没有可用的lab时不合成
         if (!otherLabs || otherLabs.length === 0) return;
         // boost设置
         const boostmem = Memory['StructControlData'][this.name]['boostRes'];
-        const boostmem2 = Memory['StructControlData'][this.name]['boostTypes']
+        const boostmem2 = Memory['StructControlData'][this.name]['boostTypes'];
+
+        // 合成产物
+        const labProduct = REACTIONS[labAtype][labBtype] as ResourceConstant;
         // 遍历其他lab进行合成
         for (let lab of otherLabs) {
-            // 合成产物
-            const labProduct = REACTIONS[labAtype][labBtype] as ResourceConstant;
-            // 如果有boost并且boost类型与合成产物不同，则跳过
-            if (boostmem && boostmem[lab.id] &&
-                boostmem[lab.id].type != labProduct) continue;
-            if (boostmem2 && boostmem2[lab.id] &&
-                boostmem2[lab.id].type != labProduct) continue;
+            // 如果有boost设置，则跳过
+            if (boostmem && boostmem[lab.id]) continue;
+            if (boostmem2 && boostmem2[lab.id]) continue;
             // 检查lab中是否存在与合成产物不同的资源
             if (lab.mineralType &&
                 lab.mineralType !== labProduct) {

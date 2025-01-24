@@ -12,16 +12,16 @@ const MineralAction = {
         }
 
         // 移动到矿物存储桶
-        const mineralContainer = creep.room.container.find(c => c.pos.inRangeTo(creep.room.mineral, 2)) || null;
+        const mineralContainer = creep.room.container.find(c => c.pos.inRangeTo(creep.room.mineral, 1)) || null;
         if (mineralContainer && !creep.pos.isEqualTo(mineralContainer)) {
-            creep.moveTo(mineralContainer, { visualizePathStyle: { stroke: '#ffaa00' } });
+            creep.moveTo(mineralContainer, { maxRooms: 1, range: 0 });
         } else {
             // 如果矿物未枯竭，则开始采集
             if (mineral.mineralAmount > 0) {
                 if (creep.pos.isNearTo(mineral)) {
                     creep.harvest(mineral);
                 } else {
-                    creep.moveTo(mineral, { visualizePathStyle: { stroke: '#ffaa00' } });
+                    creep.moveTo(mineral, { maxRooms: 1, range: 1 });
                 }
             } else {
                 creep.say('矿物枯竭');
@@ -35,7 +35,7 @@ const MineralAction = {
     target: function (creep: Creep) {
         // 如果没有缓存存储目标，则寻找存储目标
         if (!creep.memory.cache.targetId) {
-            const mineralContainer = creep.room.container.find(c => c.pos.inRangeTo(creep.room.mineral, 2)) || null;
+            const mineralContainer = creep.room.container.find(c => c.pos.inRangeTo(creep.room.mineral, 1)) || null;
             if(!mineralContainer &&
                 creep.pos.inRange(creep.room.mineral.pos, 1) &&
                 creep.pos.findInRange(FIND_CONSTRUCTION_SITES, 2)

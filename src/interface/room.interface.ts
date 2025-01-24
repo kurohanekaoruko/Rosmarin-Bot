@@ -114,6 +114,8 @@ interface Room {
     autoLab(): void;
     // 自动工厂生产
     autoFactory(): void;
+    // 自动powerSpawn
+    autoPower(): void;
     // 外矿采集模块
     outMine(): void;
 }

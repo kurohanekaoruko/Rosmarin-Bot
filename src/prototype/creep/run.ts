@@ -1,4 +1,5 @@
 import { RoleData } from '@/constant/CreepConstant';
+import { sayConstant } from '@/constant/sayConstant';
 
 export default class CreepRun extends Creep {
     run() {
@@ -31,5 +32,32 @@ export default class CreepRun extends Creep {
             roledata.action.run(this);
         }
         else return;
+    }
+    randomSay() {
+        if (this.memory.sayText && this.memory.sayText.length > 0) {
+            const text = this.memory.sayText.shift();
+            if(text) this.say(text, true);
+            return;
+        }
+    
+        if (Math.random() > 0.007) return;
+        this.memory.sayText = [];
+    
+        let text = null;
+    
+        if (this.room.my) {
+            let index = Math.floor(Math.random() * sayConstant.length);
+            text = sayConstant[index];
+        }
+        
+        if(!text) return;
+        if(typeof text === "string") {
+            this.say(text, true);
+        } else {
+            text.forEach((t:string) => {
+                this.memory.sayText.push(t)
+            })
+            this.memory.sayText.push('');
+        }
     }
 }

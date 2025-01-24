@@ -2,6 +2,15 @@ import { compress } from '@/utils';
 
 const createSite = function(creep: any) {
     if (Game.rooms[creep.memory.homeRoom].controller.level < 4) return;
+
+    if (!creep.room.my && creep.fatigue > 0 &&
+        !(creep.room.memory.road?.includes(compress(creep.pos.x, creep.pos.y)))
+    ) {
+        // creep.room.memory.road?.push(compress(creep.pos.x, creep.pos.y));
+        creep.room.createConstructionSite(creep.pos, STRUCTURE_ROAD);
+    }
+
+
     if (creep.room.name !== creep.memory.targetRoom) return;
     if (!creep.pos.isRoomEdge()) return;
     if (creep.room.memory.road && creep.room.memory.road.length > 0) return;

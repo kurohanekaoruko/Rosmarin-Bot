@@ -48,7 +48,7 @@ export default {
             return result;
         },
         getPrice(type: any, orderType: any): any {
-            let finalPrice = 0.01;
+            let finalPrice = 0.011;
             const orders = Game.market.getAllOrders({type: orderType, resourceType: type});
             if (!orders || orders.length === 0) return finalPrice;
             orders.sort((a, b) => {

@@ -2,37 +2,37 @@ interface Room {
     // 任务池初始化
     initMissionPool(): OK | void;
     // 添加任务到任务池
-    addMissionToPool(type: Task["type"], level: Task["level"], data: Task["data"]): OK | void;
+    addMissionToPool(PoolName: string, type: Task["type"], level: Task["level"], data: Task["data"]): OK | void;
     // 获取任务池中的任务
-    getMissionFromPool(type: Task["type"], pos?: string, checkFunc?: (task: Task) => boolean): Task | null;
+    getMissionFromPool(PoolName: string, pos?: string, checkFunc?: (task: Task) => boolean): Task | null;
     // 获取任务池中的第一个任务
-    getMissionFromPoolFirst(type: Task["type"], checkFunc?: (task: Task) => boolean): Task | null;
+    getMissionFromPoolFirst(PoolName: string, checkFunc?: (task: Task) => boolean): Task | null;
     // 获取任务池中的随机一个任务
-    getMissionFromPoolRandom(type: Task["type"]): Task | null;
+    getMissionFromPoolRandom(PoolName: string): Task | null;
     // 获取任务池中的所有任务
-    getAllMissionFromPool(type: Task["type"]): Task[] | null;
+    getAllMissionFromPool(PoolName: string): Task[] | null;
     // 用id获取任务池中的任务
-    getMissionFromPoolById(type: Task["type"], id: Task["id"]): Task | null;
+    getMissionFromPoolById(PoolName: string, id: Task["id"]): Task | null;
     // 检查是否有相同任务
-    checkSameMissionInPool(type: Task["type"], data: Task["data"]): Task['id'] | null;
+    checkSameMissionInPool(PoolName: string, data: Task["data"]): Task['id'] | null;
     // 检查任务池中是否存在任务
     checkMissionInPool(PoolName: string): boolean;
     // 获取任务池中的任务数量
     getMissionNumInPool(PoolName: string): number;
     // 锁定任务池中的任务
-    lockMissionInPool(type: Task["type"], id: Task["id"], creepid: Id<Creep>): OK | void;
+    lockMissionInPool(PoolName: string, id: Task["id"], creepid: Id<Creep>): OK | void;
     // 解锁任务池中的任务
-    unlockMissionInPool(type: Task["type"], id: Task["id"]): OK | void;
+    unlockMissionInPool(PoolName: string, id: Task["id"]): OK | void;
     // 更新任务池中的任务
-    updateMissionPool(type: Task["type"], id: Task["id"], 
+    updateMissionPool(PoolName: string, id: Task["id"], 
         {level, data, lock}: 
         {level?: Task["level"], data?: Task["data"], lock?: Task["lock"]}): OK | void;
     // 删除任务池中的任务
-    deleteMissionFromPool(type: Task["type"], id: Task["id"]): OK | void;
+    deleteMissionFromPool(PoolName: string, id: Task["id"]): OK | void;
     // 检查任务池中的任务是否已完成、过期、失效
-    checkMissionPool(type: Task["type"], checkFunc: (t: Task) => boolean): OK | void;
+    checkMissionPool(PoolName: string, checkFunc: (t: Task) => boolean): OK | void;
     // 提交任务完成信息
-    submitMission(type: Task["type"], id: Task["id"], data: Task["data"], deleteFunc: (t: any) => boolean): OK | void;
+    submitMission(PoolName: string, id: Task["id"], data: Task["data"], deleteFunc: (t: any) => boolean): OK | void;
 
     // 添加中央搬运任务
     ManageMissionAdd(source: string, target: string, resourceType: any, amount: number): void;

@@ -62,3 +62,52 @@ export function getDirection(fromPos, toPos) {
         }
     }
 }
+
+// 计算合适的订单价格
+export function getPrice(type: any, orderType: any): any {
+    let finalPrice = 0.011;
+    const orders = Game.market.getAllOrders({type: orderType, resourceType: type});
+    if (!orders || orders.length === 0) return finalPrice;
+    orders.sort((a, b) => {
+        if (orderType === ORDER_BUY) {
+            return b.price - a.price; // 按价格从高到低排序
+        } else {
+            return a.price - b.price; // 按价格从低到高排序
+        }
+    });
+    let rooms = {}
+    let history = Game.market.getHistory(type);
+    let avgPrice = history[0].avgPrice;
+    let stddevPrice = history[0].stddevPrice;
+    // 取前十
+    const topOrders = orders.filter(order => {
+        // 初步过滤
+        if (orderType === ORDER_BUY && order.price < 1) return false;
+        if (type == 'energy' && order.amount < 10000) return false;
+        // if (order.price > (avgPrice + stddevPrice) * 2) return false;
+        // if (order.price < avgPrice * 0.5) return false;
+        if (rooms[order.roomName]) return false;
+        rooms[order.roomName] = true;
+        return true;
+    }).slice(0, 10);
+    // 计算这些订单的平均价格
+    const averagePrice = topOrders.reduce((sum, order) => sum + order.price, 0) / topOrders.length;
+    if (orderType === ORDER_BUY) {
+        // 过滤掉高于平均价格太多的订单
+        const filteredOrders = topOrders.filter(order => order.price <= averagePrice * 1.05);
+        if (filteredOrders.length > 0) {
+            // 选择过滤后的最高价格稍微降低一点作为求购价格
+            finalPrice = filteredOrders[0].price * 0.99;
+            return finalPrice;
+        }
+    } else if (orderType === ORDER_SELL) {
+        // 过滤掉低于平均价格太多的订单
+        const filteredOrders = topOrders.filter(order => order.price >= averagePrice * 0.95);
+        if (filteredOrders.length > 0) {
+            // 选择过滤后的最低价格稍微提高一点作为出售价格
+            finalPrice = filteredOrders[0].price + 0.1;
+            return finalPrice;
+        }
+    }
+    return finalPrice;
+}
