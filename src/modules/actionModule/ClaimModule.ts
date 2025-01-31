@@ -3,6 +3,7 @@ const ClaimModule = {
         if (Game.time % 10) return;
         for (const flagName in Game.flags) {
 
+            // 占领房间
             if (flagName.startsWith('CLAIM/')) {
                 // 孵化房间
                 const spawnRoom = flagName.match(/\/([EW][1-9]+[NS][1-9]+)/)?.[1];
@@ -21,6 +22,38 @@ const ClaimModule = {
                     } as any);
                 }
                 Game.flags[flagName].remove();
+                continue;
+            }
+
+            // 拆除房间
+            if (flagName.startsWith('CLEAN/')) {
+                // 孵化间隔
+                let spawnInterval = flagName.match(/\/T-(\d+)/)?.[1] as any;
+                if (!spawnInterval) spawnInterval = 500;
+                else spawnInterval = parseInt(spawnInterval);
+                const flagMemory = Game.flags[flagName].memory;
+                if ((Game.time - (flagMemory['lastTime']||0) < spawnInterval)) continue;
+
+                // 孵化房间
+                const spawnRoom = flagName.match(/\/([EW][1-9]+[NS][1-9]+)/)?.[1];
+                const room = Game.rooms[spawnRoom];
+                if (!spawnRoom || !room.my) {
+                    Game.flags[flagName].remove();
+                    continue;
+                }
+                
+                // 目标房间
+                const targetRoom = Game.flags[flagName].pos.roomName;
+                const isNotCenterRoom = !(/^[EW]\d*[456][NS]\d*[456]$/.test(targetRoom)); // 非中间房间
+                const isNotHighway = /^[EW]\d*[1-9][NS]\d*[1-9]$/.test(targetRoom); // 非过道房间
+                if (isNotCenterRoom && isNotHighway &&
+                    (!Game.rooms[targetRoom] || !Game.rooms[targetRoom].my)) {
+                    room.SpawnMissionAdd('', [], -1, 'cleaner',{
+                        targetRoom: targetRoom
+                    } as any);
+                }
+
+                flagMemory['lastTime'] = Game.time;
                 continue;
             }
 

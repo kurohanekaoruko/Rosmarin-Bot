@@ -13,6 +13,10 @@ export default class BaseFunction extends Room {
         return Energy;
     }
 
+    isWhiteList() {
+        return Memory['whitelist']?.includes(this.controller?.owner?.username);
+    }
+
     // 获取房间指定资源储备
     getResAmount(resource: ResourceConstant) {
         if (!RESOURCES_ALL.includes(resource)) return 0;
@@ -282,11 +286,11 @@ export default class BaseFunction extends Room {
     }
 
     /** 检查资源是否足够BOOST某个体型 */
-    CheckBoostRes(bodypart: any[], BOOST: any) {
-        if (Object.keys(BOOST).length == 0) return true;
+    CheckBoostRes(bodypart: any[], boostmap: any) {
+        if (Object.keys(boostmap).length == 0) return true;
         for (let bp of bodypart) {
-            if (!BOOST[bp[0]]) continue;
-            if (this[BOOST[bp[0]]] < bp[1] * 30) {
+            if (!boostmap[bp[0]]) continue;
+            if (this[boostmap[bp[0]]] < bp[1] * 30) {
                 return false;
             }
         }
@@ -294,11 +298,11 @@ export default class BaseFunction extends Room {
     }
 
     /** 根据体型和boost配置分配boot任务 */
-    AssignBoostTaskByBody(bodypart: any[], BOOST: any = {}) {
-        if (!this.CheckBoostRes(bodypart, BOOST)) return false;
+    AssignBoostTaskByBody(bodypart: any[], boostmap: any = {}) {
+        if (!this.CheckBoostRes(bodypart, boostmap)) return false;
         for (let bp of bodypart) {
-            if (!BOOST[bp[0]]) continue;
-            this.AssignBoostTask(BOOST[bp[0]], bp[1] * 30)
+            if (!boostmap[bp[0]]) continue;
+            this.AssignBoostTask(boostmap[bp[0]], bp[1] * 30)
         }
         return true;
     }
@@ -330,8 +334,8 @@ export default class BaseFunction extends Room {
             return true;
         } else {
             // 没有就暂时放进队列
-            if (!boostmem['boostResQueue']) boostmem['boostResQueue'] = {};
-            boostmem['boostResQueue'][mineral] = (boostmem['boostResQueue'][mineral] || 0) + amount;
+            if (!boostmem['boostQueue']) boostmem['boostQueue'] = {};
+            boostmem['boostQueue'][mineral] = (boostmem['boostQueue'][mineral] || 0) + amount;
             console.log(`没有可用的lab，暂时将boost任务: ${mineral} ${amount} 放进队列`);
             return false;
         }
@@ -363,8 +367,8 @@ export default class BaseFunction extends Room {
             console.log(`删除boost任务: ${mineral} ${lab.id}`);
             return OK;
         } else {
-            if (boostmem['boostResQueue'] && boostmem['boostResQueue'][mineral]) {
-                delete boostmem['boostResQueue'][mineral];
+            if (boostmem['boostQueue'] && boostmem['boostQueue'][mineral]) {
+                delete boostmem['boostQueue'][mineral];
                 console.log(`已从队列中删除boost任务: ${mineral}`);
                 return OK;
             }

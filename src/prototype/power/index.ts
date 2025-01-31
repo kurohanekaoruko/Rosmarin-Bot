@@ -1,7 +1,7 @@
 import { assignPrototype } from "@/prototype/base"
-import BaseFunction from "./baseFunction"
-import PowerCreepRun from "./powerRun"
-import PowerCreepUsePower from "./usePower"
+import BaseFunction from "./function/baseFunction"
+import PowerCreepUsePower from "./function/usePower"
+import PowerCreepRun from "./run"
 
 
 const plugins = [

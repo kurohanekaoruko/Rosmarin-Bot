@@ -39,6 +39,13 @@ export default {
             global.BetterMove.deletePathInRoom(roomName);
             console.log(`已清空房间 ${roomName} 的路径缓存`);
             return OK;
+        },
+        boostTask(roomName: string) {
+            const boostmem = Memory['StructControlData'][roomName];
+            boostmem['boostRes'] = {};
+            boostmem['boostQueue'] = {};
+            console.log(`已清空房间 ${roomName} 的 boost 任务`);
+            return OK;
         }
     }
 }

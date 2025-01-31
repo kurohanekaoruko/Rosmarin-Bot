@@ -14,6 +14,7 @@ export default class AutoBuild extends Room {
         const layoutMemory = Memory['LayoutData'][this.name];
         if (memory.autobuild && layoutMemory &&
             Object.keys(layoutMemory).length) {
+            // 根据布局放置工地
             plannerCreateSite(this, layoutMemory);
         }
     }
@@ -79,21 +80,6 @@ function getPoints(room: Room, structureType: string, layoutArray: any, buildMax
                 if (room.level == 4) return layoutArray.slice(0, 13);
                 if (room.level == 5) return layoutArray.slice(0, 21);
                 break;
-            case 'ros':
-                if (room.level < 3) return [];   // 3级以下不建造路
-                if (room.level == 3) return layoutArray.slice(0, 9);
-                if (room.level == 4) return layoutArray.slice(0, 17);
-                if (room.level == 5) return layoutArray.slice(0, 41);
-                break;
-            case 'clover':
-                if (room.level < 3) return [];   // 3级以下不建造路
-                break;
-            case '63':
-                if (room.level < 3) return [];   // 3级以下不建造路
-                // if (room.level == 3) return layoutArray.slice(0, 10);
-                // if (room.level == 4) return layoutArray.slice(0, 20);
-                // if (room.level == 5) return layoutArray.slice(0, 40);
-                break;
             default:
                 if (room.level < 3) return [];   // 3级以下不建造路
                 break;
@@ -132,11 +118,12 @@ function checkSkipBuild(room: Room, structureType: string, LOOK_STRUCT: Structur
         case 'road':
             // 位置没建筑可以造
             if (!LOOK_STRUCT.length) return false;
-            // 有非墙建筑，则跳过
-            if (LOOK_STRUCT.some(o => o.structureType != STRUCTURE_RAMPART)) return true;
+            // 有不可通过建筑，则跳过
+            if (LOOK_STRUCT.some(o => o.structureType != STRUCTURE_RAMPART &&
+                o.structureType != STRUCTURE_CONTAINER)) return true;
             break;
         case 'container':
-            // 有非墙非路建筑，则跳过
+            // 有不可通过建筑，则跳过
             if (LOOK_STRUCT.length &&
                 LOOK_STRUCT.some(o => o.structureType != STRUCTURE_RAMPART &&
                 o.structureType != STRUCTURE_ROAD)) return true;
@@ -147,7 +134,7 @@ function checkSkipBuild(room: Room, structureType: string, LOOK_STRUCT: Structur
         default:
             // 位置没建筑可以造
             if (!LOOK_STRUCT.length) return false;
-            // 有非墙非路建筑，则跳过
+            // 有不可通过建筑，则跳过
             if (LOOK_STRUCT.some(o => o.structureType != 'rampart' &&
                 o.structureType != 'road')) return true;
             break;

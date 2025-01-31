@@ -195,8 +195,6 @@ const outHarvest = {
     },
 
     source: function(creep: Creep) {
-        createSite(creep);
-
         if (creep.room.name != creep.memory.targetRoom || creep.pos.isRoomEdge()) {
             creep.moveToRoom(creep.memory.targetRoom, { plainCost: 2, swampCost: 10 });
             return;
@@ -219,21 +217,21 @@ const outHarvest = {
         if(!targetSource) {
             return;
         }
-        let container = creep.room.container.find((c) => c.pos.isNearTo(targetSource.pos));
-        if (container && !creep.pos.isEqualTo(container)) {
-            creep.moveTo(container, { maxRooms: 1, plainCost: 2, swampCost: 10});
-            return;
-        }
 
         // 如果离采集点过远，则移动过去
         if (creep.pos.isNear(targetSource.pos)) {
             if (targetSource.energy == 0) return;
             creep.harvest(targetSource);
-        }
-        else {
+        } else {
             if(targetSource.pos.findInRange(FIND_HOSTILE_CREEPS, 3).length > 0) return;
             creep.moveTo(targetSource, {range: 1, maxRooms: 1, plainCost: 2, swampCost: 10});
         }
+
+        // let container = creep.room.container.find((c) => c.pos.isNearTo(targetSource.pos));
+        // if (container && !creep.pos.isEqualTo(container)) {
+        //     creep.moveTo(container, { maxRooms: 1, plainCost: 2, swampCost: 10});
+        //     return;
+        // }
 
         if (creep.store.getCapacity() == 0) return false;
         return creep.store.getFreeCapacity() == 0;

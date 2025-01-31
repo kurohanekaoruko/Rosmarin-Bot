@@ -8,11 +8,14 @@ interface Creep {
 
     moveHomeRoom(): boolean;
     moveToRoom(roomName: string, options?:{[key: string]: any}): any;
-    doubleMove(target: RoomPosition, color?: string, ignoreCreeps?: boolean): boolean;
+    doubleMoveTo(target: RoomPosition, color?: string, ignoreCreeps?: boolean): number | boolean;
     doubleMoveToRoom(roomName: string, color?: string): boolean;
+    doubleFlee(): number;
+    doubleToAttack(target: Creep | Structure): number | boolean
+    doubleToDismantle(target: Structure): number | boolean
 
     withdrawEnergy(pickup?: boolean): void;
-    Boost(BOOST: any): number;
+    Boost(boostmap: any): number;
     goBoost(boostTypes: string[], must?: boolean, reserve?: boolean): boolean;
     unboost(): boolean;
     transferOrMoveTo(target: AnyCreep | Structure, resoureType: ResourceConstant, amount?: number): boolean;
@@ -20,6 +23,7 @@ interface Creep {
     pickupOrMoveTo(target: any, ...args: any[]): boolean;
     repairOrMoveTo(target: any, ...args: any[]): boolean;
     buildOrMoveTo(target: any, ...args: any[]): boolean;
+    isWhiteList(): boolean;
 
     goHaverst(target: Source | Mineral): boolean;
     goWithdraw(target: Structure, resoureType?: ResourceConstant, amount?: number): boolean;
@@ -50,6 +54,6 @@ interface CreepMemory {
     Rerunt: number;
     sayText: string[];
     boostLevel: number;
-    // creep当前的行动
     action: string;
+    idle: number;
 }

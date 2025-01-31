@@ -112,7 +112,7 @@ export default class SpawnControl extends Room {
     }
 }
 
-import { CreepNameConstant } from '@/constant/CreepNameConstant';
+import { CreepNameConstant } from '@/constant/NameConstant';
 
 export function GenSortNumber() {
     return (Game.time*1296 + Math.floor(Math.random()*1296)).toString(36).slice(-4).toUpperCase();

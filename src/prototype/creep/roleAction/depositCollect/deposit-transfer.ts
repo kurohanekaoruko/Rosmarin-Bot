@@ -3,7 +3,7 @@ const deposit_transfer = {
         if((creep.memory.longMoveEnd||0) > 0 && (creep.memory.longMoveStart||0) > 0) {
             let tick = creep.memory.longMoveEnd - creep.memory.longMoveStart;
             if(tick < 0) tick = 0;
-            if (creep.ticksToLive < tick + 25 && creep.store.getUsedCapacity() > 0) {
+            if (creep.ticksToLive < tick + 50 && creep.store.getUsedCapacity() > 0) {
                 return true
             }
         }

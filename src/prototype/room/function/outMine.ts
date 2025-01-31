@@ -1,6 +1,5 @@
-import { decompress } from '@/utils';
 import { BaseConfig } from '@/constant/config';
-
+import { compress, decompress } from '@/utils';
 
 /** 外矿采集模块 */
 export default class OutMine extends Room {
@@ -29,19 +28,12 @@ export default class OutMine extends Room {
 
             // 没有房间视野不孵化
             if (!targetRoom) continue;
-            
-            // 固定路
-            if (Game.time % 100 == 0 && targetRoom.memory['road']?.length > 0) {
-                let siteCount = targetRoom.find(FIND_MY_CONSTRUCTION_SITES).length;
-                for(const road of targetRoom.memory['road']) {
-                    if (siteCount >= 10) break;
-                    const [x, y] = decompress(road);
-                    const pos = new RoomPosition(x, y, roomName);
-                    let result = targetRoom.createConstructionSite(pos, STRUCTURE_ROAD);
-                    if (result == OK) siteCount++;
-                    if (result == ERR_FULL) break;
-                }
+
+            // 造路
+            if (Game.time % 1000 == 0 && this.level >= 4) {
+                createRoadSite(this, targetRoom)
             }
+
 
             const sourceNum = targetRoom.source?.length || targetRoom.find(FIND_SOURCES).length || 0;
             if (sourceNum == 0) continue;
@@ -83,7 +75,12 @@ export default class OutMine extends Room {
             // 外矿加速搬运策略 OutSpeedCarryTactics
             if (Game.flags[`${this.name}/OSCT`]) {
                 let num = sourceNum;
-                outCarry2Spawn(this, targetRoom, num * 4);
+                if (this.level <= 4) {
+                    num *= 2.5
+                } else {
+                    num *= 3.5
+                }
+                outCarry2Spawn(this, targetRoom, num);
             } else {
                 outCarrySpawn(this, targetRoom, sourceNum);
             }
@@ -319,7 +316,7 @@ export default class OutMine extends Room {
             // 按照power容量孵化搬运工
             const maxPc = powerBank.power / 1250;
             // 预计搬运工到达时间
-            const TICK = Game.map.getRoomLinearDistance(this.name, targetRoom) * 50 + Math.ceil(maxPc/3)*150 + 50;
+            const TICK = Game.map.getRoomLinearDistance(this.name, targetRoom) * 50 + (maxPc/2)*150 + 50;
             let threshold = TICK * Math.max(1800, mineData.creep*600*(mineData.boostLevel+1));
             if (threshold < 600e3) threshold = 600e3;
             if (threshold > 1.5e6) threshold = 1.5e6;
@@ -367,6 +364,34 @@ export default class OutMine extends Room {
 
             // 统计以targetRoom为工作目标的所有role情况
             const CreepByTargetRoom = getCreepByTargetRoom(targetRoom);
+
+            // 防御
+            // if (room) {
+            //     let hostiles = room.find(FIND_HOSTILE_CREEPS, {
+            //         filter: hostile => 
+            //             !Memory['whitelist'].includes(hostile.owner.username) &&
+            //             (hostile.getActiveBodyparts(ATTACK) > 0 || 
+            //             hostile.getActiveBodyparts(RANGED_ATTACK) > 0 ||
+            //             hostile.getActiveBodyparts(HEAL) > 0)
+            //     }) as any;
+            //     if (hostiles.length > 0) {
+            //         let dfnum = Math.min(hostiles.length, (room.deposit?.length||0));
+            //         // const da = (CreepByTargetRoom['deposit-attack'] || [])
+            //         //             .filter((c: any) => c.spawning || c.ticksToLive > 200).length;
+            //         // const danum = da + (global.SpawnMissionNum[this.name]['deposit-attack']||0)
+            //         // if(danum < 1) {
+            //         //     this.SpawnMissionAdd('', [], -1, 'deposit-attack', { targetRoom: targetRoom });
+            //         //     this.SpawnMissionAdd('', [], -1, 'deposit-heal', { targetRoom: targetRoom });
+            //         // }
+            //         const dr = (CreepByTargetRoom['deposit-ranged'] || [])
+            //                     .filter((c: any) => c.spawning || c.ticksToLive > 200).length;
+            //         const drnum = dr + (global.SpawnMissionNum[this.name]['deposit-ranged']||0)
+            //         if(drnum < dfnum) {
+            //             this.SpawnMissionAdd('', [], -1, 'deposit-ranged', { targetRoom: targetRoom });
+            //         }
+            //     }
+            // }
+            
             const dh = (CreepByTargetRoom['deposit-harvest'] || [])
                         .filter((c: any) => c.spawning || c.ticksToLive > 200).length;
             const dhnum = dh + (global.SpawnMissionNum[this.name]['deposit-harvest']||0)
@@ -690,7 +715,7 @@ const PowerMineMissionData = function (room: Room, P_num: number, power: number)
         GHO2_Amount >= 3000 && UH2O_Amount >= 3000) {
         data = {
             creep: 1,      // creep队伍数
-            max: 1,            // 最大孵化数量
+            max: 2,            // 最大孵化数量
             boostLevel: 2,     // 强化等级
             prNum: 0,          // ranged数量
             prMax: 0,     // ranged最大孵化数
@@ -718,16 +743,6 @@ const PowerMineMissionData = function (room: Room, P_num: number, power: number)
             prMax: 6,
         }
     }
-    // // 一队T0 + 7个ranged
-    // else if (power >= 6500) {
-    //     data = {
-    //         creep: 1,
-    //         max: 2,
-    //         boostLevel: 0,
-    //         prNum: 7,
-    //         prMax: 10,
-    //     }
-    // }
     // 三队T0, 2个位置以下时补充4个ranged
     else {
         data = {
@@ -769,5 +784,74 @@ const getCreepByTargetRoom = function (targetRoom: string) {
             });
         }
         return global.CreepByTargetRoom[targetRoom] || {};
+    }
+}
+
+
+const createRoadSite = function (room: Room, targetRoom: Room) {
+    if (!Memory['OutMineData'][room.name]['Road'])
+        Memory['OutMineData'][room.name]['Road'] = {};
+
+    let outMineRoadMem = Memory['OutMineData'][room.name]['Road'];
+    if (outMineRoadMem[targetRoom.name]) {
+        let mem = outMineRoadMem[targetRoom.name];
+        for (let r in mem) {
+            for (let p of mem[r]) {
+                let [x, y] = decompress(p);
+                let pos = new RoomPosition(x, y, r);
+                pos.createConstructionSite(STRUCTURE_ROAD);
+            }
+        }
+        return;
+    }
+
+    outMineRoadMem[targetRoom.name] = {}
+    let mem = outMineRoadMem[targetRoom.name];
+    let center = Memory['RoomControlData'][room.name].center || {x: 25, y: 25};
+    let centerPos = new RoomPosition(center.x, center.y, room.name);
+    if (!global.OutMineRoadPathFinderCosts)
+        global.OutMineRoadPathFinderCosts = {};
+    for (let s of targetRoom.source) {
+        PathFinder.search(
+            centerPos,
+            { pos: s.pos, range: 1 },
+            {
+                plainCost: 2,
+                swampCost: 4,
+                roomCallback: function(roomName) {
+                    if (global.OutMineRoadPathFinderCosts[roomName]) {
+                        return global.OutMineRoadPathFinderCosts[roomName];
+                    }
+
+                    let costs = new PathFinder.CostMatrix();
+                    for (let r1 in Memory['OutMineData']) {
+                        for (let r2 in Memory['OutMineData'][r1]['Road']) {
+                            for (let r3 in Memory['OutMineData'][r1]['Road'][r2]) {
+                                if (r3 !== roomName) continue;
+                                for (let p of Memory['OutMineData'][r1]['Road'][r2][r3]) {
+                                    let [x, y] = decompress(p);
+                                    costs.set(x, y, 1)
+                                }
+                            }
+                        }
+                    }
+
+                    global.OutMineRoadPathFinderCosts[roomName] = costs;
+                    return costs;
+                }
+            }
+        ).path.forEach((pos) => {
+            if (pos.roomName === room.name) return;
+            if (!mem[pos.roomName]) mem[pos.roomName] = [];
+            mem[pos.roomName].push(compress(pos.x, pos.y));
+            let costs = null;
+            if (global.OutMineRoadPathFinderCosts[pos.roomName]) {
+                costs = global.OutMineRoadPathFinderCosts[pos.roomName];
+            } else {
+                costs = new PathFinder.CostMatrix();
+            }
+            costs.set(pos.x, pos.y, 1);
+            global.OutMineRoadPathFinderCosts[pos.roomName] = costs;
+        })
     }
 }

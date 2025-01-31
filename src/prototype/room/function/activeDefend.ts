@@ -25,9 +25,8 @@ export default class ActiveDefend extends Room {
                 !Memory['whitelist'].includes(hostile.owner.username) &&
                 hostile.owner.username != 'Source Keeper' &&
                 hostile.owner.username != 'Invader' &&
-                (hostile.getActiveBodyparts(ATTACK) > 0 || 
-                hostile.getActiveBodyparts(RANGED_ATTACK) > 0 ||
-                hostile.getActiveBodyparts(HEAL) > 0)
+                hostile.body.some(b => (this.level < 8 || b.boost) &&
+                (b.type == ATTACK || b.type == RANGED_ATTACK || b.type == HEAL))
         }) as any;
         let power_hostiles = this.find(FIND_HOSTILE_POWER_CREEPS,{
             filter: hostile => !Memory['whitelist'].includes(hostile.owner.username)
@@ -46,7 +45,7 @@ export default class ActiveDefend extends Room {
         // 40A红球 或 40R蓝球
         if(!global.Hostiles) global.Hostiles = {};
         global.Hostiles[this.name] = hostiles.map((hostile: Creep) => hostile.id);
-        if (this.level >= 7) {
+        if (this.level == 8) {
             const attackDefender = Object.values(Game.creeps)
                 .filter(creep => creep.room.name == this.name &&
                     creep.memory.role == 'defend-attack') as any;
@@ -78,6 +77,23 @@ export default class ActiveDefend extends Room {
                 this.SpawnMissionAdd('', [], -1, 'defend-ranged', {home: this.name, mustBoost} as any);
                 if (mustBoost) {
                     this.AssignBoostTask('XKHO2', 1200);
+                    this.AssignBoostTask('XZHO2', 300);
+                }
+            }
+        } else if (this.level == 7) {
+            const attackDefender = Object.values(Game.creeps)
+                .filter(creep => creep.room.name == this.name &&
+                    creep.memory.role == 'defend-attack') as any;
+            global.SpawnMissionNum[this.name] = this.getSpawnMissionAmount() || {};
+            let attackQueueNum = global.SpawnMissionNum[this.name]['defend-attack'] || 0;
+            if (hostiles.length > 0 && (attackDefender.length + attackQueueNum) < 1) {
+                let mustBoost = false;
+                if (this['XUH2O'] >= 3000 && this['XZHO2'] >= 3000) {
+                    mustBoost = true;
+                }
+                this.SpawnMissionAdd('', [], -1, 'defend-attack', {home: this.name, mustBoost} as any);
+                if (mustBoost) {
+                    this.AssignBoostTask('XUH2O', 1200);
                     this.AssignBoostTask('XZHO2', 300);
                 }
             }

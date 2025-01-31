@@ -56,11 +56,12 @@ export default class TowerControl extends Room {
      */
     TowerDamageToCreep(creep: Creep) {
         if(this.name != creep.room.name) return 0;
+        if (creep['_towerDamage']) return creep['_towerDamage'];
         // tower伤害
         let towerDamage = this.TowerTotalDamage(creep.pos) || 0;
         // tough减伤后的伤害
         let realDamage = 0; // 实际伤害
-        creep.body.forEach(part => {
+        creep.body?.forEach(part => {
             if (towerDamage <= 0 || part.hits <= 0) return;
             // 对该部件造成的伤害
             let partDamage = 0;
@@ -89,8 +90,8 @@ export default class TowerControl extends Room {
             'XLHO2': 4,
         }
         healers.forEach(c => {
-            if (creep['_h']) {
-                totalHeal += creep['_h'];
+            if (c['_heal']) {
+                totalHeal += c['_heal'];
                 return;
             }
             let h = 0;
@@ -99,9 +100,10 @@ export default class TowerControl extends Room {
                 else if (!part.boost) h += 12
                 else h += 12 * BOOST_POWER[part.boost];
             })
-            creep['_heal'] = h
+            c['_heal'] = h
             totalHeal += h;
         })
+        creep['_towerDamage'] = realDamage - totalHeal;
         return realDamage - totalHeal;
     }
 
@@ -147,6 +149,9 @@ export default class TowerControl extends Room {
         if(this.memory.defend) {
             for (let e of this.getEventLog()) {
                 if (e.event !== EVENT_ATTACK) continue;
+                if (e.data.attackType == EVENT_ATTACK_TYPE_DISMANTLE) continue;
+                if (e.data.attackType == EVENT_ATTACK_TYPE_HIT_BACK) continue;
+                if (e.data.attackType == EVENT_ATTACK_TYPE_NUKE) continue;
                 const target = Game.getObjectById(e.data.targetId) as Structure;
                 if (!target) continue;
                 if (target.structureType == STRUCTURE_WALL ||
@@ -165,7 +170,7 @@ export default class TowerControl extends Room {
                     else return b;
                 })
             }
-            this.CallTowerRepair(target, 200);
+            this.CallTowerRepair(target, 500);
             return true;
         }
         return false;
@@ -206,19 +211,35 @@ export default class TowerControl extends Room {
         }
         if (!global.towerTargets[this.name] ||
             global.towerTargets[this.name].length == 0) return false;
-        // 攻击
+        // 筛选敌人
         let Hostiles = (global.towerTargets[this.name]||[])
                         .map((id: Id<Creep>) => Game.getObjectById(id))
-                        .filter((c: Creep | null) => c &&
-                        this.TowerDamageToCreep(c) > 0) as Creep[] | PowerCreep[];
-        if (Hostiles.length > 0) {
+                        .filter((c: Creep | null) => c) as Creep[] | PowerCreep[];
+        if (Hostiles.length == 0) return false;
+        // 算伤排序
+        Hostiles.sort((a: any, b: any) => {
+            let A = this.TowerDamageToCreep(a);
+            let B = this.TowerDamageToCreep(b);
+            return B - A;
+        });
+
+        // 攻击
+        if (this.TowerDamageToCreep(Hostiles[0] as any) > 0) {
             this.tower.forEach(tower => {
-                if (Hostiles.length == 0) return;
-                let index = Math.floor(Math.random() * Hostiles.length);
-                tower.attack(Hostiles[index]);
+                tower.attack(Hostiles[0]);
             })
             return true;
         }
+        // else {
+        //     let index = Math.floor(Math.random() * Hostiles.length);
+        //     this.tower.forEach(tower => {
+        //         if (Hostiles.length == 0) return;
+        //         tower.attack(Hostiles[index]);
+        //     })
+        // }
+        
+        return true;
+    
     }
 
     // 处理普通修复任务, 修复建筑物

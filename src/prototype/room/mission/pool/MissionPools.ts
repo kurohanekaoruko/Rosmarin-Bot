@@ -32,7 +32,7 @@ export default class MissionPools extends Room {
             'build',
             'repair',
             'walls',
-            'send',
+            'terminal',
             'spawn'
         ]
         for (const type of Object.keys(Pools)) { if(!PoolTypes.includes(type)) delete Pools[type] }
@@ -156,12 +156,13 @@ export default class MissionPools extends Room {
     }
 
     // 检查是否有相同任务
-    public checkSameMissionInPool(PoolName: string, data: Task["data"]) {
+    public checkSameMissionInPool(PoolName: string, type: Task["type"], data: Task["data"]) {
         const tasks = this.getPool(PoolName);
         if (!tasks) { return; }
         if (!tasks.length) return null; // 如果没有任务，返回null
 
         for(const task of tasks) {
+            if (task.type !== type) continue;
             const sameInPool = Object.keys(data).every(key => data[key] === task.data[key]);
             if (!sameInPool) continue;
             return task.id; // 如果存在相同任务，返回任务的id

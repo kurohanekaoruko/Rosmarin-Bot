@@ -6,10 +6,21 @@ const double_heal = {
             creep.memory.notified = true;
         }
         if(!creep.memory.boosted) {
-            const boost = ['XGHO2', 'GHO2', 'GO', 'XLHO2', 'LHO2', 'LO', 'XZHO2', 'ZHO2', 'ZO'];
-            creep.memory.boosted = creep.goBoost(boost);
-            return
+            if (creep.memory['boostmap']) {
+                let result = creep.Boost(creep.memory['boostmap']);
+                if (result === OK) {
+                    creep.memory.boosted = true;
+                }
+            } else {
+                creep.memory.boosted = creep.goBoost([
+                    'XGHO2', 'GHO2', 'GO',
+                    'XLHO2', 'LHO2', 'LO',
+                    'XKHO2', 'KHO2', 'KO']
+                );
+            }
+            return;
         }
+        
         if(creep.ticksToLive < 100 && creep.room.my) {
             creep.unboost();
             return;
@@ -19,7 +30,8 @@ const double_heal = {
     
         if(!creep.memory.bind) {
             const squadCreeps = creep.room.find(FIND_MY_CREEPS,
-                {filter: (c) => c.memory.squad == creep.memory.squad && !c.memory.bind});
+                {filter: (c) => !c.memory.bind && c.memory.role != 'double-heal' &&
+                                 c.memory.squad == creep.memory.squad });
             if(squadCreeps.length) {
                 const squadCreep = creep.pos.findClosestByRange(squadCreeps);
                 creep.memory.bind = squadCreep.id;
@@ -27,12 +39,8 @@ const double_heal = {
             }
         }
     
-        if(creep.hits < creep.hitsMax) {
-            creep.heal(creep);
-            healed = true;
-        }
-    
         if(!creep.memory.bind) {
+            if (creep.hits < creep.hitsMax) creep.heal(creep);
             const name = creep.name.match(/#(\w+)/)?.[1] ?? creep.name;
             const moveflag = Game.flags[name + '-move'];
             if(!moveflag || creep.pos.inRangeTo(moveflag.pos, 0)) return;
@@ -43,9 +51,17 @@ const double_heal = {
     
         const bindcreep = Game.getObjectById(creep.memory.bind) as Creep;
     
-        if(!bindcreep) {
+        if(!bindcreep || bindcreep.memory.role == 'double-heal') {
             delete creep.memory.bind;
             return;
+        }
+
+        creep.memory.dontPullMe = true;
+
+        if ((creep.hitsMax - creep.hits) >
+            (bindcreep.hitsMax - bindcreep.hits)) {
+            creep.heal(creep);
+            healed = true;
         }
     
         if(bindcreep && !healed) {
@@ -64,7 +80,7 @@ const double_heal = {
             const enemies = creep.room
                             .lookForAtArea(LOOK_CREEPS, ...area, true)
                             .map(obj => obj.creep)
-                            .filter((creep) => !creep.my);
+                            .filter((c) => !c.my && !Memory['whitelist'].includes(c.owner.username));
             if (enemies.length > 0) {
                 const target = enemies[0];
                 if (creep.pos.inRangeTo(target, 3)) {

@@ -39,7 +39,7 @@ const double_defender = {
             if(creep.pos.inRangeTo(hostile, 1)) {
                 creep.attack(hostile);
             } else {
-                creep.doubleMove(hostile.pos, '#ff0000');
+                creep.doubleMoveTo(hostile.pos, '#ff0000');
             }
         }
     }

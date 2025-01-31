@@ -241,7 +241,7 @@ const outCarry = {
         if(creep.store[RESOURCE_ENERGY] == 0) return false;
         const roads = creep.room.road.filter((r: any) => {
             if (!r || r.hits >= r.hitsMax * 0.8) return false;
-            if (!creep.pos.inRange(r, 1)) return false;
+            if (!creep.pos.inRangeTo(r.pos, 1)) return false;
             return true;
         });
         if (roads.length > 0) {

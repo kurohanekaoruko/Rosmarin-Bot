@@ -34,9 +34,6 @@ export default class StructureWork extends Room {
         // 攻击敌人
         if (this.TowerAttackEnemy()) return;
 
-        // 自动修复被攻击的墙
-        if (this.TowerAutoRepair()) return;
-
         // 攻击NPC
         if (this.TowerAttackNPC()) return;
 
@@ -206,7 +203,7 @@ export default class StructureWork extends Room {
 
         const { targetRoom, resourceType, amount } = task.data;
         if(amount <= 0) {
-            this.deleteMissionFromPool('send', task.id);
+            this.deleteMissionFromPool('terminal', task.id);
             return;
         }
 
@@ -223,9 +220,9 @@ export default class StructureWork extends Room {
         const result = terminal.send(resourceType, sendAmount, targetRoom);
         if (result === OK) {
             if(amount - sendAmount > 0) {
-                this.updateMissionPool('send', task.id, {data: {amount: amount - sendAmount}});
+                this.updateMissionPool('terminal', task.id, {data: {amount: amount - sendAmount}});
             } else {
-                this.deleteMissionFromPool('send', task.id);
+                this.deleteMissionFromPool('terminal', task.id);
             }
             cost = Game.market.calcTransactionCost(sendAmount, this.name, targetRoom);
             global.log(`[资源发送] ${this.name} -> ${targetRoom}, ${sendAmount} ${resourceType}, 能量消耗: ${cost}`);

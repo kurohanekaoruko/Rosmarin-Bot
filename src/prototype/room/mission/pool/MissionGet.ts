@@ -64,23 +64,24 @@ export default class MissionGet extends Room {
     getSendMission() {
         const terminal = this.terminal;
         const checkFunc = (task: Task) => {
+            if (task.type != 'send') return false;
             const data = task.data as SendTask;
             const resourceType = data.resourceType;
             return terminal.store[resourceType] >= Math.min(data.amount, 1000);
         }
-        const task = this.getMissionFromPoolFirst('send', checkFunc);
+        const task = this.getMissionFromPoolFirst('terminal', checkFunc);
         if(!task) return null;
         return task;
     }
     // 获取发送任务总共发送量
     getSendMissionTotalAmount() {
-        const tasks = this.getAllMissionFromPool('send');
+        const tasks = this.getAllMissionFromPool('terminal').filter(task => task.type == 'send');
         const sends = {};
         for(const task of tasks) {
             const data = task.data as SendTask;
             const resTotalAmount = (this.terminal?.store[data.resourceType] || 0) + (this.storage?.store[data.resourceType] || 0);
             if(resTotalAmount < Math.min(data.amount, 10000)) {
-                this.deleteMissionFromPool('send', task.id);
+                this.deleteMissionFromPool('terminal', task.id);
                 continue;
             }
             sends[data.resourceType] = data.amount + (sends[data.resourceType] || 0);

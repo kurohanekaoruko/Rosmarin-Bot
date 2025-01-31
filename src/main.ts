@@ -15,7 +15,7 @@ import { Statistics } from '@/modules/Statistics'
 
 import { ClaimModule } from '@/modules/actionModule/ClaimModule';
 import { AidModule } from '@/modules/actionModule/AidModule';
-import { WarSpawnModule } from '@/modules/actionModule/WarSpawnModule';
+import { WarModule } from '@/modules/actionModule/WarModule';
 
 import { ResourceManage } from '@/modules/ResourceManage';
 
@@ -48,7 +48,7 @@ Bot.on(ClaimModule);    // 占领模块
 
 Bot.on(AidModule);      // 援建模块
 
-Bot.on(WarSpawnModule); // 战斗模块
+Bot.on(WarModule);      // 战斗模块
 
 Bot.on(TeamModule);     // 四人小队模块
 

@@ -24,7 +24,7 @@ export default class MissionAdd extends Room {
         if(typeof amount !== 'number' || amount <= 0) return false;
 
         // 检查是否有相同任务
-        let existingTaskId = this.checkSameMissionInPool('manage', {source, target, resourceType} as ManageTask);
+        let existingTaskId = this.checkSameMissionInPool('manage', 'manage', {source, target, resourceType} as ManageTask);
         if (existingTaskId) {
             // 如果存在相同任务，更新任务数据
             return this.updateMissionPool('manage', existingTaskId,
@@ -42,14 +42,14 @@ export default class MissionAdd extends Room {
         const RES = global.BaseConfig.RESOURCE_ABBREVIATIONS;
         if(RES[resourceType]) resourceType = RES[resourceType];
         // 检查是否有相同任务
-        let existingTaskId = this.checkSameMissionInPool('send', {targetRoom, resourceType} as SendTask);
+        let existingTaskId = this.checkSameMissionInPool('terminal', 'send', {targetRoom, resourceType} as SendTask);
         if (existingTaskId) {
             // 如果存在相同任务，更新任务数据
-            return this.updateMissionPool('send', existingTaskId,
+            return this.updateMissionPool('terminal', existingTaskId,
                 {data:{targetRoom, resourceType, amount} as SendTask});
         } else {
             // 如果不存在相同任务，添加新任务
-            return this.addMissionToPool('send', 'send', 0, 
+            return this.addMissionToPool('terminal', 'send', 0, 
                 {targetRoom, resourceType, amount} as SendTask);
         }
     }
@@ -57,7 +57,7 @@ export default class MissionAdd extends Room {
     // 添加建造维修任务
     BuildRepairMissionAdd(type: 'build' | 'repair' | 'walls', level: number, data: BuildTask | RepairTask) {
         // 检查是否有相同任务
-        let existingTaskId = this.checkSameMissionInPool(type, { target: data.target });
+        let existingTaskId = this.checkSameMissionInPool(type, type, { target: data.target });
         if (existingTaskId) {
             // 如果存在相同任务，更新任务数据
             return this.updateMissionPool(type, existingTaskId, {level, data});
@@ -70,7 +70,7 @@ export default class MissionAdd extends Room {
     // 添加运输任务
     TransportMissionAdd(level: number, data: TransportTask) {
         // 检查是否有相同任务
-        let existingTaskId = this.checkSameMissionInPool('transport', 
+        let existingTaskId = this.checkSameMissionInPool('transport', 'transport',
                     {source:data.source, target:data.target,resourceType:data.resourceType});
         if (existingTaskId) {
             // 如果存在相同任务，更新任务数据

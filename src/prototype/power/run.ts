@@ -25,15 +25,26 @@ export default class PowerCreepRun extends PowerCreep {
         if(this.PowerEnabled()) return;
         // 生成ops
         if(this.Generate_OPS())  return;
-        // 转移ops
-        if(this.transferOPS())  return;
-        // 取ops
-        if(this.withdrawOPS())  return;
 
-        const role = name.match(/(\w+)-\d+/)[1];
+        if (this.room.my) {
+            // 转移ops
+            if(this.transferOPS())  return;
+            // 取ops
+            if(this.withdrawOPS())  return;
+            const role = name.match(/(\w+)-\d+/)[1];
+            if(PowerCreepAction[role]?.(this)) return;
+        } else if (this.room.isWhiteList()) {
+            // 加速spawn
+            if(Game.flags[`${name}-spawn`] &&
+                this.Operate_Spawn()) return;
+            // 填充扩展
+            if(Game.flags[`${name}-ext`] &&
+                this.Operate_Extension()) return;
 
-        if(PowerCreepAction[role](this)) return;
-
+        } else {
+            
+        }
+        
         // 移动到待机位置
         const idleFlag = Game.flags[`${name}-idle`];
         if (idleFlag && !this.pos.isEqual(idleFlag.pos) &&
@@ -53,6 +64,7 @@ const PowerCreepAction = {
     },
     'O': function(pc: PowerCreep) {
         if(pc.Regen_Source())  return true;       // 生成能量
+        if(pc.Operate_Storage())  return true;  // 扩容storage
         if(pc.Operate_Tower())  return true;      // 增强塔
         if(pc.Operate_Extension())  return true;  // 填充扩展
         if(pc.Operate_Spawn())  return true;        // 加速spawn

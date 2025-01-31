@@ -6,6 +6,8 @@ import {RESOURCE_ABBREVIATIONS} from './ResourceConstant'
 export const BaseConfig = {
     // bot名称
     BOT_NAME: 'Rosmarin',
+    // 默认签名
+    DEFAULT_SIGN: '𝕽𝖔𝖘𝖒𝖆𝖗𝖎𝖓',
     // 长名资源缩写
     RESOURCE_ABBREVIATIONS,
     // 过道观察间隔

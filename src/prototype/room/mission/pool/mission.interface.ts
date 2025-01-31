@@ -14,7 +14,7 @@ interface Room {
     // 用id获取任务池中的任务
     getMissionFromPoolById(PoolName: string, id: Task["id"]): Task | null;
     // 检查是否有相同任务
-    checkSameMissionInPool(PoolName: string, data: Task["data"]): Task['id'] | null;
+    checkSameMissionInPool(PoolName: string, type: Task["type"], data: Task["data"]): Task['id'] | null;
     // 检查任务池中是否存在任务
     checkMissionInPool(PoolName: string): boolean;
     // 获取任务池中的任务数量
@@ -43,7 +43,7 @@ interface Room {
     // 添加资源发送任务
     SendMissionAdd(target: string, resourceType: string | ResourceConstant, amount: number): OK | void;
     // 添加孵化任务
-    SpawnMissionAdd(name: string, body: any[], level: number, role: string, memory?: CreepMemory): OK | -1;
+    SpawnMissionAdd(name: string, body: any[], level: number, role: string, memory?: any): OK | -1;
 
     // 获取运输任务
     getTransportMission(creep: Creep): Task | null;

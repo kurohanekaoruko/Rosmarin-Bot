@@ -192,9 +192,13 @@ function UpdateLabMission(room: Room) {
     if (!BotMemStructures['boostRes']) BotMemStructures['boostRes'] = {};
     if (!BotMemStructures['boostTypes']) BotMemStructures['boostTypes'] = {};
 
+    const labAtype = BotMemStructures.labAtype;
+    const labBtype = BotMemStructures.labBtype;
+    const labA = Game.getObjectById(BotMemStructures.labA) as StructureLab;
+    const labB = Game.getObjectById(BotMemStructures.labB) as StructureLab;
+
     // lab关停时取出所有资源, 不包括boost
-    if (!BotMemStructures.lab || !BotMemStructures.labA || !BotMemStructures.labB ||
-        !BotMemStructures.labAtype || !BotMemStructures.labBtype) {
+    if (!BotMemStructures.lab || !labA || !labB || !labAtype || !labBtype) {
         room.lab.forEach(lab => {
             if(BotMemStructures['boostRes'][lab.id]) return;
             if(BotMemStructures['boostTypes'][lab.id]) return;
@@ -211,13 +215,8 @@ function UpdateLabMission(room: Room) {
         })
         return;
     }
-    
-    const labA = Game.getObjectById(BotMemStructures.labA) as StructureLab;
-    const labB = Game.getObjectById(BotMemStructures.labB) as StructureLab;
-    if (!labA || !labB) return; // 没有labA或labB时跳过
 
-    const labAtype = BotMemStructures.labAtype;
-    const labBtype = BotMemStructures.labBtype;
+    // 开启lab并有任务时才执行如下逻辑
 
     // 检查labA和labB中是否存在非设定资源
     [labA, labB].forEach((lab, index) => {
@@ -306,32 +305,34 @@ function UpdateLabBoostMission(room: Room) {
     const Labs = room.lab.filter(lab => lab);
 
     // 把boost队列更新到空余lab中
-    if (!botmem['boostResQueue']) botmem['boostResQueue'] = {};
-    if (Object.keys(botmem['boostResQueue']).length) {
+    if (!botmem['boostQueue']) botmem['boostQueue'] = {};
+    if (Object.keys(botmem['boostQueue']).length) {
         // 筛选出没有分配boost的lab, 排除底物lab
         Labs.filter(lab => !botmem['boostRes'][lab.id] &&
             lab.id !== botmem.labA && lab.id !== botmem.labB)
             .forEach(lab => {
-            const boostType = Object.keys(botmem['boostResQueue'])[0];
+            const mineral = Object.keys(botmem['boostQueue'])[0];
             botmem['boostRes'][lab.id] = {
-                mineral: boostType,
-                amount: botmem['boostResQueue'][boostType],
+                mineral: mineral,
+                amount: botmem['boostQueue'][mineral],
             }
-            delete botmem['boostResQueue'][boostType];
+            delete botmem['boostQueue'][mineral];
         })
     }
 
     // 根据分配的boost类型与数量填充lab
     Labs.forEach(lab => {
-        let boostType = botmem['boostRes'][lab.id]?.mineral;
-        if(boostType) {
+        let mineral = botmem['boostRes'][lab.id]?.mineral;
+        if(mineral) {
             // 资源设定不正确那么删除
-            if (!RESOURCES_ALL.includes(boostType)) {
+            if (!RESOURCES_ALL.includes(mineral)) {
                 delete botmem['boostRes'][lab.id];
                 return;
             }
-            // 如果该lab是底物lab, 那么不填充, 同时删除
+            // 如果该lab是底物lab, 那么不填充, 将boost任务放回队列
             if (lab.id == botmem.labA || lab.id == botmem.labB) {
+                let amount = botmem['boostRes'][lab.id].amount;
+                botmem['boostQueue'][mineral] = (botmem['boostQueue'][mineral] || 0) + amount;
                 delete botmem['boostRes'][lab.id];
                 return;
             }
@@ -341,21 +342,21 @@ function UpdateLabBoostMission(room: Room) {
                 return;
             }
             // 库存余量不足，则修改boost剩余任务量
-            const resTotalAmount = room.storage.store[boostType] + room.terminal.store[boostType] +
-                        room.lab.reduce((a, b) => a + (b.store[boostType] || 0), 0) +
-                        room.find(FIND_MY_CREEPS).reduce((a, b) => a + (b.store[boostType] || 0), 0);
+            const resTotalAmount = room.storage.store[mineral] + room.terminal.store[mineral] +
+                        room.lab.reduce((a, b) => a + (b.store[mineral] || 0), 0) +
+                        room.find(FIND_MY_CREEPS).reduce((a, b) => a + (b.store[mineral] || 0), 0);
             if (botmem['boostRes'][lab.id].amount > resTotalAmount) {
                 botmem['boostRes'][lab.id].amount = resTotalAmount;
             }
         } else {
-            boostType = botmem['boostTypes'][lab.id];
+            mineral = botmem['boostTypes'][lab.id];
         }
 
         // 如果没有设定boost，则不填充
-        if(!boostType) return;
+        if(!mineral) return;
         
         // 如果lab中存在非设定的资源，则搬走
-        if(lab.mineralType !== boostType && lab.store[lab.mineralType] > 0) {
+        if(lab.mineralType !== mineral && lab.store[lab.mineralType] > 0) {
             const posInfo = `${lab.pos.x}/${lab.pos.y}/${lab.pos.roomName}`;
             const taskdata = {
                 pos: posInfo,
@@ -375,17 +376,17 @@ function UpdateLabBoostMission(room: Room) {
             totalAmount = 3000;
         }
         // 如果设定的资源不足，则补充
-        if(lab.store[boostType] < totalAmount) {
-            const amount = totalAmount - lab.store[boostType];
-            const target = [storage, terminal].find(t => t.store[boostType] > 0);
+        if(lab.store[mineral] < totalAmount) {
+            const amount = totalAmount - lab.store[mineral];
+            const target = [storage, terminal].find(t => t.store[mineral] > 0);
             const posInfo = `${lab.pos.x}/${lab.pos.y}/${lab.pos.roomName}`;
             if (!target) return;
             const taskdata = {
                 pos: posInfo,
                 source: target.id,
                 target: lab.id,
-                resourceType: boostType,
-                amount: Math.min(amount, target.store[boostType])
+                resourceType: mineral,
+                amount: Math.min(amount, target.store[mineral])
             }
             room.TransportMissionAdd(LevelMap.boost, taskdata)
             return;
@@ -407,10 +408,9 @@ function UpdateNukerMission(room: Room) {
     if(nuker.store[RESOURCE_GHODIUM] === 5000) return;  // 如果nuker中已经满了，则不补充
 
     let amount = 5000 - nuker.store[RESOURCE_GHODIUM];
-    if (!storage && !terminal) return;  // 如果storage和terminal都不存在，则不补充
 
     let source: Id<Structure>;
-    if (storage.store[RESOURCE_GHODIUM] > 0) {
+    if (storage && storage.store[RESOURCE_GHODIUM] > 0) {
         source = storage.id; // 从storage获取
         amount = Math.min(amount, storage.store[RESOURCE_GHODIUM])
     } else if (terminal && terminal.store[RESOURCE_GHODIUM] > 0) {

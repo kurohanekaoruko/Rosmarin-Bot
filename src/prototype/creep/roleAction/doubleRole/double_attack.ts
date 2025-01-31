@@ -7,7 +7,7 @@ const action = {
             if(creep.room.name !== moveflag.pos.roomName) {
                 creep.memory.targetRoom = moveflag.pos.roomName;
             }
-            creep.doubleMove(moveflag.pos, '#ff0000')
+            creep.doubleMoveTo(moveflag.pos, '#ff0000')
             return true;
         }
         return false
@@ -27,13 +27,13 @@ const action = {
                                 Math.max(aFlag.pos.y - 5, 0), Math.max(aFlag.pos.x - 5, 0),
                                 Math.min(aFlag.pos.y + 5, 49), Math.min(aFlag.pos.x + 5, 49), true)
                             .map(obj => obj.creep)
-                            .filter(creep => !creep.my)
+                            .filter(c => !c.my && !c.isWhiteList())
             if (enemies.length > 0) {
                 const targetEnemy = creep.pos.findClosestByRange(enemies);
                 if(creep.pos.inRangeTo(targetEnemy, 1)) {
                     creep.attack(targetEnemy);
                 } else {
-                    creep.doubleMove(targetEnemy.pos, '#ff0000');
+                    creep.doubleMoveTo(targetEnemy.pos, '#ff0000');
                 }
                 return true;
             } else {
@@ -42,7 +42,7 @@ const action = {
                     if(creep.pos.inRangeTo(target, 1)) {
                         creep.attack(target);
                     } else {
-                        creep.doubleMove(target.pos, '#ff0000');
+                        creep.doubleMoveTo(target.pos, '#ff0000');
                     }
                 }
             }
@@ -53,7 +53,7 @@ const action = {
                 if(creep.pos.inRangeTo(targetEnemy, 1)) {
                     creep.attack(targetEnemy);
                 } else {
-                    creep.doubleMove(targetEnemy.pos, '#ff0000');
+                    creep.doubleMoveTo(targetEnemy.pos, '#ff0000');
                 }
             }
         }
@@ -70,8 +70,17 @@ const double_attack = {
             creep.memory.notified = true;
         }
         if (!creep.memory.boosted) {
-            const boosts = ['XGHO2', 'GHO2', 'GO', 'XUH2O', 'UH2O', 'UH', 'XZHO2', 'ZHO2', 'ZO'];
-            creep.memory.boosted = creep.goBoost(boosts);
+            if (creep.memory['boostmap']) {
+                let result = creep.Boost(creep.memory['boostmap']);
+                if (result === OK) {
+                    creep.memory.boosted = true;
+                }
+            } else {
+                creep.memory.boosted = creep.goBoost([
+                    'XGHO2', 'GHO2', 'GO',
+                    'XUH2O', 'UH2O', 'UH'
+                ]);
+            }
             return
         }
     
@@ -84,15 +93,29 @@ const double_attack = {
             delete creep.memory.bind;
             return;
         }
+
+        creep.memory.dontPullMe = true;
     
         // 旗帜控制移动
-        if (action.move(creep)) return;
+        const name = creep.name.match(/#(\w+)/)?.[1] ?? creep.name;
+        const moveflag = Game.flags['2A-' + name + '-move'];
+        if(moveflag && !creep.pos.inRangeTo(moveflag.pos, 0)) {
+            if(creep.room.name !== moveflag.pos.roomName) {
+                creep.memory.targetRoom = moveflag.pos.roomName;
+            }
+            creep.doubleMoveTo(moveflag.pos, '#ffff00')
+        }
+        if (moveflag) return true;
+
     
         // 移动到目标房间.未到达房间不继续行动
         if (creep.doubleMoveToRoom(creep.memory.targetRoom, '#ff0000')) return;
+
+
+
         
         if (action.attack(creep)) return;
     }
 }
 
-export default double_attack
+export default double_attack;

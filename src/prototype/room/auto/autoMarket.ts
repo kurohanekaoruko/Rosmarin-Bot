@@ -1,7 +1,7 @@
 export default class AutoMarket extends Room {
     // 自动市场交易
     autoMarket() {
-        if (Game.time % 50 !== 0) return;
+        if (Game.time % 100 !== 0) return;
         const autoMaket = Memory['AutoData']['AutoMarketData'][this.name];
         if(!autoMaket) return;
         for(const item of autoMaket) {
@@ -171,7 +171,7 @@ function AutoDealBuy(roomName: string, item: any) {
 
     // 计算需要购买的数量
     const buyAmount = Math.min(amount - totalAmount, terminal.store.getFreeCapacity());  // 总购买量
-    if (buyAmount <= 10000) return;
+    if (resourceType == RESOURCE_ENERGY && buyAmount <= 10000) return;
 
     AutoDeal(room.name, resourceType, buyAmount, ORDER_SELL, 10, price)
 
@@ -197,7 +197,7 @@ function AutoDealSell(roomName: string, item: any) {
     // 计算需要出售的数量
     const sellAmount = Math.min(totalAmount - amount, terminalAmount);
 
-    if (sellAmount <= 5000) return;
+    if (resourceType == RESOURCE_ENERGY && sellAmount <= 5000) return;
 
     AutoDeal(room.name, resourceType, sellAmount, ORDER_BUY, 10, price);
 }
@@ -222,6 +222,10 @@ function AutoDeal(roomName: string, res: ResourceConstant, amount: number, order
 
     // 按照单价排序
     orders.sort((a, b) => {
+        if (a.price === b.price) {
+            return Game.map.getRoomLinearDistance(roomName, a.roomName) -
+                   Game.map.getRoomLinearDistance(roomName, b.roomName)
+        }
         if (orderType === ORDER_SELL) {
             return a.price - b.price;
         } else {
@@ -231,6 +235,7 @@ function AutoDeal(roomName: string, res: ResourceConstant, amount: number, order
     
 
     let ecost = Game.market.getHistory(RESOURCE_ENERGY)[0].avgPrice;
+    if (!ecost || ecost < 0.01) ecost = 0.01;
 
     let bestOrder = null;
     let bestCost = (orderType === ORDER_SELL) ? Infinity : 0;

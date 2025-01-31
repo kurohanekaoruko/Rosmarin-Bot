@@ -9,4 +9,8 @@ interface RoomPosition {
     inRange(target: any, range: number): boolean;
     // 是否位于房间边界
     isRoomEdge(): boolean;
+    // 该位置是否可通行, 无视野根据terrain判定
+    walkable(withCreep?: boolean, rampartOwnerUserName?: string): boolean
+    // 转为全局坐标
+    toGlobal(): { x: number, y: number };
 }

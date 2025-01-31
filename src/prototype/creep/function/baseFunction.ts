@@ -125,25 +125,25 @@ export default class BaseFunction extends Creep {
     }
 
     /** 根据给定配置boost, 返回OK表示完成 */
-    Boost(BOOST: { [part: string]: string }) {
-        let bodypast = {}   // 需要强化的部件及其数量
+    Boost(boostmap: { [part: string]: string }) {
+        let bodypart = {}   // 需要强化的部件及其数量
         const done = this.body.every(part => {
-            if (!BOOST[part.type]) return true;
+            if (!boostmap[part.type]) return true;
             if (part.boost) {
                 return true;
             }
-            if (!bodypast[part.type]) {
-                bodypast[part.type] = 1;
+            if (!bodypart[part.type]) {
+                bodypart[part.type] = 1;
             } else {
-                bodypast[part.type] += 1;
+                bodypart[part.type] += 1;
             }
             return false;
         })
         if (done) return OK;
 
         // 检查是否拥有足够资源
-        for (const part in bodypast) {
-            if (this.room[BOOST[part]] < bodypast[part] * 30) {
+        for (const part in bodypart) {
+            if (this.room[boostmap[part]] < bodypart[part] * 30) {
                 return -1;
             }
         }
@@ -151,13 +151,19 @@ export default class BaseFunction extends Creep {
         // 查找有足够指定资源的lab
         const labs = this.room.lab?.filter((lab) => 
             lab.mineralType &&
-            Object.values(BOOST).includes(lab.mineralType) &&
+            Object.values(boostmap).includes(lab.mineralType) &&
             lab.store[lab.mineralType] >= 30
         ) || [];
 
+        // 需要的资源
+        const needMineral = [];
+        for (const part in bodypart) {
+            needMineral.push(boostmap[part]);
+        }
+
         // 过滤掉对应部件已强化满的lab
         const availableLabs = labs.filter(lab => {
-            return this.body.some(part => !part.boost && BOOSTS[part.type] && lab.mineralType in BOOSTS[part.type]);
+            return needMineral.includes(lab.mineralType);
         }) || [];
         // 如果找不到
         if (availableLabs.length == 0) {
@@ -176,7 +182,7 @@ export default class BaseFunction extends Creep {
         let result = closestLab.boostCreep(this);
         if (result == OK) {
             const mineral = closestLab.mineralType;
-            const boostedParts = this.body.filter(part => BOOSTS[part.type] && mineral in BOOSTS[part.type]);
+            const boostedParts = this.body.filter(part => !part.boost && boostmap[part.type] === mineral);
             const boostAmount = Math.min(boostedParts.length * 30, closestLab.store[mineral] - closestLab.store[mineral] % 30);
             this.room.SubmitBoostTask(mineral, boostAmount);
             return null;
@@ -356,5 +362,9 @@ export default class BaseFunction extends Creep {
             });
         }
         return true;
+    }
+
+    isWhiteList() {
+        return Memory['whitelist']?.includes(this.owner.username);
     }
 }

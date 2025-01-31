@@ -9,10 +9,9 @@ export const signConstant = [
 
 // 外矿签名
 export const outSignConstant = [
-    '薪柴, 为我燃烧',
     '那双月在照耀着',
     '美丽的满月闪闪发光',
-    '花束, 在燃烧着',
+    '花束, 燃烧着',
     "雨伞晃动 谁人哭泣",
     "愿天空终将拨云放晴",
     '日升月落 静待天命',

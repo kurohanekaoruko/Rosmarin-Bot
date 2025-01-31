@@ -61,24 +61,26 @@ export default {
             console.log(`[${roomName}] 即将孵化${squad}双人小队到${targetRoom}。`);
             return 0;
         },
-        quad(roomName: string, Type: 'test') {
+        team(roomName: string, Type: 'test', targetRoom?: string) {
             const room = Game.rooms[roomName];
             if (!room || !Type) return;
-            const squadName = (Game.time*36*36 + Math.floor(Math.random()*36*36)).toString(36).slice(-4).toUpperCase();
-            Memory['SquadData'][squadName] = {
-                'name': squadName,
-                'state': 'idle',
-                'direction': '↑',
+            const teamName = (Game.time*36*36 + Math.floor(Math.random()*36*36)).toString(36).slice(-4).toUpperCase();
+            Memory['TeamData'][teamName] = {
+                'name': teamName,
+                'type': Type,
+                'state': 'ready',
+                'toward': '↑',
                 'formation': 'line',
                 'members': {},
                 'time': Game.time, // 创建时间
-            }
+                'targetRoom': targetRoom,
+            } as TeamMemory;
             if (Type == 'test') {
-                console.log(`[${roomName}] 即将孵化测试quad小队, 名称: ${squadName}`);
-                room.SpawnMissionAdd('', [0, 0, 1, 1, 0, 0, 0, 0], -1, 'quad-attack', {squadName} as any);
-                room.SpawnMissionAdd('', [1, 0, 1, 0, 0, 0, 0, 0], -1, 'quad-dismantle', {squadName} as any);
-                room.SpawnMissionAdd('', [0, 0, 1, 0, 0, 1, 0, 0], -1, 'quad-heal', {squadName} as any);
-                room.SpawnMissionAdd('', [0, 0, 1, 0, 0, 1, 0, 0], -1, 'quad-heal', {squadName} as any);
+                console.log(`[${roomName}] 即将孵化测试用四人小队, 名称: ${teamName}`);
+                room.SpawnMissionAdd('', [[ATTACK, 1], [MOVE, 1]], -1, 'team-attack', {teamName} as any);
+                room.SpawnMissionAdd('', [[WORK, 1], [MOVE, 1]], -1, 'team-dismantle', {teamName} as any);
+                room.SpawnMissionAdd('', [[HEAL, 1], [MOVE, 1]], -1, 'team-heal', {teamName} as any);
+                room.SpawnMissionAdd('', [[HEAL, 1], [MOVE, 1]], -1, 'team-heal', {teamName} as any);
             }
 
             return OK;

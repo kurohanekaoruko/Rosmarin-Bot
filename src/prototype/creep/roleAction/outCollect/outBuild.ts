@@ -73,7 +73,7 @@ const outBuild = {
                     creep.build(target);
                 }
                 else {
-                    creep.moveTo(target, { visualizePathStyle: { stroke: '#ffaa00' } });
+                    creep.moveTo(target, { visualizePathStyle: { stroke: '#ffaa00' }, maxRooms: 1});
                 }
             }
             else {

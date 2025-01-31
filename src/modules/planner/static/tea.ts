@@ -5,7 +5,6 @@ export default
             "storage": [
                 { "x": 26, "y": 24 }
             ],
-            
             "tower": [
                 { "x": 22, "y": 27 }, //lvl 3
                 { "x": 28, "y": 23 }, //lvl 5

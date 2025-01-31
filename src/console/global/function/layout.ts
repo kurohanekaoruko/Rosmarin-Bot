@@ -506,12 +506,12 @@ const BuildStaticPlanner = function (roomName: string, layoutType: string) {
     }
 
     const costs = new PathFinder.CostMatrix();
-    for (let i = 0; i < 50; i++) {
-        for (let j = 0; j < 50; j++) {
-            const te = terrain.get(i, j);
-            costs.set(i, j, te == TERRAIN_MASK_WALL ? 255 : te == TERRAIN_MASK_SWAMP ? 4 : 2);
-        }
-    }
+    // for (let i = 0; i < 50; i++) {
+    //     for (let j = 0; j < 50; j++) {
+    //         const te = terrain.get(i, j);
+    //         costs.set(i, j, te == TERRAIN_MASK_WALL ? 255 : te == TERRAIN_MASK_SWAMP ? 4 : 2);
+    //     }
+    // }
 
     for (const struct of OBSTACLE_OBJECT_TYPES) {
         if (layoutMemory[struct]) {
@@ -540,6 +540,8 @@ const BuildStaticPlanner = function (roomName: string, layoutType: string) {
             new RoomPosition(center.x, center.y, roomName),
             { pos: pos, range: 1 },
             {
+                plainCost: 2,
+                swampCost: 4,
                 roomCallback: () => {
                     return costs;
                 },

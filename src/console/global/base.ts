@@ -1,28 +1,31 @@
 // 基础与杂项
 const Base = {
-    bot: {
-        whitelist: {
-            add(id: string): OK | Error {
-                if(!Memory['whitelist']) Memory['whitelist'] = [];
-                if(Memory['whitelist'].includes(id)) return Error("白名单中已存在, 无法添加");
-                Memory['whitelist'].push(id);
-                return OK;
-            },
-            remove(id: string): OK | Error {
-                if(!Memory['whitelist']) return Error("白名单不存在");
-                if(!Memory['whitelist'].includes(id)) return Error("白名单中不存在, 无法移除");
-                Memory['whitelist'].splice(Memory['whitelist'].indexOf(id), 1);
-                return OK;
-            },
-            show(): string[] {
-                return Memory['whitelist'] || [];
-            }
-        },
-        pixel() {
-            Memory['GenPixel'] = !Memory['GenPixel'];
-            console.log(`搓Pixel功能已${Memory['GenPixel'] ? '开启' : '关闭'}`);
+    whitelist: {
+        add(id: string): OK | Error {
+            if(!Memory['whitelist']) Memory['whitelist'] = [];
+            if(Memory['whitelist'].includes(id)) return Error("白名单中已存在, 无法添加");
+            Memory['whitelist'].push(id);
             return OK;
         },
+        remove(id: string): OK | Error {
+            if(!Memory['whitelist']) return Error("白名单不存在");
+            if(!Memory['whitelist'].includes(id)) return Error("白名单中不存在, 无法移除");
+            Memory['whitelist'].splice(Memory['whitelist'].indexOf(id), 1);
+            return OK;
+        },
+        show(): string[] {
+            return Memory['whitelist'] || [];
+        }
+    },
+
+    pixel() {
+        Memory['GenPixel'] = !Memory['GenPixel'];
+        console.log(`搓Pixel功能已${Memory['GenPixel'] ? '开启' : '关闭'}`);
+        return OK;
+    },
+
+    avoidRoom(room: string): OK | Error {
+        return global.BetterMove.addAvoidRooms(room);
     },
 
     showRoomRes() {
@@ -42,10 +45,6 @@ const Base = {
         return OK;
     },
 }
-
-Base['Bot'] = Base.bot;
-Base['BOT'] = Base.bot;
-Base['Log'] = Base.log;
 
 
 export default Base;

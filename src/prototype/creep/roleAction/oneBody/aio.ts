@@ -6,8 +6,8 @@ const aio = {
         }
     
         if (!creep.memory.boosted) {
-            if (creep.memory['BOOST']) {
-                let result = creep.Boost(creep.memory['BOOST'])
+            if (creep.memory['boostmap']) {
+                let result = creep.Boost(creep.memory['boostmap'])
                 if (result == OK) {
                     creep.memory.boosted = true
                 }

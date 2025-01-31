@@ -62,8 +62,13 @@ const autoDefend = function (creep: Creep) {
             const result = creep.attack(target);
             if(result == OK) creep.room.CallTowerAttack(target);
         } else if (hasRangedAttackPart) { // 如果有 RANGED_ATTACK
-            const result = creep.rangedAttack(target);
-            if(result == OK) creep.room.CallTowerAttack(target);
+            if (creep.pos.isNearTo(target)) {
+                creep.rangedMassAttack();
+                creep.room.CallTowerAttack(target);
+            } else if (creep.pos.inRangeTo(target, 3)) {
+                creep.rangedAttack(target);
+                creep.room.CallTowerAttack(target);
+            }
         }
     }
 }

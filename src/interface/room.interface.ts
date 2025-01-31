@@ -33,6 +33,8 @@ interface Room {
     deposit: Deposit[];
     /** 房间中的rampart数组 */
     rampart: StructureRampart[];
+    /** 房间中的wall数组 */
+    constructedWall: StructureWall[];
     /** 房间等级 */
     level: number;
     /** 房间是否为自己所有 */
@@ -82,6 +84,8 @@ interface Room {
     CacheCenterPos(): void;
     // 计算房间内所有结构体能量
     AllEnergy(): number;
+    // 判断房间所有者是否在白名单中
+    isWhiteList(): boolean;
     // 获取房间指定资源储备
     getResAmount(type: ResourceConstant | string): number;
     // 获取属于该房间的creep数量
@@ -92,10 +96,10 @@ interface Room {
     GetRoleBodys(role:string, upbody?: boolean): any[];
     // 生成creep body
     GenerateBodys(bodypartList: any[], role?: string): BodyPartConstant[];
-    // 检查boost资源十分足够
-    CheckBoostRes(bodypart: any[], BOOST: any): boolean;
+    // 检查boost资源是否足够
+    CheckBoostRes(bodypart: any[], boostmap: any): boolean;
     // 根据体型和boost配置分配boot任务
-    AssignBoostTaskByBody(bodypart: any[], BOOST: any): boolean;
+    AssignBoostTaskByBody(bodypart: any[], boostmap: any): boolean;
     // 给lab分配boost任务
     AssignBoostTask(mineral: string, amount: number): void;
     // 提交lab boost任务

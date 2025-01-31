@@ -29,7 +29,7 @@ function updateCPUinfo() {
 
     Memory.stats.cpuUsed['total'] += Game.cpu.getUsed();
     Memory.stats.cpuUsed['count'] += 1;
-    if (Memory.stats.cpuUsed['count'] >= 1000) {
+    if (Memory.stats.cpuUsed['count'] >= 500) {
         Memory.stats.AvgCpuUsed = Memory.stats.cpuUsed['total'] / Memory.stats.cpuUsed['count'];
         Memory.stats.cpuUsed['total'] = 0;
         Memory.stats.cpuUsed['count'] = 0;

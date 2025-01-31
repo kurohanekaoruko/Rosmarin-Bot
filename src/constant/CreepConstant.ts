@@ -19,7 +19,7 @@ interface RoleConfig {
             run: (creep: Creep) => void,
             [key: string]: (creep: Creep) => void
         },  // 执行函数，自由定义的行动逻辑
-        BOOST?: {
+        boostmap?: {
             [key: string]: string
         },  // 是否必须boost, 以及boost配置
     }
@@ -58,7 +58,7 @@ export const RoleData: RoleConfig = {
     }, // 矿工
     // 采集搬运通用机，处理停摆与新房起步
     'universal': {
-        bodypart: [[WORK, 1], [CARRY, 1], [MOVE, 2]],
+        bodypart: [[WORK, 1], [CARRY, 2], [MOVE, 2]],
         level: 0, code: 'UNIV', work: RoleAction.universal
     },
 
@@ -71,14 +71,15 @@ export const RoleData: RoleConfig = {
         bodypart: [[CARRY, 3], [MOVE, 3]],
         level: 10, code: 'L', work: RoleAction.logistic
     }, // 长途运输
-    'dismantle': {
-        bodypart: [[WORK, 25], [MOVE, 25]],
-        level: 10, code: 'D', action: RoleAction.dismantle
-    },  // 拆墙
     'cleaner': {
         bodypart: [[WORK, 25], [MOVE, 25]],
-        level: 11, code: 'CLEAN', action: RoleAction.cleaner
+        level: 11, code: 'CLE', action: RoleAction.cleaner
     },  // 清理者
+    'dismantle': {
+        bodypart: [[WORK, 40], [MOVE, 10]],
+        boostmap: {[WORK]: 'XZH2O', [MOVE]: 'XZHO2'},
+        level: 11, code: 'DIS', action: RoleAction.dismantle
+    },  // 拆除者
     'big-carry': {
         bodypart: [[CARRY, 40], [MOVE, 10]],
         level: 10, code: 'BC', work: RoleAction.bigCarry
@@ -105,10 +106,6 @@ export const RoleData: RoleConfig = {
     'aclaimer': {
         bodypart: [[MOVE, 19], [CLAIM, 19]],
         level: 10, code: 'ACL', action: RoleAction.aclaimer
-    },
-    'healAclaimer': {
-        bodypart: [[TOUGH, 4], [MOVE, 25], [HEAL, 10], [CLAIM, 11]],
-        level: 10, code: 'HACL', action: RoleAction.aclaimer
     },
 
     /* 援建 */
@@ -147,34 +144,41 @@ export const RoleData: RoleConfig = {
 
     /* 二人队 */
     'double-attack': {
-        bodypart: [[TOUGH, 12], [MOVE, 10], [ATTACK, 28],],
+        bodypart: [[ATTACK, 8], [TOUGH, 12], [ATTACK, 20], [MOVE, 10]],
+        boostmap: {[ATTACK]: 'XUH2O', [MOVE]: 'XZHO2', [TOUGH]: 'XGHO2'},
         level: 10, code: '2A', action: RoleAction.double_attack
     },
     'double-dismantle': {
-        bodypart: [[TOUGH, 12], [MOVE, 10], [WORK, 28]],
+        bodypart: [[WORK, 8], [TOUGH, 12], [WORK, 20], [MOVE, 10]],
+        boostmap: {[WORK]: 'XZH2O', [MOVE]: 'XZHO2', [TOUGH]: 'XGHO2'},
         level: 10, code: '2D', action: RoleAction.double_dismantle
     },
     'double-heal': {
-        bodypart: [[TOUGH, 11], [RANGED_ATTACK, 1], [MOVE, 10], [HEAL, 28]],
+        bodypart: [[TOUGH, 12], [HEAL, 28], [MOVE, 10]],
+        boostmap: {[TOUGH]: 'XGHO2', [HEAL]: 'XLHO2', [MOVE]: 'XZHO2'},
         level: 10, code: '2H', action: RoleAction.double_heal
     },
 
     /* 四人队 */
-    'squad-attack': {
-        bodypart: [[TOUGH, 12], [ATTACK, 28], [MOVE, 10]],
-        level: 10, code: '4A', action: RoleAction.squad_attack
+    'team-attack': {
+        bodypart: [[ATTACK, 8], [TOUGH, 12], [ATTACK, 20], [MOVE, 10]],
+        boostmap: {[ATTACK]: 'XUH2O', [MOVE]: 'XZHO2', [TOUGH]: 'XGHO2'},
+        level: 10, code: '4A', action: RoleAction.team_attack
     },
-    'squad-dismantle': {
-        bodypart: [[TOUGH, 12], [WORK, 28], [MOVE, 10]],
-        level: 10, code: '4D', action: RoleAction.squad_dismantle
+    'team-dismantle': {
+        bodypart: [[WORK, 8], [TOUGH, 12], [WORK, 20], [MOVE, 10]],
+        boostmap: {[WORK]: 'XZH2O', [MOVE]: 'XZHO2', [TOUGH]: 'XGHO2'},
+        level: 10, code: '4D', action: RoleAction.team_dismantle
     },
-    'squad-heal': {
-        bodypart: [[TOUGH, 12], [RANGED_ATTACK, 2], [MOVE, 10], [HEAL, 26]],
-        level: 10, code: '4H', action: RoleAction.squad_heal
+    'team-heal': {
+        bodypart: [[TOUGH, 12], [MOVE, 10], [HEAL, 28]],
+        boostmap: {[HEAL]: 'XLHO2', [MOVE]: 'XZHO2', [TOUGH]: 'XGHO2'},
+        level: 10, code: '4H', action: RoleAction.team_heal
     },
-    'squad-ranged': {
+    'team-ranged': {
         bodypart: [[TOUGH, 12], [RANGED_ATTACK, 8], [MOVE, 10], [HEAL, 20]],
-        level: 10, code: '4R', action: RoleAction.squad_ranged
+        boostmap: {[HEAL]: 'XLHO2', [RANGED_ATTACK]: 'XKHO2', [MOVE]: 'XZHO2', [TOUGH]: 'XGHO2'},
+        level: 10, code: '4R', action: RoleAction.team_ranged
     },
 
     /* 主动防御 */
@@ -230,8 +234,12 @@ export const RoleData: RoleConfig = {
         level: 11, code: 'DT', work: RoleAction.deposit_transfer
     },
     'deposit-attack': {
-        bodypart: [[ATTACK, 15], [MOVE, 25], [HEAL, 10]],
+        bodypart: [[ATTACK, 25], [MOVE, 25]],
         level: 8, code: "DPA", action: RoleAction.deposit_attack
+    },
+    'deposit-heal': {
+        bodypart: [[HEAL, 25], [MOVE, 25]],
+        level: 8, code: 'DPH', action: RoleAction.deposit_heal
     },
     'deposit-ranged': {
         bodypart: [[RANGED_ATTACK, 17], [MOVE, 25], [HEAL, 8]],
@@ -299,7 +307,7 @@ export const RoleLevelData = {
         5: { bodypart: [[CARRY, 5], [MOVE, 2]], num: 1 },
         6: { bodypart: [[CARRY, 15], [MOVE, 5]], num: 1 },
         7: { bodypart: [[CARRY, 25], [MOVE, 5]], num: 1 },
-        8: { bodypart: [[CARRY, 35], [MOVE, 5]], num: 1 },
+        8: { bodypart: [[CARRY, 30], [MOVE, 5]], num: 1 },
     },
     'upgrader': {
         1: { bodypart: [[WORK, 1], [CARRY, 1], [MOVE, 2]], num: 3 },
@@ -318,8 +326,9 @@ export const RoleLevelData = {
         4: { bodypart: [[WORK, 5], [CARRY, 4], [MOVE, 9]], num: 0 },
         5: { bodypart: [[WORK, 6], [CARRY, 6], [MOVE, 12]], num: 0 },
         6: { bodypart: [[WORK, 10], [CARRY, 10], [MOVE, 10]], num: 0 },
-        7: { bodypart: [[WORK, 16], [CARRY, 10], [MOVE, 13]], num: 0 },
-        8: { bodypart: [[WORK, 20], [CARRY, 10], [MOVE, 15]], num: 0 },
+        7: { bodypart: [[WORK, 20], [CARRY, 10], [MOVE, 15]], num: 0 },
+        8: { bodypart: [[WORK, 15], [CARRY, 15], [MOVE, 15]], num: 0,
+             upbodypart: [[WORK, 20], [CARRY, 10], [MOVE, 15]]},
     },
     'mineral': {
         1: { bodypart: [[WORK, 2], [CARRY, 1], [MOVE, 1]], num: 0 },
@@ -489,44 +498,63 @@ export const RoleBodys = {
         /** 0tower */
         '0T': {
             bodypart: [[TOUGH, 3], [RANGED_ATTACK, 32], [MOVE, 10], [HEAL, 5]],
-            BOOST: { [HEAL]: 'XLHO2', [RANGED_ATTACK]: 'XKHO2', [MOVE]: 'XZHO2', [TOUGH]: 'XGHO2' }
+            boostmap: { [HEAL]: 'XLHO2', [RANGED_ATTACK]: 'XKHO2', [MOVE]: 'XZHO2', [TOUGH]: 'XGHO2' }
         },
         /** 2tower */
         '2T': {
             bodypart: [[TOUGH, 4], [RANGED_ATTACK, 26], [MOVE, 10], [HEAL, 10]],
-            BOOST: { [HEAL]: 'XLHO2', [RANGED_ATTACK]: 'XKHO2', [MOVE]: 'XZHO2', [TOUGH]: 'XGHO2' }
+            boostmap: { [HEAL]: 'XLHO2', [RANGED_ATTACK]: 'XKHO2', [MOVE]: 'XZHO2', [TOUGH]: 'XGHO2' }
         },
         /** 3tower */
         '3T': {
             bodypart: [[TOUGH, 6], [RANGED_ATTACK, 22], [MOVE, 10], [HEAL, 12]],
-            BOOST: { [HEAL]: 'XLHO2', [RANGED_ATTACK]: 'XKHO2', [MOVE]: 'XZHO2', [TOUGH]: 'XGHO2' }
+            boostmap: { [HEAL]: 'XLHO2', [RANGED_ATTACK]: 'XKHO2', [MOVE]: 'XZHO2', [TOUGH]: 'XGHO2' }
         },
         /** 6tower */
         '6T': {
             bodypart: [[TOUGH, 10], [RANGED_ATTACK, 5], [MOVE, 10], [HEAL, 25]],
-            BOOST: { [HEAL]: 'XLHO2', [RANGED_ATTACK]: 'XKHO2', [MOVE]: 'XZHO2', [TOUGH]: 'XGHO2' }
+            boostmap: { [HEAL]: 'XLHO2', [RANGED_ATTACK]: 'XKHO2', [MOVE]: 'XZHO2', [TOUGH]: 'XGHO2' }
         }
     },
+
+    'double-attack': {
+        'test': {
+            bodypart: [[ATTACK, 1], [MOVE, 1]],
+        }
+    },
+    'double-dismantle': {
+        'test': {
+            bodypart: [[WORK, 1], [MOVE, 1]],
+        }
+    },
+    'double-heal': {
+        'test': {
+            bodypart: [[RANGED_ATTACK, 1], [HEAL, 1], [MOVE, 2]],
+        },
+    },
+
+
+
     'aid-build': {
         'T3': {
             bodypart: [[WORK, 35], [CARRY, 5], [MOVE, 10]],
-            BOOST: { [WORK]: 'XLH2O', [CARRY]: 'XKH2O', [MOVE]: 'XZHO2' }
+            boostmap: { [WORK]: 'XLH2O', [CARRY]: 'XKH2O', [MOVE]: 'XZHO2' }
         }
     },
     'aid-upgrade': {
         'T3': {
             bodypart: [[WORK, 35], [CARRY, 5], [MOVE, 10]],
-            BOOST: { [WORK]: 'XGH2O', [CARRY]: 'XKH2O', [MOVE]: 'XZHO2' }
+            boostmap: { [WORK]: 'XGH2O', [CARRY]: 'XKH2O', [MOVE]: 'XZHO2' }
         }
     },
     'aid-carry': {
-        'A': {
+        'T3': {
             bodypart: [[CARRY, 25], [MOVE, 25]],
-            BOOST: { [CARRY]: 'XKH2O' }
+            boostmap: { [CARRY]: 'XKH2O' }
         },
-        'B': {
+        'BIG': {
             bodypart: [[CARRY, 40], [MOVE, 10]],
-            BOOST: { [CARRY]: 'XKH2O', [MOVE]: 'XZHO2' }
+            boostmap: { [CARRY]: 'XKH2O', [MOVE]: 'XZHO2' }
         }
     }
 }

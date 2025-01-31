@@ -1,46 +1,52 @@
 const deposit_attack = {
     run: function (creep: Creep) {
-        if (creep.room.name != creep.memory.targetRoom || creep.pos.isRoomEdge()) {
-            let opt = {};
-            if (creep.room.name != creep.memory.homeRoom) opt = { ignoreCreeps: false };
-            creep.moveToRoom(creep.memory.targetRoom, opt);
+        if (!creep.memory.notified) {
+            creep.notifyWhenAttacked(false);
+            creep.memory.notified = true;
+        }
+    
+        // 等待绑定
+        if(!creep.memory.bind) return;
+    
+        // 获取绑定的另一个creep
+        const bindcreep = Game.getObjectById(creep.memory.bind) as Creep;
+        if(!bindcreep) {
+            delete creep.memory.bind;
             return;
         }
+    
+        // 移动到目标房间.未到达房间不继续行动
+        if (creep.doubleMoveToRoom(creep.memory.targetRoom, '#ff0000')) return;
     
         let hostiles = creep.room.find(FIND_HOSTILE_CREEPS, {
             filter: (c) => !Memory['whitelist'].includes(c.owner.username) &&
             c.body.some(part => part.type == ATTACK || part.type == RANGED_ATTACK || part.type == HEAL || part.type == WORK) &&
-            (c.pos.findInRange(FIND_MY_CREEPS, 3).length || c.pos.findInRange(FIND_DEPOSITS, 3).length)
+            (c.pos.findInRange(FIND_DEPOSITS, 5).length || c.pos.inRangeTo(creep, 3))
         });
     
+
         if (hostiles.length) {
             let hostile = creep.pos.findClosestByRange(hostiles);
             if (creep.pos.isNearTo(hostile)) {
                 creep.attack(hostile);
             } else {
-                creep.moveTo(hostile, { reusePath: 0, ignoreCreeps: false });
-            }
-        } else if (creep.hits < creep.hitsMax) {
-            creep.heal(creep);
-        } else {
-            let healTarget = creep.pos.findClosestByRange(FIND_MY_CREEPS, {filter: (c) => c.hits < c.hitsMax});
-            if (healTarget) {
-                if (creep.pos.inRangeTo(healTarget, 1)) {
-                    creep.heal(healTarget);
-                } else {
-                    creep.moveTo(healTarget, { reusePath: 0, ignoreCreeps: false });
-                }
-            } else {
-                let deposit = creep.pos.findClosestByRange(FIND_DEPOSITS);
-                if (deposit) {
-                    if (creep.pos.inRangeTo(deposit, 5)) {
-                        creep.harvest(deposit);
-                    } else {
-                        creep.moveTo(deposit, { range: 5, ignoreCreeps: false });
-                    }
-                }
+                creep.doubleMoveTo(hostile.pos, '#ff0000');
             }
         }
+        // else {
+        //     let healTarget = creep.pos.findClosestByRange(FIND_MY_CREEPS, {filter: (c) => c.hits < c.hitsMax});
+        //     if (healTarget) {
+        //         if (creep.pos.inRangeTo(healTarget, 1)) {
+        //             if (bindcreep.pos.inRangeTo(healTarget, 1)) {
+        //                 bindcreep.heal(healTarget);
+        //             } else {
+        //                 bindcreep.moveTo(healTarget.pos, {visualizePathStyle: {stroke: '#00ff00'}});
+        //             }
+        //         } else {
+        //             creep.doubleMoveTo(healTarget.pos, '#ff0000');
+        //         }
+        //     }
+        // }
     }
 }
 

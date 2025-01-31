@@ -17,7 +17,7 @@ const AidModule = {
                 if ((Game.time - (flagMemory['lastTime']||0) < spawnInterval)) continue;
 
                 // 孵化房间
-                const spawnRoom = flagName.match(/\/([EW][1-9]+[NS][1-9]+)/)?.[1];
+                const spawnRoom = flagName.match(/\/([EW][1-9]+[NS][1-9]+)\//)?.[1];
                 const room = Game.rooms[spawnRoom];
                 if (!spawnRoom || !room.my) {
                     Game.flags[flagName].remove();
@@ -37,14 +37,14 @@ const AidModule = {
                 } as CreepMemory;
 
                 // 是否BOOST
-                let boost = flagName.match(/\/B-(.*)$/)?.[1] as string || undefined;
+                let boost = flagName.match(/\/B-(\w+)/)?.[1] as string || undefined;
                 if (boost && RoleBodys['aid-build'][boost]) {
                     bodys = RoleBodys['aid-build'][boost].bodypart || [];
-                    memory['BOOST'] = RoleBodys['aid-build'][boost].BOOST || {};
-                    let result = room.AssignBoostTaskByBody(bodys, memory['BOOST']);
+                    memory['boostmap'] = RoleBodys['aid-build'][boost].boostmap || {};
+                    let result = room.AssignBoostTaskByBody(bodys, memory['boostmap']);
                     if (!result) {
                         bodys = [];
-                        delete memory['BOOST'];
+                        delete memory['boostmap'];
                     }
                 }
                 
@@ -83,14 +83,14 @@ const AidModule = {
                 } as CreepMemory;
 
                 // 是否BOOST
-                let boost = flagName.match(/\/B-(.*)$/)?.[1] as string || undefined;
+                let boost = flagName.match(/\/B-(\w+)/)?.[1] as string || undefined;
                 if (boost && RoleBodys['aid-upgrade'][boost]) {
                     bodys = RoleBodys['aid-upgrade'][boost].bodypart || [];
-                    memory['BOOST'] = RoleBodys['aid-upgrade'][boost].BOOST || {};
-                    let result = room.AssignBoostTaskByBody(bodys, memory['BOOST']);
+                    memory['boostmap'] = RoleBodys['aid-upgrade'][boost].boostmap || {};
+                    let result = room.AssignBoostTaskByBody(bodys, memory['boostmap']);
                     if (!result) {
                         bodys = [];
-                        delete memory['BOOST'];
+                        delete memory['boostmap'];
                     }
                 }
                 
@@ -159,14 +159,14 @@ const AidModule = {
                 } as any;
 
                 // 是否BOOST
-                let boost = flagName.match(/\/B-(.*)$/)?.[1] as string || undefined;
+                let boost = flagName.match(/\/B-(\w+)/)?.[1] as string || undefined;
                 if (boost && RoleBodys['aid-carry'][boost]) {
                     bodys = RoleBodys['aid-carry'][boost].bodypart || [];
-                    memory['BOOST'] = RoleBodys['aid-carry'][boost].BOOST || {};
-                    let result = room.AssignBoostTaskByBody(bodys, memory['BOOST']);
+                    memory['boostmap'] = RoleBodys['aid-carry'][boost].boostmap || {};
+                    let result = room.AssignBoostTaskByBody(bodys, memory['boostmap']);
                     if (!result) {
                         bodys = [];
-                        delete memory['BOOST'];
+                        delete memory['boostmap'];
                     }
                 }
 

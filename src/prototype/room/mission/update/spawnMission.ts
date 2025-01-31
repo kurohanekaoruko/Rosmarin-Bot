@@ -49,7 +49,7 @@ const RoleSpawnCheck = {
         return false;
     },
     'worker': (room: Room, current: number) => {
-        if (room.memory.defend) return false;
+        // if (room.memory.defend) return false;
         if (room.level < 4 && current < 3 && room.checkMissionInPool('build')) return true;
         if (room.level < 6) {
             if (current < 2 && room.checkMissionInPool('build')) return true;
@@ -83,7 +83,7 @@ const RoleSpawnCheck = {
         const match = UPFlag.name.match(/UP-UPGRADE\/(\d+)/);
         let num = match ? parseInt(match[1]) : 0;
         if (num < 1) return false;
-        if (room[RESOURCE_ENERGY] < 100000) return false;
+        if (room.level >= 4 && room[RESOURCE_ENERGY] < 100000) return false;
 
         const lv = room.level;
         // 当前等级的最大ext能量容量
