@@ -3,7 +3,7 @@
  */
 export const ClearModule = {
     tickEnd: () => {
-        if(Game.time % 50 == 0) {
+        if(Game.time % 100 == 0) {
             // 全局 Memory 清理
             memoryClear();
         };

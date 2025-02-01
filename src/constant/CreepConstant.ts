@@ -1,4 +1,4 @@
-import * as RoleAction from '@/prototype/creep/roleAction';
+import * as Role from '@/creeps';
 
 
 interface RoleConfig {
@@ -30,96 +30,96 @@ export const RoleData: RoleConfig = {
     /* 基本房间运营 */
     'harvester': {
         bodypart: [[WORK, 2], [MOVE, 2]],
-        level: 3, code: 'H', action: RoleAction.harvester
+        level: 3, code: 'H', action: Role.harvester
     },  // 采集
     'carrier': {
         bodypart: [[CARRY, 3], [MOVE, 3]],
-        level: 4, code: 'C', work: RoleAction.carrier
+        level: 4, code: 'C', work: Role.carrier
     },  // 通用搬运
     'transport': {
         bodypart: [[CARRY, 4], [MOVE, 2]],
-        level: 2, code: 'T', mission: RoleAction.transport
+        level: 2, code: 'T', mission: Role.transport
     }, // 资源搬运
     'manager': {
         bodypart: [[CARRY, 4], [MOVE, 2]],
-        level: 1, code: 'M', mission: RoleAction.manager
+        level: 1, code: 'M', mission: Role.manager
     }, // 中央搬运
     'upgrader': {
         bodypart: [[WORK, 1], [CARRY, 1], [MOVE, 2]],
-        level: 10, code: 'U', work: RoleAction.upgrader
+        level: 10, code: 'U', work: Role.upgrader
     }, // 升级
     'worker': {
         bodypart: [[WORK, 1], [CARRY, 1], [MOVE, 2]],
-        level: 10, code: 'W', work: RoleAction.worker
+        level: 10, code: 'W', work: Role.worker
     }, // 建造、维修、刷墙
     'mineral': {
         bodypart: [[WORK, 2], [CARRY, 1], [MOVE, 1]],
-        level: 6, code: 'MR', work: RoleAction.mineral
+        level: 6, code: 'MR', work: Role.mineral
     }, // 矿工
     // 采集搬运通用机，处理停摆与新房起步
     'universal': {
         bodypart: [[WORK, 1], [CARRY, 2], [MOVE, 2]],
-        level: 0, code: 'UNIV', work: RoleAction.universal
+        level: 0, code: 'UNIV', work: Role.universal
     },
 
     /* 特殊用途 */
     'scout': {
         bodypart: [[MOVE, 1]],
-        level: 11, code: 'S', work: RoleAction.scout
+        level: 11, code: 'S', work: Role.scout
     },
     'logistic': {
         bodypart: [[CARRY, 3], [MOVE, 3]],
-        level: 10, code: 'L', work: RoleAction.logistic
+        level: 10, code: 'L', work: Role.logistic
     }, // 长途运输
     'cleaner': {
         bodypart: [[WORK, 25], [MOVE, 25]],
-        level: 11, code: 'CLE', action: RoleAction.cleaner
+        level: 11, code: 'CLE', action: Role.cleaner
     },  // 清理者
     'dismantle': {
         bodypart: [[WORK, 40], [MOVE, 10]],
         boostmap: {[WORK]: 'XZH2O', [MOVE]: 'XZHO2'},
-        level: 11, code: 'DIS', action: RoleAction.dismantle
+        level: 11, code: 'DIS', action: Role.dismantle
     },  // 拆除者
     'big-carry': {
         bodypart: [[CARRY, 40], [MOVE, 10]],
-        level: 10, code: 'BC', work: RoleAction.bigCarry
+        level: 10, code: 'BC', work: Role.bigCarry
     },  // 大体型搬运
     'UP-upgrade': {
         bodypart: [[WORK, 2], [CARRY, 1], [MOVE, 1]],
-        level: 11, code: 'UUP', work: RoleAction.UP_Upgrade
+        level: 11, code: 'UUP', work: Role.UP_Upgrade
     }, // 加速升级
     'UP-repair': {
         bodypart: [[WORK, 30], [CARRY, 5], [MOVE, 15]],
-        level: 11, code: 'URE', work: RoleAction.UP_Repair
+        level: 11, code: 'URE', work: Role.UP_Repair
     }, // 加速维修
 
 
     /* 占领房间 */
     'claimer': {
         bodypart: [[MOVE, 5], [CLAIM, 1]],
-        level: 10, code: 'CL', action: RoleAction.claimer
+        level: 10, code: 'CL', action: Role.claimer
     },
     'lclaimer': {
         bodypart: [[MOVE, 10], [HEAL, 9], [CLAIM, 1]],
-        level: 10, code: 'LCL', action: RoleAction.claimer
+        level: 10, code: 'LCL', action: Role.claimer
     },
     'aclaimer': {
         bodypart: [[MOVE, 19], [CLAIM, 19]],
-        level: 10, code: 'ACL', action: RoleAction.aclaimer
+        level: 10, code: 'ACL', action: Role.aclaimer
     },
 
     /* 援建 */
     'aid-build': {
         bodypart: [[WORK, 20], [CARRY, 5], [MOVE, 25]],
-        level: 10, code: 'AIDB', action: RoleAction.aid_build
+        level: 10, code: 'AIDB', action: Role.aid_build
     },
     'aid-carry': {
         bodypart: [[CARRY, 25], [MOVE, 25]],
-        level: 10, code: 'AIDC', work: RoleAction.aid_carry
+        level: 10, code: 'AIDC', work: Role.aid_carry
     },
     'aid-upgrade': {
         bodypart: [[WORK, 20], [CARRY, 5], [MOVE, 25]],
-        level: 10, code: 'AIDU', work: RoleAction.aid_upgrade
+        level: 10, code: 'AIDU', work: Role.aid_upgrade
     },
 
 
@@ -127,141 +127,141 @@ export const RoleData: RoleConfig = {
     /* 一体机 */
     'one-tough': {
         bodypart: [[TOUGH, 6], [MOVE, 20], [HEAL, 14]],
-        level: 10, code: '1T', action: RoleAction.one_tough
+        level: 10, code: '1T', action: Role.one_tough
     },
     'one-ranged': {
         bodypart: [[TOUGH, 10], [RANGED_ATTACK, 10], [MOVE, 10], [HEAL, 20]],
-        level: 10, code: '1R', action: RoleAction.one_ranged
+        level: 10, code: '1R', action: Role.one_ranged
     },
     'aio': {
         bodypart: [[RANGED_ATTACK, 13], [MOVE, 25], [HEAL, 12]],
-        level: 10, code: 'AIO', action: RoleAction.aio
+        level: 10, code: 'AIO', action: Role.aio
     }, // 进攻一体机
     'saio': {
         bodypart: [[RANGED_ATTACK, 10], [MOVE, 25], [HEAL, 15]],
-        level: 10, code: 'SAIO', action: RoleAction.aio
+        level: 10, code: 'SAIO', action: Role.aio
     }, // 支援一体机
 
     /* 二人队 */
     'double-attack': {
         bodypart: [[ATTACK, 8], [TOUGH, 12], [ATTACK, 20], [MOVE, 10]],
         boostmap: {[ATTACK]: 'XUH2O', [MOVE]: 'XZHO2', [TOUGH]: 'XGHO2'},
-        level: 10, code: '2A', action: RoleAction.double_attack
+        level: 10, code: '2A', action: Role.double_attack
     },
     'double-dismantle': {
         bodypart: [[WORK, 8], [TOUGH, 12], [WORK, 20], [MOVE, 10]],
         boostmap: {[WORK]: 'XZH2O', [MOVE]: 'XZHO2', [TOUGH]: 'XGHO2'},
-        level: 10, code: '2D', action: RoleAction.double_dismantle
+        level: 10, code: '2D', action: Role.double_dismantle
     },
     'double-heal': {
         bodypart: [[TOUGH, 12], [HEAL, 28], [MOVE, 10]],
         boostmap: {[TOUGH]: 'XGHO2', [HEAL]: 'XLHO2', [MOVE]: 'XZHO2'},
-        level: 10, code: '2H', action: RoleAction.double_heal
+        level: 10, code: '2H', action: Role.double_heal
     },
 
     /* 四人队 */
     'team-attack': {
         bodypart: [[ATTACK, 8], [TOUGH, 12], [ATTACK, 20], [MOVE, 10]],
         boostmap: {[ATTACK]: 'XUH2O', [MOVE]: 'XZHO2', [TOUGH]: 'XGHO2'},
-        level: 10, code: '4A', action: RoleAction.team_attack
+        level: 10, code: '4A', action: Role.team_attack
     },
     'team-dismantle': {
         bodypart: [[WORK, 8], [TOUGH, 12], [WORK, 20], [MOVE, 10]],
         boostmap: {[WORK]: 'XZH2O', [MOVE]: 'XZHO2', [TOUGH]: 'XGHO2'},
-        level: 10, code: '4D', action: RoleAction.team_dismantle
+        level: 10, code: '4D', action: Role.team_dismantle
     },
     'team-heal': {
         bodypart: [[TOUGH, 12], [MOVE, 10], [HEAL, 28]],
         boostmap: {[HEAL]: 'XLHO2', [MOVE]: 'XZHO2', [TOUGH]: 'XGHO2'},
-        level: 10, code: '4H', action: RoleAction.team_heal
+        level: 10, code: '4H', action: Role.team_heal
     },
     'team-ranged': {
         bodypart: [[TOUGH, 12], [RANGED_ATTACK, 8], [MOVE, 10], [HEAL, 20]],
         boostmap: {[HEAL]: 'XLHO2', [RANGED_ATTACK]: 'XKHO2', [MOVE]: 'XZHO2', [TOUGH]: 'XGHO2'},
-        level: 10, code: '4R', action: RoleAction.team_ranged
+        level: 10, code: '4R', action: Role.team_ranged
     },
 
     /* 主动防御 */
     'defend-attack': {
         bodypart: [[ATTACK, 40], [MOVE, 10]],
-        level: 8, code: "DFA", must: true, action: RoleAction.defend_attack
+        level: 8, code: "DFA", must: true, action: Role.defend_attack
     },
     'defend-ranged': {
         bodypart: [[RANGED_ATTACK, 40], [MOVE, 10]],
-        level: 8, code: "DFR", must: true, action: RoleAction.defend_ranged
+        level: 8, code: "DFR", must: true, action: Role.defend_ranged
     },
     'defend-2Attack': {
         bodypart: [[TOUGH, 15], [ATTACK, 25], [MOVE, 10]],
-        level: 7, code: "D2A", must: true, action: RoleAction.double_defender
+        level: 7, code: "D2A", must: true, action: Role.double_defender
     },
     'defend-2Heal': {
         bodypart: [[TOUGH, 10], [HEAL, 30], [MOVE, 10]],
-        level: 7, code: "D2H", must: true, action: RoleAction.double_heal
+        level: 7, code: "D2H", must: true, action: Role.double_heal
     },
 
     /* 外矿相关 */
     /* 外矿 */
-    'out-scout': { bodypart: [[MOVE, 1]], level: 11, code: 'OS', work: RoleAction.scout },
-    'out-claim': { bodypart: [], level: 11, code: 'OCL', work: RoleAction.outClaim },
-    'out-harvest': { bodypart: [], level: 12, code: 'OH', work: RoleAction.outHarvest },
-    'out-car': { bodypart: [], level: 13, code: 'OC', work: RoleAction.outCarry },
-    'out-carry': { bodypart: [], level: 13, code: 'OC', work: RoleAction.outCarry },
-    'out-build': { bodypart: [], level: 12, code: 'OB', work: RoleAction.outBuild },
-    'out-defend': { bodypart: [], level: 8, code: 'OD', action: RoleAction.outDefend },
-    'out-2Attack': { bodypart: [], level: 8, code: 'O2A', action: RoleAction.out2Attack },
-    'out-2Heal': { bodypart: [], level: 8, code: 'O2H', action: RoleAction.out2Heal },
-    'out-invader': { bodypart: [], level: 10, code: 'OI', action: RoleAction.outInvader },
+    'out-scout': { bodypart: [[MOVE, 1]], level: 11, code: 'OS', work: Role.scout },
+    'out-claim': { bodypart: [], level: 11, code: 'OCL', work: Role.outClaim },
+    'out-harvest': { bodypart: [], level: 12, code: 'OH', work: Role.outHarvest },
+    'out-car': { bodypart: [], level: 13, code: 'OC', work: Role.outCarry },
+    'out-carry': { bodypart: [], level: 13, code: 'OC', work: Role.outCarry },
+    'out-build': { bodypart: [], level: 12, code: 'OB', work: Role.outBuild },
+    'out-defend': { bodypart: [], level: 8, code: 'OD', action: Role.outDefend },
+    'out-2Attack': { bodypart: [], level: 8, code: 'O2A', action: Role.out2Attack },
+    'out-2Heal': { bodypart: [], level: 8, code: 'O2H', action: Role.out2Heal },
+    'out-invader': { bodypart: [], level: 10, code: 'OI', action: Role.outInvader },
     'out-attack': {
         bodypart: [[ATTACK, 19], [MOVE, 25], [HEAL, 6]],
-        level: 9, code: 'OA', action: RoleAction.outAttack
+        level: 9, code: 'OA', action: Role.outAttack
     },
     'out-ranged': {
         bodypart: [[RANGED_ATTACK, 15], [MOVE, 25], [HEAL, 10]],
-        level: 9, code: 'OR', action: RoleAction.outRanged
+        level: 9, code: 'OR', action: Role.outRanged
     },
-    'out-miner': {
+    'out-mineral': {
         bodypart: [[WORK, 30], [CARRY, 5], [MOVE, 15]],
-        level: 12, code: 'OM', work: RoleAction.outMineral
+        level: 12, code: 'OMR', work: Role.outMineral
     },
 
     /* 沉积物 */
     'deposit-harvest': {
         bodypart: [[WORK, 20], [ATTACK, 2], [CARRY, 6], [MOVE, 22]],
-        level: 11, code: 'DH', work: RoleAction.deposit_harvest
+        level: 11, code: 'DH', work: Role.deposit_harvest
     },
     'deposit-transfer': {
         bodypart: [[CARRY, 25], [MOVE, 25]],
-        level: 11, code: 'DT', work: RoleAction.deposit_transfer
+        level: 11, code: 'DT', work: Role.deposit_transfer
     },
     'deposit-attack': {
         bodypart: [[ATTACK, 25], [MOVE, 25]],
-        level: 8, code: "DPA", action: RoleAction.deposit_attack
+        level: 8, code: "DPA", action: Role.deposit_attack
     },
     'deposit-heal': {
         bodypart: [[HEAL, 25], [MOVE, 25]],
-        level: 8, code: 'DPH', action: RoleAction.deposit_heal
+        level: 8, code: 'DPH', action: Role.deposit_heal
     },
     'deposit-ranged': {
         bodypart: [[RANGED_ATTACK, 17], [MOVE, 25], [HEAL, 8]],
-        level: 8, code: "DPR", action: RoleAction.deposit_ranged
+        level: 8, code: "DPR", action: Role.deposit_ranged
     },
 
     /* Power */
     'power-attack': {
         bodypart: [[TOUGH, 5], [MOVE, 25], [ATTACK, 20]],
-        level: 10, code: 'PA', action: RoleAction.power_attack
+        level: 10, code: 'PA', action: Role.power_attack
     },
     'power-heal': {
         bodypart: [[MOVE, 25], [HEAL, 25]],
-        level: 10, code: 'PH', action: RoleAction.power_heal
+        level: 10, code: 'PH', action: Role.power_heal
     },
     'power-carry': {
         bodypart: [[MOVE, 25], [CARRY, 25]],
-        level: 9, code: 'PC', work: RoleAction.power_carry
+        level: 9, code: 'PC', work: Role.power_carry
     },
     'power-ranged': {
         bodypart: [[MOVE, 25], [RANGED_ATTACK, 17], [HEAL, 8]],
-        level: 11, code: 'PR', action: RoleAction.power_ranged
+        level: 11, code: 'PR', action: Role.power_ranged
     },
 
 }

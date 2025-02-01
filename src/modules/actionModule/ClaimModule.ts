@@ -25,7 +25,7 @@ const ClaimModule = {
                 continue;
             }
 
-            // 拆除房间
+            // 清扫房间 (用于防御薄弱的房间)
             if (flagName.startsWith('CLEAN/')) {
                 // 孵化间隔
                 let spawnInterval = flagName.match(/\/T-(\d+)/)?.[1] as any;
@@ -44,14 +44,11 @@ const ClaimModule = {
                 
                 // 目标房间
                 const targetRoom = Game.flags[flagName].pos.roomName;
-                const isNotCenterRoom = !(/^[EW]\d*[456][NS]\d*[456]$/.test(targetRoom)); // 非中间房间
-                const isNotHighway = /^[EW]\d*[1-9][NS]\d*[1-9]$/.test(targetRoom); // 非过道房间
-                if (isNotCenterRoom && isNotHighway &&
-                    (!Game.rooms[targetRoom] || !Game.rooms[targetRoom].my)) {
-                    room.SpawnMissionAdd('', [], -1, 'cleaner',{
-                        targetRoom: targetRoom
-                    } as any);
-                }
+                
+                room.SpawnMissionAdd('', [], -1, 'cleaner',{
+                    targetRoom: targetRoom
+                } as any);
+                
 
                 flagMemory['lastTime'] = Game.time;
                 continue;

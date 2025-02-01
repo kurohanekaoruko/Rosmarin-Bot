@@ -105,10 +105,10 @@ const outCarry = {
             }
         }
 
-        // 如果没有可以拿的资源，移动到最近的out-harvest身边，或者out-miner身边
+        // 如果没有可以拿的资源，移动到最近的out-harvest身边，或者out-mineral身边
         // 优先miner
         const nearestMiner = creep.pos.findClosestByRange(FIND_MY_CREEPS, {
-            filter: (c) => c.memory.role === 'out-miner'
+            filter: (c) => c.memory.role === 'out-mineral'
         });
         if (nearestMiner) {
             if(!creep.pos.inRangeTo(nearestMiner, 1) || nearestMiner.store.getUsedCapacity() > 0) {

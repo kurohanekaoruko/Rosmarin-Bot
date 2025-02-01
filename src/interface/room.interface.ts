@@ -58,27 +58,32 @@ interface Room {
     // 全部建筑工作
     StructureWork(): void;
 
-    // 呼叫全体tower对目标发起攻击
+    /** 呼叫全体tower对目标发起攻击 */
     CallTowerAttack(target: any): void;
-    // 计算全部Tower对某个creep可能造成的实际伤害
+    /** 计算全部Tower对某个creep可能造成的实际伤害 */
     TowerDamageToCreep(creep: Creep): number;
-    // 治疗房间内的己方单位
+    /** 治疗房间内的己方单位 */
     TowerHealCreep(): boolean;
-    // Tower攻击敌人
+    /** Tower攻击敌人 */
     TowerAttackEnemy(): boolean;
-    // Tower攻击NPC
+    /** Tower攻击NPC */
     TowerAttackNPC(): boolean;
-    // Tower自动修复被攻击的建筑物
+    /** Tower自动修复被攻击的建筑物 */
     TowerAutoRepair(): boolean;
-    // Tower根据任务修复建筑
+    /** Tower根据任务修复建筑 */
     TowerTaskRepair(): boolean;
 
-    // 孵化信息可视化
+    /** 孵化信息可视化 */
     VisualSpawnInfo(): void;
     /** 获取孵化任务的相关数据 */
     GetSpawnTaskData(): { bodypart: BodyPartConstant[], name: string, memory: CreepMemory, taskId: string, cost: number };
     /** 孵化Creep */
     SpawnCreep(): void;
+
+    /** Lab信息可视化 */
+    VisualLabInfo(): void;
+    /** Lab反应 */
+    RunReaction(): void;
 
     // 计算中心点
     CacheCenterPos(): void;

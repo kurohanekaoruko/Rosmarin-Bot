@@ -8,7 +8,7 @@ interface Creep {
 
     moveHomeRoom(): boolean;
     moveToRoom(roomName: string, options?:{[key: string]: any}): any;
-    doubleMoveTo(target: RoomPosition, color?: string, ignoreCreeps?: boolean): number | boolean;
+    doubleMoveTo(target: RoomPosition, color?: string, ops?: any): number | boolean;
     doubleMoveToRoom(roomName: string, color?: string): boolean;
     doubleFlee(): number;
     doubleToAttack(target: Creep | Structure): number | boolean

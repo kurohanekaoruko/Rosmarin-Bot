@@ -2,9 +2,6 @@ function FlagActionMove(creep: Creep) {
     const name = creep.name.match(/#(\w+)/)?.[1] ?? creep.name;
     const moveflag = Game.flags[`2D-${name}-MOVE`];
     if(moveflag && !creep.pos.inRangeTo(moveflag.pos, 0)) {
-        if(creep.room.name !== moveflag.pos.roomName) {
-            creep.memory.targetRoom = moveflag.pos.roomName;
-        }
         creep.doubleMoveTo(moveflag.pos, '#ffff00')
     }
     if (moveflag) return true;
@@ -13,19 +10,19 @@ function FlagActionMove(creep: Creep) {
 function FlagActionDismantle(creep: Creep) {
     const name = creep.name.match(/#(\w+)/)?.[1] ?? creep.name;
     const disflag = Game.flags[`2D-${name}-DIS`] || Game.flags['DIS-' + creep.memory.targetRoom];
-    if(disflag) {
-        if (creep.room.name !== disflag.pos.roomName) {
-            creep.doubleMoveTo(disflag.pos, '#ffff00');
-            return true;
-        }
-        const structures = disflag.pos.lookFor(LOOK_STRUCTURES);
-        if(structures.length > 0) {
-            const targetStructure = structures.find((s) => s.structureType == STRUCTURE_RAMPART) || structures[0];
-            creep.doubleToDismantle(targetStructure);
-            return true;
-        }
+    if (!disflag) return false;
+    
+    if (creep.room.name !== disflag.pos.roomName) {
+        creep.doubleMoveTo(disflag.pos, '#ffff00');
+        return true;
     }
-    if (disflag) return true;
+    const structures = disflag.pos.lookFor(LOOK_STRUCTURES);
+    if(structures.length > 0) {
+        const targetStructure = structures.find((s) => s.structureType == STRUCTURE_RAMPART) || structures[0];
+        creep.doubleToDismantle(targetStructure);
+        return true;
+    }
+    return true;
 }
 
 function AutoFindTarget(creep: Creep) {
@@ -80,40 +77,36 @@ function AutoFindTarget(creep: Creep) {
     creep.memory['targetId'] = targetStructure.id;
 }
 
-function DoubleDismantleAction(creep: Creep) {
-    // 旗帜移动
-    if (FlagActionMove(creep)) return;
+function AutoActionDismantle(creep: Creep) {
+    // 获取缓存的目标
+    let target = Game.getObjectById(creep.memory['targetId']) as Structure;
+
+    // 如果目标位于危险区域, 更换目标
+    if (target && target.pos.findInRange(FIND_HOSTILE_CREEPS, 6, {
+        filter: (c) => !c.isWhiteList() &&
+        (c.getActiveBodyparts(ATTACK) > 0 && c.pos.inRangeTo(creep, 3)) ||
+        (c.getActiveBodyparts(RANGED_ATTACK) > 0 && c.pos.inRangeTo(creep, 5))
+    })) {
+        creep.memory['targetId'] = null;
+        AutoFindTarget(creep);
+        target = Game.getObjectById(creep.memory['targetId']) as Structure;
+    }
 
     // 规避
     if (creep.pos.findInRange(FIND_HOSTILE_CREEPS, 6, {
         filter: (c) => !c.isWhiteList() &&
-        (c.getActiveBodyparts(ATTACK) > 0 || c.getActiveBodyparts(RANGED_ATTACK) > 0)
-    }).length > 0) {
+        (c.getActiveBodyparts(ATTACK) > 0 && c.pos.inRangeTo(creep, 5)) ||
+        (c.getActiveBodyparts(RANGED_ATTACK) > 0 && c.pos.inRangeTo(creep, 6))
+    }).length) {
         let result = creep.doubleFlee();
-        if (result === OK) {
-            creep.memory['targetId'] = null;
-            return;
-        }
+        if (result === OK) return true;
     }
 
-    // 拆除旗帜标记的目标
-    if (FlagActionDismantle(creep)) return;
-
-    // 获取缓存的目标
-    const target = Game.getObjectById(creep.memory['targetId']) as Structure;
     // 目标存在则行动
     if (target) {
         creep.doubleToDismantle(target);
-        return;
+        return true;
     }
-
-    // 移动到目标房间, 未到达房间不继续行动
-    if (creep.doubleMoveToRoom(creep.memory.targetRoom, '#ffff00')) return;
-    if (creep.room.my) return;
-    if (Game.time < (creep.memory.idle || 0)) return;
-
-    // 自动寻找目标
-    AutoFindTarget(creep);
 }
 
 
@@ -152,8 +145,21 @@ const double_dismantle = {
 
         creep.memory.dontPullMe = true;
     
-        // 主要行动
-        DoubleDismantleAction(creep);
+        // 旗帜移动
+        if (FlagActionMove(creep)) return;
+
+        // 手动标记行动
+        if (FlagActionDismantle(creep)) return;
+
+        // 自动行动
+        if (AutoActionDismantle(creep)) return;
+
+        // 移动到目标房间, 未到达房间不继续行动
+        if (creep.doubleMoveToRoom(creep.memory.targetRoom, '#ffff00')) return;
+        if (creep.room.my || Game.time < (creep.memory.idle||0)) return;
+
+        // 自动寻找目标
+        AutoFindTarget(creep);
     }
 }
 

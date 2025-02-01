@@ -42,7 +42,7 @@
     "inquirer": "^12.2.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-screeps": "^1.0.1",
-    "shelljs": "^0.8.5",
+    "shelljs": ">=0.8.5",
     "source-map": "^0.6.1",
     "source-map-js": "^1.0.2"
   }

@@ -53,7 +53,8 @@ export default class OutMine extends Room {
                 if (c.owner.username === 'Source Keeper') return false;
                 return true;
             })) {
-                out2DefendSpawn(this, targetRoom, hostiles)
+                // 二人小队防御
+                // outDoubleDefendSpawn(this, targetRoom, hostiles)
             } else {
                 outDefendSpawn(this, targetRoom, hostiles)
             }
@@ -451,12 +452,12 @@ const outRangedSpawn = function (homeRoom: Room, targetRoom: Room) {
 // 元素矿采集者
 const outMineSpawn = function (homeRoom: Room, targetRoom: Room) {
     const CreepByTargetRoom = getCreepByTargetRoom(targetRoom.name);
-    const outerMiners = (CreepByTargetRoom['out-miner'] || []).length;
-    const spawnNum = global.SpawnMissionNum[homeRoom.name]['out-miner'] || 0;
+    const outerMiners = (CreepByTargetRoom['out-mineral'] || []).length;
+    const spawnNum = global.SpawnMissionNum[homeRoom.name]['out-mineral'] || 0;
     if (outerMiners + spawnNum >= 1) return false;
 
     const memory = { homeRoom: homeRoom.name, targetRoom: targetRoom.name } as CreepMemory;
-    homeRoom.SpawnMissionAdd('OM', [], -1, 'out-miner', memory);
+    homeRoom.SpawnMissionAdd('OMR', [], -1, 'out-mineral', memory);
     return true;
 }
 
@@ -507,7 +508,7 @@ const outDefendSpawn = function (homeRoom: Room, targetRoom: Room, hostiles: Cre
     return false;
 }
 
-const out2DefendSpawn = function (homeRoom: Room, targetRoom: Room, hostiles: Creep[]) {
+const outDoubleDefendSpawn = function (homeRoom: Room, targetRoom: Room, hostiles: Creep[]) {
     if (hostiles.length == 0) return false;
 
     const CreepByTargetRoom = getCreepByTargetRoom(targetRoom.name);

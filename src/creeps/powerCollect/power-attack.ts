@@ -85,7 +85,7 @@ const power_attack = {
             const hostile = Game.getObjectById(creep.memory['hostile']) as Creep;
             if (hostile && hostile.pos.inRangeTo(powerBank.pos, 10)) {
                 if (creep.pos.isNearTo(hostile)) creep.attack(hostile);
-                creep.doubleMoveTo(hostile.pos, '#ff0000', false);
+                creep.doubleMoveTo(hostile.pos, '#ff0000');
                 return;
             } else {
                 delete creep.memory['hostile'];
@@ -112,7 +112,7 @@ const power_attack = {
             if (creep.hits >= creep.hitsMax / 2)
                 creep.attack(powerBank);
         } else {
-            creep.doubleMoveTo(powerBank.pos, '#aa0000', true);
+            creep.doubleMoveTo(powerBank.pos, '#aa0000', { ignoreCreeps: true });
         }
 
         return false;

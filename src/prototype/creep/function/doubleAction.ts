@@ -26,12 +26,12 @@ export default class DoubleAction extends Creep {
     }
 
     // 双人小队移动到目标
-    doubleMoveTo(target: RoomPosition, color='#ffffff', ignoreCreeps=false): number | boolean {
+    doubleMoveTo(target: RoomPosition, color='#ffffff', ops={}): number | boolean {
         const bindCreep = Game.getObjectById(this.memory.bind) as Creep;
         if(!bindCreep) return;
 
-        const ops = { visualizePathStyle: { stroke: color }}
-        ops['ignoreCreeps'] = ignoreCreeps;
+        ops['visualizePathStyle'] = { stroke: color };
+        if (!ops['ignoreCreeps']) ops['ignoreCreeps'] = false;
 
         if (this.pos.isNear(bindCreep.pos)) {
             // 疲劳时不移动
@@ -59,7 +59,7 @@ export default class DoubleAction extends Creep {
         if(!bindcreep) return;
         // 移动到目标房间
         if(this.room.name !== roomName) {
-            this.doubleMoveTo(new RoomPosition(25, 25, roomName), color, false);
+            this.doubleMoveTo(new RoomPosition(25, 25, roomName), color);
             return true;
         }
         // 躲边界

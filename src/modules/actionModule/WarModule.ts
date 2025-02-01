@@ -62,14 +62,80 @@ const WarModule = {
                 let spawnCount = flagName.match(/\/N-(\d+)/)?.[1] as any;
                 if (!spawnCount) spawnCount = 0;
                 else spawnCount = parseInt(spawnCount);
-                if (spawnCount != 0 && flagMemory['spawnCount'] >= spawnCount) {
+                if (flagMemory['spawnCount'] >= spawnCount) {
                     console.log(flagName, '孵化数量已满');
                     Game.flags[flagName].remove();
                 }
+                continue;
+            }
+
+            // 拆除房间 (用于墙厚的房间)
+            if (flagName.startsWith('DISMANTLE/')) {
+                // 孵化间隔
+                let spawnInterval = flagName.match(/\/T-(\d+)/)?.[1] as any;
+                if (!spawnInterval) spawnInterval = 1000;
+                else spawnInterval = parseInt(spawnInterval);
+
+                const flagMemory = Game.flags[flagName].memory;
+                if ((Game.time - (flagMemory['lastTime']||0) < spawnInterval)) continue;
+
+                // 孵化房间
+                const spawnRoom = flagName.match(/\/([EW][1-9]+[NS][1-9]+)/)?.[1];
+                const room = Game.rooms[spawnRoom];
+                if (!spawnRoom || !room.my) {
+                    Game.flags[flagName].remove();
+                    continue;
+                }
+
+                // 目标房间
+                const targetRoom = Game.flags[flagName].pos.roomName;
+
+                let bodys = [];
+                let boostmap = RoleData['dismantle'].boostmap || {};
+
+                // 配置
+                const B = flagName.match(/\/B-(\w+)/)?.[1];
+                if (B && RoleBodys['dismantle']?.[B]) {
+                    bodys = RoleBodys['dismantle'][B].bodypart || bodys;
+                    boostmap = RoleBodys['dismantle'][B].boostmap || boostmap
+                }
+
+                // 尝试添加boost任务
+                let boostResult = null;
+                if (bodys.length == 0) {
+                    boostResult = room.AssignBoostTaskByBody(RoleData['dismantle'].bodypart, boostmap);
+                } else {
+                    boostResult = room.AssignBoostTaskByBody(bodys, boostmap);
+                }
+                
+                // 返回false代表资源不足
+                if (!boostResult) {
+                    console.log(flagName, '没有足够的boost资源');
+                    Game.flags[flagName].remove();
+                    continue;
+                }
+
+                room.SpawnMissionAdd('', bodys, -1, 'dismantle', {
+                    targetRoom: targetRoom,
+                    boostmap: boostmap,
+                } as any);
+                flagMemory['lastTime'] = Game.time;
+                flagMemory['spawnCount'] = (flagMemory['spawnCount']||0) + 1;
+                console.log(flagName, '已添加孵化任务.');
+
+                // 孵化数量
+                let spawnCount = flagName.match(/\/N-(\d+)/)?.[1] as any;
+                if (!spawnCount) spawnCount = 0;
+                else spawnCount = parseInt(spawnCount);
+                if (flagMemory['spawnCount'] >= spawnCount) {
+                    console.log(flagName, '孵化数量已满');
+                    Game.flags[flagName].remove();
+                }
+                continue;
             }
 
             // 双人小队
-            // DOUBLE/类型/孵化房间/B-配置/N-孵化数量/T-孵化间隔
+            // DOUBLE/配置/孵化房间/N-孵化数量/T-孵化间隔
             if (flagName.startsWith('DOUBLE/')) {
                 // 孵化间隔
                 let spawnInterval = flagName.match(/\/T-(\d+)/)?.[1] as any;
@@ -89,27 +155,30 @@ const WarModule = {
 
                 // 目标房间
                 const targetRoom = Game.flags[flagName].pos.roomName;
-                // 类型
-                const type = flagName.match(/DOUBLE\/(\w+)/)?.[1] as any;
                 // 配置
-                const BodyBoost = flagName.match(/\/B-(\w+)/)?.[1];
+                const config = flagName.match(/DOUBLE\/(\w+)/)?.[1] as any;
+                // 类型
+                const body = config.split(0,2)
+                // boost配置
+                const boost = config.length > 2 ? config.split(2) : null;
 
                 let A_BODY: any, B_BODY: any;
 
-                if (type == 'ATTACK') {
-                    A_BODY = !BodyBoost ? RoleData['double-attack'] :
-                        RoleBodys['double-attack'][BodyBoost] || RoleData['double-attack'];
-                    B_BODY = !BodyBoost ? RoleData['double-heal']:
-                        RoleBodys['double-heal'][BodyBoost] || RoleData['double-heal'];
-                }  else if (type == 'DISMANTLE' || type == 'DIS') {
-                    A_BODY = !BodyBoost ? RoleData['double-dismantle']:
-                        RoleBodys['double-dismantle'][BodyBoost] || RoleData['double-dismantle'];
-                    B_BODY = !BodyBoost ? RoleData['double-heal']:
-                        RoleBodys['double-heal'][BodyBoost] || RoleData['double-heal'];
+                if (body == '2A') {
+                    A_BODY = !boost ? RoleData['double-attack'] :
+                        RoleBodys['double-attack'][boost] || RoleData['double-attack'];
+                    B_BODY = !boost ? RoleData['double-heal']:
+                        RoleBodys['double-heal'][boost] || RoleData['double-heal'];
+                }
+                else if (body == '2D') {
+                    A_BODY = !boost ? RoleData['double-dismantle']:
+                        RoleBodys['double-dismantle'][boost] || RoleData['double-dismantle'];
+                    B_BODY = !boost ? RoleData['double-heal']:
+                        RoleBodys['double-heal'][boost] || RoleData['double-heal'];
                 }
 
                 if (!A_BODY || !B_BODY) {
-                    console.log(flagName, `不支持的二人小队类型${type}`);
+                    console.log(flagName, `不支持的二人小队类型${body}`);
                     Game.flags[flagName].remove();
                     continue;
                 }
@@ -128,7 +197,7 @@ const WarModule = {
                 room.AssignBoostTaskByBody(A_BODY.bodypart, A_BODY.boostmap);
                 room.AssignBoostTaskByBody(B_BODY.bodypart, B_BODY.boostmap);
 
-                if (type == 'ATTACK') {
+                if (body == '2A') {
                     // 添加孵化任务
                     room.SpawnMissionAdd('', A_BODY.bodypart, -1, 'double-attack', {
                         targetRoom: targetRoom,
@@ -140,7 +209,7 @@ const WarModule = {
                         boostmap: B_BODY.boostmap,
                         squad: 'attack'
                     } as any)
-                } else if (type == 'DISMANTLE' || type == 'DIS') {
+                } else if (body == '2D') {
                     // 添加孵化任务
                     room.SpawnMissionAdd('', A_BODY.bodypart, -1, 'double-dismantle', {
                         targetRoom: targetRoom,
@@ -156,7 +225,7 @@ const WarModule = {
 
                 flagMemory['lastTime'] = Game.time;
                 flagMemory['spawnCount'] = (flagMemory['spawnCount']||0) + 1;
-                console.log(flagName, `已添加一支${type}二人小队的孵化任务`);
+                console.log(flagName, `已添加一支二人小队的孵化任务, 配置${config}`);
 
                 // 孵化数量
                 let spawnCount = flagName.match(/\/N-(\d+)/)?.[1] as any;

@@ -7,7 +7,7 @@ export default class TowerControl extends Room {
         });
     }
 
-    /** 呼叫全体tower对目标发起治疗 */
+    /** 呼叫全体tower对目标治疗 */
     CallTowerHeal(target: any) {
         this.tower.forEach(tower => {
             if (tower.store['energy'] < 10) return;
@@ -15,7 +15,7 @@ export default class TowerControl extends Room {
         });
     }
 
-    /** 呼叫全体tower对目标发起维修 */
+    /** 呼叫全体tower对目标维修 */
     CallTowerRepair(target: any, energy: number = 10) {
         this.tower.forEach(tower => {
             if (tower.store['energy'] < energy) return;
@@ -43,9 +43,12 @@ export default class TowerControl extends Room {
         return _.sum(this.tower, tower => {
             if (tower.store.energy < 10) return 0;
             let ratio = 1;
-            if (tower.effects && tower.effects.length) tower.effects.forEach(effect => {
-                if (effect.effect == PWR_OPERATE_TOWER) ratio = POWER_INFO[effect.effect].effect[effect.level];
-            });
+            if (tower.effects && tower.effects.length) {
+                tower.effects.forEach(effect => {
+                    if (effect.effect !== PWR_OPERATE_TOWER) return;
+                    ratio = POWER_INFO[effect.effect].effect[effect.level];
+                });
+            }
             return this.TowerDamage(tower.pos.getRangeTo(pos)) * ratio;
         });
     }
@@ -59,6 +62,7 @@ export default class TowerControl extends Room {
         if (creep['_towerDamage']) return creep['_towerDamage'];
         // tower伤害
         let towerDamage = this.TowerTotalDamage(creep.pos) || 0;
+        if (this.my && this.controller.safeMode) return towerDamage;
         // tough减伤后的伤害
         let realDamage = 0; // 实际伤害
         creep.body?.forEach(part => {
@@ -205,9 +209,13 @@ export default class TowerControl extends Room {
         if (!global.towerTargets) global.towerTargets = {};
         if (Game.time % 10 == 0) {
             global.towerTargets[this.name] = 
-                this.find(FIND_HOSTILE_CREEPS)
+                [
+                    ...this.find(FIND_HOSTILE_CREEPS)
+                    .filter(c => !c.isWhiteList())
+                    .map(c => c.id),
+                    ...this.find(FIND_HOSTILE_POWER_CREEPS)
                     .filter(c => !Memory['whitelist']?.includes(c.owner.username))
-                    .map(c => c.id);
+                ]
         }
         if (!global.towerTargets[this.name] ||
             global.towerTargets[this.name].length == 0) return false;
@@ -216,17 +224,20 @@ export default class TowerControl extends Room {
                         .map((id: Id<Creep>) => Game.getObjectById(id))
                         .filter((c: Creep | null) => c) as Creep[] | PowerCreep[];
         if (Hostiles.length == 0) return false;
-        // 算伤排序
-        Hostiles.sort((a: any, b: any) => {
-            let A = this.TowerDamageToCreep(a);
-            let B = this.TowerDamageToCreep(b);
-            return B - A;
-        });
+
+
+        // 算伤
+        let hostile = Hostiles.reduce((a, b) => {
+            let A = this.TowerDamageToCreep(a as any);
+            let B = this.TowerDamageToCreep(b as any);
+            if (A > B) return a;
+            else return b;
+        })
 
         // 攻击
-        if (this.TowerDamageToCreep(Hostiles[0] as any) > 0) {
+        if (this.TowerDamageToCreep(hostile as any) > 0) {
             this.tower.forEach(tower => {
-                tower.attack(Hostiles[0]);
+                tower.attack(hostile);
             })
             return true;
         }

@@ -19,6 +19,7 @@ export default class PowerCreepUsePower extends PowerCreep {
         return false;
     }
     Regen_Source() {
+        if (this.room.memory.defend) return false;
         const powers = this.powers;
         // 没有技能时不处理
         if(!powers[PWR_REGEN_SOURCE]) return false;

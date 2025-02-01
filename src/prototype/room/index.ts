@@ -4,8 +4,10 @@ import ActiveDefend from "./function/activeDefend"
 import OutMine from "./function/outMine"
 
 import StructureWork from "./structure/structureWork"
-import TowerControl from "./structure/towerControl"
 import SpawnControl from "./structure/spawnControl"
+import TowerControl from "./structure/towerControl"
+import LabControl from "./structure/labControl"
+
 
 import RoomInit from "./init"
 
@@ -28,8 +30,9 @@ const plugins = [
     OutMine,        // 外矿采集
 
     StructureWork,  // 建筑物工作
-    TowerControl,   // 塔防控制
     SpawnControl,   // 孵化控制
+    LabControl,     // Lab控制
+    TowerControl,   // 塔防控制
     
     AutoMarket,     // 自动市场交易
     AutoBuild,      // 自动建筑
