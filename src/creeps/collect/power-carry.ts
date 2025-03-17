@@ -24,8 +24,8 @@ const power_carry = {
         if (powerBank) {
             creep.memory['powerBankId'] = powerBank.id;
             // 靠近powerBank
-            if (!creep.pos.inRangeTo(powerBank, 4)) {
-                creep.moveTo(powerBank, {range: 4, ignoreCreeps: false});
+            if (!creep.pos.inRangeTo(powerBank, 3)) {
+                creep.moveTo(powerBank, {range: 3, ignoreCreeps: false});
                 return false;
             }
         }

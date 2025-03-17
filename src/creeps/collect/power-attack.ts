@@ -1,3 +1,25 @@
+// 未绑定时的行动
+const noBindAction = (creep: Creep) => {
+    let hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 8) || [];
+    if (hostiles.length == 0) return;
+    const healHostiles = hostiles.filter((c: any) => c.body.some((p: any) => p.type == HEAL));
+    if (healHostiles.length > 0) {
+        const hostile = creep.pos.findClosestByRange(healHostiles);
+        if (creep.pos.isNearTo(hostile)) creep.attack(hostile);
+        creep.moveTo(hostile);
+        return;
+    } 
+    const attackHostiles = hostiles.filter((c: any) => c.body.some((p: any) => p.type == ATTACK || p.type == RANGED_ATTACK));
+    if (attackHostiles.length > 0) {
+        const hostile = creep.pos.findClosestByRange(attackHostiles);
+        if (creep.pos.isNearTo(hostile)) creep.attack(hostile);
+        creep.moveTo(hostile);
+        return;
+    }
+}
+
+
+
 const power_attack = {
     run: function(creep: Creep) {
         if (!creep.memory.notified) {
@@ -17,26 +39,12 @@ const power_attack = {
             return;
         }
 
-        if (!creep.memory.bind && creep.room.name == creep.memory.targetRoom) {
-            let hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 8) || [];
-            if (hostiles.length == 0) return;
-            const healHostiles = hostiles.filter((c: any) => c.body.some((p: any) => p.type == HEAL));
-            if (healHostiles.length > 0) {
-                const hostile = creep.pos.findClosestByRange(healHostiles);
-                if (creep.pos.isNearTo(hostile)) creep.attack(hostile);
-                creep.moveTo(hostile);
-                return;
-            } 
-            const attackHostiles = hostiles.filter((c: any) => c.body.some((p: any) => p.type == ATTACK || p.type == RANGED_ATTACK));
-            if (attackHostiles.length > 0) {
-                const hostile = creep.pos.findClosestByRange(attackHostiles);
-                if (creep.pos.isNearTo(hostile)) creep.attack(hostile);
-                creep.moveTo(hostile);
-                return;
+        if (!creep.memory.bind) {
+            if (creep.room.name == creep.memory.targetRoom) {
+                noBindAction(creep);
             }
+            return; // 等待绑定
         }
-        if (!creep.memory.bind) return; // 等待绑定
-        
 
         const bindcreep = Game.getObjectById(creep.memory.bind) as Creep;
         if (!bindcreep) {
@@ -54,9 +62,9 @@ const power_attack = {
         }
         if (!powerBank) {
             if(Game.time % 5 === 0){
-                creep.suicide();
-                const bindCreep = Game.getObjectById(creep.memory.bind) as Creep;
-                bindCreep?.suicide();
+                // creep.suicide();
+                // const bindCreep = Game.getObjectById(creep.memory.bind) as Creep;
+                // bindCreep?.suicide();
                 if (Memory.rooms[creep.memory.homeRoom]?.['powerMine']?.[creep.memory.targetRoom]) {
                     delete Memory.rooms[creep.memory.homeRoom]['powerMine'][creep.memory.targetRoom];
                     console.log(`${creep.memory.targetRoom} 的 PowerBank 已耗尽, 已移出开采队列。`);
@@ -70,13 +78,12 @@ const power_attack = {
             let hostiles = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 8, {
                 filter: (c) => c.pos.inRangeTo(powerBank.pos, 8)
             }) || [];
-
             const attackHostiles = hostiles.filter((c: any) => c.body.some((p: any) => p.type == ATTACK || p.type == RANGED_ATTACK));
             const healHostiles = hostiles.filter((c: any) => c.body.some((p: any) => p.type == HEAL));
             let hostile = creep.pos.findClosestByRange([...healHostiles, ...attackHostiles]) ||
                             creep.pos.findClosestByRange(hostiles, {
-                                filter: (c) => c.pos.inRangeTo(powerBank.pos, 5) &&
-                                        c.body.some((p: any) => p.type == CARRY)
+                                filter: (c) => c.pos.inRangeTo(powerBank.pos, 3) &&
+                                c.body.some((p: any) => p.type == CARRY)
                             });
             if (hostile) creep.memory['hostile'] = hostile.id;
         }
@@ -86,6 +93,12 @@ const power_attack = {
             const hostile = Game.getObjectById(creep.memory['hostile']) as Creep;
             if (hostile && hostile.pos.inRangeTo(powerBank.pos, 10)) {
                 if (creep.pos.isNearTo(hostile)) creep.attack(hostile);
+                else {
+                    const nearCreeps = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 1, {
+                        filter: (c) => !Memory['whitelist'].includes(c.owner.username)
+                    }) || [];
+                    if (nearCreeps.length > 0) creep.attack(nearCreeps[0]);
+                }
                 if (!hostile.getActiveBodyparts(ATTACK)) {
                     creep.doubleMoveTo(hostile.pos, '#ff0000');
                 }

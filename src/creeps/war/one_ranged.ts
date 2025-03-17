@@ -22,7 +22,7 @@ const one_ranged = {
         let moveOK = false;
         let rangedOK = false;
     
-        const name = creep.name.match(/#(\w+)/)?.[1] ?? creep.name;
+        const name = creep.name.match(/_(\w+)/)?.[1] ?? creep.name;
         const moveflag = Game.flags[name + '-move'];
         if(moveflag) {
             if(creep.room.name !== moveflag.pos.roomName) {

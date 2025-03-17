@@ -12,11 +12,13 @@ export const ResourceManage = {
         for (const roomName in Memory['RoomControlData']) {
             const room = Game.rooms[roomName];
             if (!room || !room.my || !room.terminal || !room.storage || room.level < 6 ||
-                Game.flags[`${roomName}_balance_stop`] ||
+                Game.flags[`${roomName}/NOBALANCE`] ||
                 room.terminal.owner.username != room.controller.owner.username ||
                 room.storage.owner.username != room.controller.owner.username ||
                 room.tower.length < CONTROLLER_STRUCTURES['tower'][room.level]
             ) continue;
+
+            if (!room.terminal.pos.inRangeTo(room.storage.pos, 2)) continue;
 
             let Ress = [...Object.keys(ResManageMem[roomName]||{}), ...Object.keys(RESOURCE_BALANCE)];
             Ress = [...new Set(Ress)];

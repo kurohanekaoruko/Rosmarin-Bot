@@ -3,14 +3,14 @@ import { createApp } from '@/framework/createApp';
 import { PrototypeExtension } from '@/prototype';
 import { ConsoleExtension } from '@/console';
 
-import { GlobalInit, MemoryInit } from '@/init';
+import { MemoryInit, GlobalInit } from '@/init';
+import { EventModule } from '@/event';
 
 import { roomControl } from '@/boot/RoomControl'
 import { creepControl } from '@/boot/CreepControl'
 import { powerControl } from '@/boot/PowerControl'
 import { flagControl } from '@/boot/FlagControl'
 
-import { EventModule } from '@/modules/EventModule';
 import { ClearModule  } from '@/modules/function/ClearModule';
 import { GeneratePixel } from '@/modules/function/Pixel';
 import { Statistics } from '@/modules/function/Statistics'
@@ -42,9 +42,9 @@ App.on(MemoryInit);     // 初始化内存
 
 App.on(GlobalInit);     // 全局变量模块
 
-App.on(TeamModule);     // 小队模块
-
 App.on(EventModule);    // 事件模块
+
+App.on(TeamModule);     // 小队模块
 
 App.on(FlagSpawn);      // 旗帜触发孵化
 

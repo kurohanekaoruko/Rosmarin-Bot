@@ -1,4 +1,5 @@
 {
+  "types": ["screeps"],
   "compilerOptions": {
     "target": "ES2017", // 指定 ECMAScript 目标版本
     "module": "esnext", // 指定模块系统的类型

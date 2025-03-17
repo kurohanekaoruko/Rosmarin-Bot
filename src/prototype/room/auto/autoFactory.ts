@@ -16,13 +16,7 @@ export default class AutoFactory extends Room {
         const components = COMMODITIES[Product]?.components;
 
         // 未超限额, 原料充足, 则不变更任务
-        if (Product && components &&
-            (amount <= 0 || this.getResAmount(Product) < amount) &&
-            Object.keys(components).every((c: any) =>
-                (Goods.includes(c) && this.getResAmount(c) >= components[c]) ||
-                this.getResAmount(c) >= 1000 || this.factory.store[c] >= components[c]
-            )
-        ) return;
+        if (checkTask(this, Product, components, amount)) return;
 
         if (Product) {
             botmem.factoryProduct = null;
@@ -35,27 +29,8 @@ export default class AutoFactory extends Room {
         if (!autoFactoryMap || !Object.keys(autoFactoryMap).length) return;
 
         // 查找未到达限额且原料足够的任务
-        let task = null;
-        let lv = -Infinity;
-        for (const res in autoFactoryMap) {
-            const level = COMMODITIES[res].level || 0;
-            if (level <= lv) continue;
-            const components = COMMODITIES[res].components;
-            const amount = autoFactoryMap[res];
-            if (amount > 0 && this.getResAmount(res) >= amount * 0.9) continue;
-            if (Goods.includes(res as any)) {
-                if (Object.keys(components).some((c: any) =>
-                    this.getResAmount(c) < components[c] * 10)) continue;
-            } else {
-                if (Object.keys(components).some((c: any) =>
-                    this.getResAmount(c) < 10000)) continue;
-            }
-            task = res;
-            lv = level;
-        }
-
-        let taskAmount: number = 0;
-        if (task) taskAmount = autoFactoryMap[task];
+        let task = getTask(this, autoFactoryMap);
+        let taskAmount = task ? autoFactoryMap[task] : 0;
 
         if (!task) task = getBasicCommoditiesTask(this);
 
@@ -71,6 +46,40 @@ export default class AutoFactory extends Room {
     }
 }
 
+// 检查是否继续现有任务
+const checkTask = (room: Room, Product: string, components: any, amount: number) => {
+    if (!Product || !components) return false;
+    if (amount <= 0 || room.getResAmount(Product) < amount) {
+        return Object.keys(components).every((c: any) =>
+            (Goods.includes(c) && room.getResAmount(c) >= components[c]) ||
+            room.getResAmount(c) >= 1000 || room.factory.store[c] >= components[c]
+        )
+    } else {
+        return false;
+    }
+}
+
+const getTask = (room: Room, autoFactoryMap: any) => {
+    let task = null;
+    let lv = -Infinity;
+    for (const res in autoFactoryMap) {
+        const level = COMMODITIES[res].level || 0;
+        if (level <= lv) continue;
+        const components = COMMODITIES[res].components;
+        const amount = autoFactoryMap[res];
+        if (amount > 0 && room.getResAmount(res) >= amount * 0.9) continue;
+        if (Goods.includes(res as any)) {
+            if (Object.keys(components).some((c: any) =>
+                room.getResAmount(c) < components[c] * 10)) continue;
+        } else {
+            if (Object.keys(components).some((c: any) =>
+                room.getResAmount(c) < 10000)) continue;
+        }
+        task = res;
+        lv = level;
+    }
+    return task;
+}
 
 function getBasicCommoditiesTask(room: Room) {
     if (room.getResAmount(RESOURCE_SILICON) >= 5000 &&

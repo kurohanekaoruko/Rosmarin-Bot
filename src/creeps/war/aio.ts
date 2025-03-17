@@ -1,5 +1,5 @@
 let autoAttack = (creep) => {
-    const name = creep.name.match(/#(\w+)/)?.[1] ?? creep.name;
+    const name = creep.name.match(/_(\w+)/)?.[1] ?? creep.name;
     let flag = Game.flags[`aio-${name}`];
 
     let em = Game.getObjectById(creep.memory.targetId) as Creep | Structure;
@@ -143,7 +143,7 @@ const aio = {
 
         
 
-        const name = creep.name.match(/#(\w+)/)?.[1] ?? creep.name;
+        const name = creep.name.match(/_(\w+)/)?.[1] ?? creep.name;
         const moveflag = Game.flags[name + '-move'];
         if (moveflag) {
             if (creep.room.name !== moveflag.pos.roomName) {

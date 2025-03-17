@@ -124,11 +124,13 @@ class Team {
     // 移动行为
     execMove(): void {
         if (this.moved) return;
-
+        
         // 队伍集结
+        const isLinear = TeamUtils.isLinear(this);
         if (this.formation === 'line' &&
             TeamUtils.inSameRoom(this) &&
-            !TeamUtils.isLinear(this)) {
+            !isLinear
+        ) {
             this.moved = TeamAction.Gather(this);
             return;
         }
@@ -137,21 +139,28 @@ class Team {
         if (!this.flag) return;
         if (this.creeps.some(c => c.fatigue > 0)) return;
         const isQuad = TeamUtils.isQuad(this);
+        const inSamaRoom = TeamUtils.inSameRoom(this);
         const hasOnEdge = TeamUtils.hasCreepOnEdge(this);
 
         // 线性队形转方阵队形
-        if (this.formation !== 'quad') {
+        if (this.formation === 'line') {
             const roomName = this.creeps[0].room.name;
             const exits = Game.map.describeExits(this.targetRoom);
             const isInExits = [...Object.values(exits), this.targetRoom].includes(roomName);
             if (isQuad && isInExits) this.formation = 'quad';
-            if (this.creeps.length >= 3 && TeamUtils.inSameRoom(this) &&
-                !hasOnEdge && !isQuad && isInExits
-            ) {
+            if (this.creeps.length >= 3 && inSamaRoom &&
+                !hasOnEdge && !isQuad && isInExits) {
                 if (TeamAction.formLineToQuad(this)) {
                     this.moved = true;
                     return;
                 }
+            }
+        }
+        // 特殊情况归位
+        else if (!isQuad && isLinear && !hasOnEdge && this.creeps.length >= 3) {
+            if (TeamAction.formLineToQuad(this)) {
+                this.moved = true;
+                return;
             }
         }
 

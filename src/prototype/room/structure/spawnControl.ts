@@ -147,9 +147,9 @@ export function GenCreepName(code: string) {
     const index = Math.floor(Game.time * Math.random() * 1000) % CreepNameConstant.length;
     let name: string;
     if (CreepNameConstant && CreepNameConstant.length) {
-        name = `【${CreepNameConstant[index]}】${code}#${number}`;
+        name = `【${CreepNameConstant[index]}】${code}_${number}`;
     } else {
-        name = `${code}#${number}`;
+        name = `${code}_${number}`;
     }
     if (Game.creeps[name]) {
         return GenCreepName(code);

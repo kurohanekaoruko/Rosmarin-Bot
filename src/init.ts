@@ -21,7 +21,7 @@ let MemoryDataInit = () => {
 
 export const MemoryInit = {
     init: MemoryDataInit,
-    tickStart: MemoryDataInit,
+    start: MemoryDataInit,
 }
 
 /**
@@ -34,7 +34,7 @@ export const GlobalInit = {
         global.BOT_NAME = BaseConfig.BOT_NAME;
         global.cache = {};
     },
-    tickStart() {
+    start() {
         if(!global.cache) global.cache = {};
     }
 }

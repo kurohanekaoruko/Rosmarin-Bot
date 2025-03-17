@@ -1,6 +1,6 @@
 /** 统计模块 */
 export const Statistics = {
-    tickEnd: function() {
+    end: function() {
         if (!Memory['OpenStats']) return;
         if (!Memory.stats) Memory.stats = {}
 

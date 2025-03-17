@@ -69,7 +69,7 @@ const dismantle = {
             return
         }
         
-        let name = creep.name.match(/#(\w+)/)?.[1] ?? creep.name;
+        let name = creep.name.match(/_(\w+)/)?.[1] ?? creep.name;
         const moveflag = Game.flags[name + '-move'];
         if(moveflag && !creep.pos.isEqual(moveflag.pos)) {
             creep.moveTo(moveflag.pos, {
@@ -79,7 +79,7 @@ const dismantle = {
         }
         if (moveflag) return true;
         
-        name = creep.name.match(/#(\w+)/)?.[1] ?? creep.name;
+        name = creep.name.match(/_(\w+)/)?.[1] ?? creep.name;
         const disflag = Game.flags[name + '-dis'] || Game.flags['dis-' + creep.room.name];
         if(disflag) {
             const enemiesStructures = disflag.pos.lookFor(LOOK_STRUCTURES);

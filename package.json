@@ -1,6 +1,6 @@
 {
   "name": "rosmarin",
-  "version": "3.7.0",
+  "version": "4.0.0",
   "description": "",
   "type": "module",
   "scripts": {
@@ -8,7 +8,8 @@
     "push": "rollup -cw --environment DEST:main",
     "sim": "rollup -cw --environment DEST:sim",
     "local": "rollup -cw --environment DEST:local",
-    "commit": "git add . && git-cz"
+    "commit": "git add . && git-cz",
+    "submit": "node ./scripts/submit.js"
   },
   "keywords": [],
   "author": "",

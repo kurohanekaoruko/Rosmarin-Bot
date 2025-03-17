@@ -1,5 +1,5 @@
 function FlagActionMove(creep: Creep) {
-    const name = creep.name.match(/#(\w+)/)?.[1] ?? creep.name;
+    const name = creep.name.match(/_(\w+)/)?.[1] ?? creep.name;
     const moveflag = Game.flags[`2A-${name}-MOVE`];
     if(moveflag && !creep.pos.inRangeTo(moveflag.pos, 0)) {
         if(creep.room.name !== moveflag.pos.roomName) {
@@ -11,7 +11,7 @@ function FlagActionMove(creep: Creep) {
 }
 
 function FlagActionAttack(creep: Creep) {
-    const name = creep.name.match(/#(\w+)/)?.[1] ?? creep.name;
+    const name = creep.name.match(/_(\w+)/)?.[1] ?? creep.name;
     const aFlag = Game.flags[`2A-${name}-attack`];
     if (!aFlag) return false;
 

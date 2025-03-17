@@ -104,7 +104,7 @@ const defend_attack = {
             creep.memory.boosted = creep.goBoost(boosts, creep.memory['mustBoost'], creep.memory['mustBoost']);
             return
         }
-        const name = creep.name.match(/#(\w+)/)?.[1] ?? creep.name;
+        const name = creep.name.match(/_(\w+)/)?.[1] ?? creep.name;
         const flag = Game.flags[name+'-defend'];
         if (!flag) autoDefend(creep);
         else flagDefend(creep, flag);

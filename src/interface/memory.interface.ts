@@ -1,4 +1,5 @@
 interface Memory {
+    stats: any;
     RoomControlData: { 
         [roomName: string]: {
             /** 运行模式 */

@@ -1,5 +1,5 @@
 function FlagActionMove(creep: Creep) {
-    const name = creep.name.match(/#(\w+)/)?.[1] ?? creep.name;
+    const name = creep.name.match(/_(\w+)/)?.[1] ?? creep.name;
     const moveflag = Game.flags[`2D-${name}-MOVE`];
     if(moveflag && !creep.pos.inRangeTo(moveflag.pos, 0)) {
         creep.doubleMoveTo(moveflag.pos, '#ffff00')
@@ -8,7 +8,7 @@ function FlagActionMove(creep: Creep) {
 }
 
 function FlagActionDismantle(creep: Creep) {
-    const name = creep.name.match(/#(\w+)/)?.[1] ?? creep.name;
+    const name = creep.name.match(/_(\w+)/)?.[1] ?? creep.name;
     const disflag = Game.flags[`2D-${name}-DIS`] || Game.flags['DIS-' + creep.memory.targetRoom];
     if (!disflag) return false;
     

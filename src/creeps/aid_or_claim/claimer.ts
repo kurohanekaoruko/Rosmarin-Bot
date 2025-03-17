@@ -12,7 +12,7 @@ const claimer = {
         }
 
         // 根据旗帜移动
-        const name = creep.name.match(/#(\w+)/)?.[1];
+        const name = creep.name.match(/_(\w+)/)?.[1];
         const moveflag = Game.flags[name + '-move'];
         if(moveflag) {
             if(creep.room.name !== moveflag.pos.roomName) {

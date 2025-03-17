@@ -5,7 +5,7 @@ import TeamRole from "./TeamRole";
 import TeamCalc from "./TeamClass/TeamCalc";
 
 const TeamModule = {
-    tickStart: function () {
+    start: function () {
         // 孵化四人小队
         if (Game.time % 10) return;
         for (const flagName in Game.flags) {
@@ -48,7 +48,7 @@ const TeamModule = {
             }
             
             // 配置
-            const config = flagName.match(/TEAM_([0-9A-Za-z]+)/)?.[1].toUpperCase();
+            const config = flagName.match(/TEAM_([0-9A-Za-z/]+)/)?.[1].toUpperCase();
             if (!config) {
                 console.log(`未设置四人小队配置.`);
                 flag.remove();
@@ -120,9 +120,10 @@ const TeamModule = {
             }
 
             // 孵化小队成员
-            for (const C of Team_Config) {
-                room.SpawnMissionAdd('', compressBodyConfig(C.bodypart), -1, C.role, {
-                    teamID, boostmap: {...C.boostmap}
+            for (const c of Team_Config) {
+                room.SpawnMissionAdd('',
+                    compressBodyConfig(c.bodypart), -1, c.role, {
+                    teamID, boostmap: {...c.boostmap}
                 } as any);
             }
 
