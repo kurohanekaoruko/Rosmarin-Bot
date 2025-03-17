@@ -1,5 +1,5 @@
 import { RoleData } from '@/constant/CreepConstant';
-import { decompressBodyConfig } from '@/utils/utils';
+import { decompressBodyConfig, GenCreepName } from '@/utils/utils';
 
 export default class SpawnControl extends Room {
     VisualSpawnInfo() {
@@ -129,31 +129,5 @@ export default class SpawnControl extends Room {
             global.log(`房间 ${this.name} 没有且不足以孵化 ${role}，已紧急孵化 universal。`);
             
         }
-    }
-}
-
-import { CreepNameConstant } from '@/constant/NameConstant';
-
-// 生成一个短编码
-export function GenShortNumber() {
-    return (Game.time*1296 + Math.floor(Math.random()*1296))
-            .toString(36)
-            .slice(-4)
-            .toUpperCase();
-}
-// 生成一个 creep 名称
-export function GenCreepName(code: string) {
-    const number = GenShortNumber();
-    const index = Math.floor(Game.time * Math.random() * 1000) % CreepNameConstant.length;
-    let name: string;
-    if (CreepNameConstant && CreepNameConstant.length) {
-        name = `【${CreepNameConstant[index]}】${code}_${number}`;
-    } else {
-        name = `${code}_${number}`;
-    }
-    if (Game.creeps[name]) {
-        return GenCreepName(code);
-    } else {
-        return name;
     }
 }

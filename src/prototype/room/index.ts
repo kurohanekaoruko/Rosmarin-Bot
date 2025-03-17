@@ -22,6 +22,8 @@ import MissionAdd from "./mission/pool/MissionAdd"
 import MissionGet from "./mission/pool/MissionGet"
 import MissionSubmit from "./mission/pool/MissionSubmit"
 
+import RoomExecute from "./execute"
+
 
 const plugins = [
     BaseFunction,   // 基础函数
@@ -46,6 +48,7 @@ const plugins = [
     Mission,        // 任务模块
     
     RoomInit,       // 房间初始化
+    RoomExecute,    // 房间执行
 ]
 
 export default () => plugins.forEach(plugin => assignPrototype(Room, plugin))

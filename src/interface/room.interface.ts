@@ -46,6 +46,8 @@ interface Room {
     init(): void;
     // 房间建筑缓存更新
     update(type?: string): void;
+    // 房间运行
+    exec(): void;
     
     // Creep数量检查
     CheckCreeps(): void;

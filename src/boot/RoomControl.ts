@@ -22,16 +22,5 @@ export const roomControl = function (room: Room) {
     }
     
     // 房间运行
-    room.MissionUpdate();    // 更新任务池
-    room.StructureWork();    // 处理建筑行为
-    room.activeDefense();    // 主动防御处理
-    room.autoMarket();       // 自动市场交易
-    room.autoBuild();        // 自动建筑
-    room.autoLab();          // 自动Lab合成
-    room.autoFactory();      // 自动Factory生产
-    room.autoPower();        // 自动Power处理
-    room.outMine();          // 外矿采集
-
-    room.showDefenseCostMatrix(); // 显示防御cost矩阵
-    
+    room.exec();
 }

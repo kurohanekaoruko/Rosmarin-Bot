@@ -1,7 +1,7 @@
 import clear from 'rollup-plugin-clear';
 // import screeps from 'rollup-plugin-screeps';
 // 修改过的版本, 解决了上传wasm文件有重复后缀的问题
-import screeps from './rollup-plugin-screeps';
+import screeps from './plugins/rollup-plugin-screeps';
 import copy from 'rollup-plugin-copy';
 import fs from 'fs';
 import resolve from '@rollup/plugin-node-resolve';
