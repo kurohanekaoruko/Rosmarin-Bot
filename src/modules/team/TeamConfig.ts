@@ -129,6 +129,16 @@ export const TEAM_CONFIG = {
     // 二人黄蓝
     'WR40/2': [ W40, R40],
 
+    // 小型二人队
+    'WHx/2': [
+        { role: 'team-dismantle', bodypart: [[WORK, 25], [MOVE, 25]] },
+        { role: 'team-heal', bodypart: [[HEAL, 25], [MOVE, 25]] }
+    ],
+    'RHx/2': [
+        { role: 'team-ranged', bodypart: [[RANGED_ATTACK, 25], [MOVE, 25]] },
+        { role: 'team-heal', bodypart: [[HEAL, 25], [MOVE, 25]] }
+    ],
+
 
     /** 测试 */
     'TEST': [

@@ -40,7 +40,7 @@ const TeamModule = {
             const targetRoom = flag.room;
             if (targetRoom) {
                 if (targetRoom.controller?.level < 1) {
-                    flagMemory['spawnCount'] = 2e52;
+                    flagMemory['spawnCount'] = 2e32;
                 } else if (targetRoom.controller?.safeMode) {
                     flagMemory['lastTime'] = Game.time + targetRoom.controller.safeMode;
                     continue;
@@ -48,7 +48,7 @@ const TeamModule = {
             }
             
             // 配置
-            const config = flagName.match(/TEAM_([0-9A-Za-z/]+)/)?.[1].toUpperCase();
+            const config = flagName.match(/TEAM_([0-9A-Za-z/]+)/)?.[1];
             if (!config) {
                 console.log(`未设置四人小队配置.`);
                 flag.remove();
@@ -111,9 +111,9 @@ const TeamModule = {
                 'homeRoom': room.name,
                 'targetRoom': flag.pos.roomName,
             };
-            if (flag.room) {
+            try {
                 flag.pos.createFlag(`Team-${teamID}`, flag.color, flag.secondaryColor);
-            } else {
+            } catch (e) {
                 room.createFlag(0, 0, `Team-${teamID}`, flag.color, flag.secondaryColor);
                 const {x, y, roomName} = flag.pos;
                 Memory.flags[`Team-${teamID}`] = {'setPosition': `${x}/${y}/${roomName}`}
@@ -130,7 +130,7 @@ const TeamModule = {
             // 孵化计数
             flagMemory['lastTime'] = Game.time;
             flagMemory['spawnCount'] = (flagMemory['spawnCount']||0) + 1;
-            console.log(flagName, `已添加一支四人小队的孵化任务, 配置:${config}`);
+            console.log(flagName, `已添加一支四人小队的孵化任务, 配置:${config}, 编号:${teamID}`);
             // 孵化数量
             let spawnCount = flagName.match(/_N-(\d+)/)?.[1] as any;
             if (!spawnCount) {

@@ -10,11 +10,11 @@ import LabControl from "./structure/labControl"
 
 import RoomInit from "./init"
 
-import AutoMarket from "./auto/autoMarket"
-import AutoBuild from "./auto/autoBuild"
-import AutoLab from "./auto/autoLab"
-import AutoFactory from "./auto/autoFactory"
-import AutoPower from "./auto/autoPower"
+import AutoMarket from "./autotask/autoMarket"
+import AutoBuild from "./autotask/autoBuild"
+import AutoLab from "./autotask/autoLab"
+import AutoFactory from "./autotask/autoFactory"
+import AutoPower from "./autotask/autoPower"
 
 import Mission from "./mission"
 import MissionPools from "./mission/pool/MissionPools"

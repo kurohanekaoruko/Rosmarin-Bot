@@ -51,7 +51,7 @@ class Team {
     // 更新数据
     execUpdate(): void {
         // 没有旗帜则创建, 目标房间不一致则更新
-        if (!this.flag && !(Game.time%10)) this.creeps[0].pos.createFlag(`Team-${this.name}`);
+        if (!this.flag) this.creeps[0].pos.createFlag(`Team-${this.name}`);
         else if (this.targetRoom != this.flag.pos.roomName) {
             this.targetRoom = this.flag.pos.roomName;
         }

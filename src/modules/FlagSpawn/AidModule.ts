@@ -27,7 +27,7 @@ const RoleBodys = {
 
 const AidModule = (flagName: string) => {
     // 增援建造
-    // AID-BUILD/孵化房间/S-能量源房间/T-间隔
+    // AID-BUILD_孵化房间_S-能量源房间_T-间隔
     if (flagName.startsWith('AID-BUILD/')) {
         // 孵化间隔
         let spawnInterval = getSpawnInterval(flagName);
@@ -62,7 +62,7 @@ const AidModule = (flagName: string) => {
     }
 
     // 增援升级
-    // AID-UPGRADE/孵化房间/T-间隔
+    // AID-UPGRADE_孵化房间_T-间隔
     if (flagName.startsWith('AID-UPGRADE/')) {
         // 孵化间隔
         let spawnInterval = getSpawnInterval(flagName);
@@ -94,7 +94,7 @@ const AidModule = (flagName: string) => {
     }
     
     // 增援冲级
-    // AID-UUP/孵化房间/T-间隔
+    // AID-UUP_孵化房间_T-间隔
     if (flagName.startsWith('AID-UUP/')) {
         // 孵化间隔
         let spawnInterval = getSpawnInterval(flagName);
@@ -115,7 +115,7 @@ const AidModule = (flagName: string) => {
     }
 
     // 增援能量
-    // AID-ENERGY/孵化房间/B-BOOST配置/T-间隔
+    // AID-ENERGY_孵化房间_B-BOOST配置_T-间隔
     if (flagName.startsWith('AID-ENERGY/')) {
         // 孵化间隔
         let spawnInterval = getSpawnInterval(flagName);
@@ -135,7 +135,7 @@ const AidModule = (flagName: string) => {
         } as any;
 
         // 是否BOOST
-        let boost = flagName.match(/\/B-(\w+)/)?.[1] as string || undefined;
+        let boost = flagName.match(/\/B_(\w+)/)?.[1] as string || undefined;
         if (boost && RoleBodys['aid-carry'][boost]) {
             bodys = RoleBodys['aid-carry'][boost].bodypart || [];
             memory['boostmap'] = RoleBodys['aid-carry'][boost].boostmap || {};

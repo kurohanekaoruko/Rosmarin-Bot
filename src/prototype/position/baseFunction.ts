@@ -285,4 +285,10 @@ export default class BaseFunction extends RoomPosition {
             }
         }
     }
+
+    /** 创建旗帜 */
+    createFlag(name: string, color1: ColorConstant = COLOR_WHITE, color2: ColorConstant = COLOR_WHITE) {
+        let obj = { name: this.roomName, createFlag: Room.prototype.createFlag };
+        return obj.createFlag(this.x, this.y, name, color1, color2);
+    };
 }

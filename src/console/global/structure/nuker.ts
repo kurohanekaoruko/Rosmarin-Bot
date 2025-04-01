@@ -4,7 +4,7 @@ export default {
             const cpu0 = Game.cpu.getUsed();
             const flags = Object.keys(Game.flags).filter(flagName => flagName.startsWith('nuke-'));
             for (const flagName of flags) {
-                const launchNukeMatch = flagName.match(/^nuke[-_](\d+)$/);
+                const launchNukeMatch = flagName.match(/^nuke[-_](\d+)/);
                 if (!launchNukeMatch) continue;
                 // 获取目标
                 const targetPos = Game.flags[flagName].pos;

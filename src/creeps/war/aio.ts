@@ -39,7 +39,7 @@ let autoAttack = (creep) => {
     if (!em) em = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 3, { filter: e => !e.pos.coverRampart() && !e.isWhiteList() })[0]
     if (!em) em = creep.pos.findInRange(FIND_HOSTILE_STRUCTURES, 3, {filter: e => e.hits && !e.pos.coverRampart() && e.structureType != STRUCTURE_ROAD })[0];
 
-    if (em) creep.room.visual.text('×', em.pos.x, em.pos.y + 0.35, { color: 'red', opacity: 0.75, font: 1 });
+    if (em) creep.room.visual.text('_', em.pos.x, em.pos.y + 0.35, { color: 'red', opacity: 0.75, font: 1 });
     if (em && (em as any).structureType) isHostileConstruction = true
 
     // 行动

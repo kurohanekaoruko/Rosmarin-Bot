@@ -148,10 +148,10 @@ export const RoleData: RoleConfig = {
     },
 
     /* 四人队 */
-    'team-attack': { bodypart: [], level: 10, code: '4A' },
-    'team-dismantle': { bodypart: [], level: 10, code: '4D' },
-    'team-heal': { bodypart: [], level: 10, code: '4H' },
-    'team-ranged': { bodypart: [], level: 10, code: '4R' },
+    'team-attack': { bodypart: [], level: 10, code: 'xA' },
+    'team-dismantle': { bodypart: [], level: 10, code: 'xD' },
+    'team-heal': { bodypart: [], level: 10, code: 'xH' },
+    'team-ranged': { bodypart: [], level: 10, code: 'xR' },
 
     /* 主动防御 */
     'defend-attack': {
