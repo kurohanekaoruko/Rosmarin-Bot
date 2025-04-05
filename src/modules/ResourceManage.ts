@@ -12,7 +12,7 @@ export const ResourceManage = {
         for (const roomName in Memory['RoomControlData']) {
             const room = Game.rooms[roomName];
             if (!room || !room.my || !room.terminal || !room.storage || room.level < 6 ||
-                Game.flags[`${roomName}/NOBALANCE`] ||
+                Game.flags[`${roomName}/NOBALANCE`] || 
                 room.terminal.owner.username != room.controller.owner.username ||
                 room.storage.owner.username != room.controller.owner.username ||
                 room.tower.length < CONTROLLER_STRUCTURES['tower'][room.level]
@@ -20,8 +20,10 @@ export const ResourceManage = {
 
             if (!room.terminal.pos.inRangeTo(room.storage.pos, 2)) continue;
 
-            let Ress = [...Object.keys(ResManageMem[roomName]||{}), ...Object.keys(RESOURCE_BALANCE)];
+            let Ress: string[] = [];
+            Ress = [...Object.keys(ResManageMem[roomName]||{}), ...Object.keys(RESOURCE_BALANCE)];
             Ress = [...new Set(Ress)];
+            
             for (const res of Ress) {
                 if (!ResManageMap[res]) ResManageMap[res] = { source: [], target: [] };
                 let sourceThreshold: number, targetThreshold: number;

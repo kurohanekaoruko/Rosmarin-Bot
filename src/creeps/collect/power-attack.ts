@@ -62,9 +62,9 @@ const power_attack = {
         }
         if (!powerBank) {
             if(Game.time % 5 === 0){
-                // creep.suicide();
-                // const bindCreep = Game.getObjectById(creep.memory.bind) as Creep;
-                // bindCreep?.suicide();
+                creep.suicide();
+                const bindCreep = Game.getObjectById(creep.memory.bind) as Creep;
+                bindCreep?.suicide();
                 if (Memory.rooms[creep.memory.homeRoom]?.['powerMine']?.[creep.memory.targetRoom]) {
                     delete Memory.rooms[creep.memory.homeRoom]['powerMine'][creep.memory.targetRoom];
                     console.log(`${creep.memory.targetRoom} 的 PowerBank 已耗尽, 已移出开采队列。`);
