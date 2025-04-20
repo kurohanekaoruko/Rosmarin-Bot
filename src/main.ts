@@ -20,9 +20,9 @@ import { ResourceManage } from '@/modules/ResourceManage';
 
 import TeamModule from '@/modules/team/TeamModule';
 
-import '@/modules/wheel/betterMove';    // 超级移动优化
-import '@/modules/wheel/structureCache';  // 极致建筑缓存
-import '@/modules/wheel/roomResource'; // 资源统计
+import '@/wheel/betterMove';    // 超级移动优化
+import '@/wheel/structureCache';  // 极致建筑缓存
+import '@/wheel/roomResource'; // 资源统计
 
 PrototypeExtension();    // 原型拓展
 

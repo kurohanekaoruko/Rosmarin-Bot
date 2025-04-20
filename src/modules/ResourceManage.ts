@@ -18,11 +18,14 @@ export const ResourceManage = {
                 room.tower.length < CONTROLLER_STRUCTURES['tower'][room.level]
             ) continue;
 
-            if (!room.terminal.pos.inRangeTo(room.storage.pos, 2)) continue;
-
             let Ress: string[] = [];
-            Ress = [...Object.keys(ResManageMem[roomName]||{}), ...Object.keys(RESOURCE_BALANCE)];
-            Ress = [...new Set(Ress)];
+
+            if (!room.terminal.pos.inRangeTo(room.storage.pos, 2) || Game.flags[`${roomName}/BALANCE_ENERGY`]) {
+                Ress = [RESOURCE_ENERGY];
+            } else {
+                Ress = [...Object.keys(ResManageMem[roomName]||{}), ...Object.keys(RESOURCE_BALANCE)];
+                Ress = [...new Set(Ress)];
+            }
             
             for (const res of Ress) {
                 if (!ResManageMap[res]) ResManageMap[res] = { source: [], target: [] };

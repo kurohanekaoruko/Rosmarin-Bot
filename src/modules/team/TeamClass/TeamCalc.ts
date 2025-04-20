@@ -1,4 +1,6 @@
-
+/**
+ * 计算函数
+ */
 export default class TeamCalc {
     /**
      * 基础攻击力

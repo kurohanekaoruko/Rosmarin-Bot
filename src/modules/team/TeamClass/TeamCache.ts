@@ -198,7 +198,7 @@ export default class TeamCache {
      * 获取洪水填充分布图（暂时只用于敌人房间）
      * 用于将敌人房间划分为不连通的区域，爬只能寻找自己区域内的对象
      */
-    public static getFloodFillMap(room: Room) {
+    public static getFloodFillMap(room: Room, isFour = false) {
         if (!room) return
 
         const defensiveStructures = this.getDefensiveStructure(room)
@@ -248,6 +248,11 @@ export default class TeamCache {
 
             for (const s of defensiveStructures) {
                 floodArray.set(s.pos.x, s.pos.y, 0)
+                if (isFour) {
+                    floodArray.set(s.pos.x-1, s.pos.y-1, 0)
+                    floodArray.set(s.pos.x-1, s.pos.y, 0)
+                    floodArray.set(s.pos.x, s.pos.y-1, 0)
+                }
             }
 
             let cnt = 0
@@ -298,12 +303,12 @@ export default class TeamCache {
     /**
      * 获取本区域内的可以攻击的建筑
      */
-    public static getStructuresInFloodFill(creep: Creep, structures: Structure[]) {
+    public static getStructuresInFloodFill(creep: Creep, structures: Structure[], isFour = false) {
         if (!creep || !creep.room.controller) return structures
 
         // 假设房间内有控制器，否则不会调用本函数
         const room = creep.room
-        const floodFill = this.getFloodFillMap(room)
+        const floodFill = this.getFloodFillMap(room, isFour)
 
         // 房间各区域连通
         if (!floodFill && room.memory['blockCount'] === 1) {
@@ -416,11 +421,11 @@ export default class TeamCache {
     /**
      * 获取本区域内的可以攻击的爬
      */
-    public static getCreepsInFloodFill(creep: Creep, hostileCreeps: Creep[]) {
+    public static getCreepsInFloodFill(creep: Creep, hostileCreeps: Creep[], isFour = false) {
         if (!creep || !creep.room.controller) return hostileCreeps
 
         const room = creep.room
-        const floodFill = this.getFloodFillMap(room)
+        const floodFill = this.getFloodFillMap(room, isFour)
 
         // 房间各区域连通
         if (!floodFill && room.memory['blockCount'] === 1) {

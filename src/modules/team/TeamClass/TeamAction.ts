@@ -8,6 +8,9 @@ import { creepPosBipartiteMatch } from '@/utils/utils'
 const emptyCostMatrix = new PathFinder.CostMatrix()
 const tempRoomArray = new RoomArray()
 
+/**
+ * 小队行动
+ */
 export default class TeamAction {
     /**
      * 小队路径缓存

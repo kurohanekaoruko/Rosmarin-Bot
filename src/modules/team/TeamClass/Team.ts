@@ -3,6 +3,7 @@ import TeamAction from './TeamAction';
 import TeamBattle from './TeamBattle';
 import TeamVisual from './TeamVisual';
 
+// 小队类
 class Team {
     name: string;
     status: 'ready' | 'attack' | 'flee' | 'avoid' | 'sleep'; // 状态
@@ -10,8 +11,8 @@ class Team {
     formation: 'line' | 'quad';  // 队形
     moveMode: string;    // 移动模式
     homeRoom: string;    // 孵化房间
-    targetRoom: string;    // 目标房间
-    creeps: Creep[];    // 成员数组
+    targetRoom: string;  // 目标房间
+    creeps: Creep[];     // 成员数组
     cache: { [key: string]: any };    // 缓存
     flag: Flag;          // 小队指挥旗
     moved = false;       // 本tick是否移动过

@@ -2,6 +2,9 @@ import TeamCalc from "./TeamCalc"
 import TeamCache from "./TeamCache";
 import TeamAction from "./TeamAction";
 
+/**
+ * 战斗类
+ */
 export default class TeamBattle {
     /**
      * 中立建筑
@@ -19,7 +22,7 @@ export default class TeamBattle {
     }
 
     /**
-     * n tick 内能否奶住，算伤策略有问题，但是先不管了
+     * n tick 内能否奶住
      * @returns true 表示能奶住，false 表示不能奶住
      *
      * TODO: 优化算伤策略，同时考虑会陷入沼泽的情况
@@ -217,13 +220,13 @@ export default class TeamBattle {
                 const structures = room.findEnemyStructures()
                     .filter((s) => s.hits && !this.neutralStructures.has(s.structureType))
                     team['_attackable_structures'] = structures
-                canAttackStructures = TeamCache.getStructuresInFloodFill(creep, structures)
+                canAttackStructures = TeamCache.getStructuresInFloodFill(creep, structures, team.creeps.length >= 3)
             }
 
             const getCanAttackCreeps = () => {
                 const creeps = room.findEnemyCreeps().filter((e) => e.owner.username !== 'Source Keeper')
                 team['_attackable_creeps'] = creeps
-                canAttackCreeps = TeamCache.getCreepsInFloodFill(creep, creeps)
+                canAttackCreeps = TeamCache.getCreepsInFloodFill(creep, creeps, team.creeps.length >= 3)
             }
 
             if (isFocusStructure) {

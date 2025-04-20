@@ -86,6 +86,7 @@ export const TEAM_CONFIG = {
     'WT/4': [ W25T15, W25T15, H28T12, H28T12 ],
     'AT/4': [ A25T15, A25T15, H28T12, H28T12 ],
     'RT/4': [ R28T12, R28T12, H28T12, H28T12 ],
+    
     'R28/4': [ R28T12, R28T12, H28T12, H28T12 ],
     'W28/4': [ W28T12, W28T12, H28T12, H28T12 ],
     'A28/4': [ A28T12, A28T12, H28T12, H28T12  ],
@@ -129,12 +130,34 @@ export const TEAM_CONFIG = {
     // 二人黄蓝
     'WR40/2': [ W40, R40],
 
-    // 小型二人队
-    'WHx/2': [
+    // 无boost
+    'RH/4T0': [
+        { role: 'team-ranged', bodypart: [[RANGED_ATTACK, 25], [MOVE, 25]]},
+        { role: 'team-ranged', bodypart: [[RANGED_ATTACK, 25], [MOVE, 25]]},
+        { role: 'team-heal', bodypart: [[HEAL, 25], [MOVE, 25]]},
+        { role: 'team-heal', bodypart: [[HEAL, 25], [MOVE, 25]]}
+    ],
+    'AH/4T0': [
+        { role: 'team-attack', bodypart: [[ATTACK, 25], [MOVE, 25]] },
+        { role: 'team-attack', bodypart: [[ATTACK, 25], [MOVE, 25]] },
+        { role: 'team-heal', bodypart: [[HEAL, 25], [MOVE, 25]] },
+        { role: 'team-heal', bodypart: [[HEAL, 25], [MOVE, 25]] }
+    ],
+    'WH/4T0': [
+        { role: 'team-dismantle', bodypart: [[WORK, 25], [MOVE, 25]] },
+        { role: 'team-dismantle', bodypart: [[WORK, 25], [MOVE, 25]] },
+        { role: 'team-heal', bodypart: [[HEAL, 25], [MOVE, 25]] },
+        { role: 'team-heal', bodypart: [[HEAL, 25], [MOVE, 25]] }
+    ],
+    'AH/2T0': [
+        { role: 'team-attack', bodypart: [[ATTACK, 25], [MOVE, 25]] },
+        { role: 'team-heal', bodypart: [[HEAL, 25], [MOVE, 25]] }
+    ],
+    'WH/2T0': [
         { role: 'team-dismantle', bodypart: [[WORK, 25], [MOVE, 25]] },
         { role: 'team-heal', bodypart: [[HEAL, 25], [MOVE, 25]] }
     ],
-    'RHx/2': [
+    'RH/2T0': [
         { role: 'team-ranged', bodypart: [[RANGED_ATTACK, 25], [MOVE, 25]] },
         { role: 'team-heal', bodypart: [[HEAL, 25], [MOVE, 25]] }
     ],

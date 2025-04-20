@@ -30,7 +30,7 @@ export default class AutoLab extends Room {
             (ResAmountCheck || LabMineralCheck)
         ) return;
 
-
+        // 关闭任务
         if (labProduct) {
             botmem.labAtype = null;
             botmem.labBtype = null;
@@ -38,24 +38,9 @@ export default class AutoLab extends Room {
             global.log(`[自动Lab合成] ${this.name}已自动关闭lab合成任务: ${labProduct}`)
         }
 
-        // 获取自动任务列表
-        const autoLabMap = Memory['AutoData']['AutoLabData'][this.name];
-        if (!autoLabMap || !Object.keys(autoLabMap).length) return;
+        // 获取新任务
 
-        // 查找未到达限额且原料足够的任务, 按优先级选择
-        let task = null;
-        let lv = Infinity; // 优先级
-        for (const res in autoLabMap) {
-            const level = LabLevel[res];
-            if (lv <= level) continue;
-            if (autoLabMap[res] > 0 && this.getResAmount(res) >= autoLabMap[res] * 0.9) continue;
-            if (this.getResAmount(LabMap[res]['raw1']) < 6000 ||
-                this.getResAmount(LabMap[res]['raw2']) < 6000) continue;
-            task = res;
-            lv = level;
-        }
-
-        let taskAmount = task ? autoLabMap[task] : 0;
+        let [task, taskAmount] = getCustomizeTask(this);
 
         if (!task) [task, taskAmount] = getT1Task(this);
 
@@ -74,12 +59,34 @@ export default class AutoLab extends Room {
     }
 }
 
+const getCustomizeTask = (room: Room) => {
+    const autoLabMap = Memory['AutoData']['AutoLabData'][room.name];
+    if (!autoLabMap || !Object.keys(autoLabMap).length) return [null, 0];
+
+    // 查找未到达限额且原料足够的任务, 按优先级选择
+    let task = null;
+    let lv = Infinity; // 优先级
+    for (const res in autoLabMap) {
+        const level = LabLevel[res];
+        if (lv <= level) continue;
+        if (autoLabMap[res] > 0 && room.getResAmount(res) >= autoLabMap[res] * 0.9) continue;
+        if (room.getResAmount(LabMap[res]['raw1']) < 6000 ||
+            room.getResAmount(LabMap[res]['raw2']) < 6000) continue;
+        task = res;
+        lv = level;
+    }
+
+    let taskAmount = task ? autoLabMap[task] : 0;
+
+    return [task, taskAmount]
+}
+
 const getT1Task = (room: Room) => {
     if (Game.time % 100) return [ null, 0 ];
 
     const r = (res: string) => room.getResAmount(res);
 
-    let threshold = 100e3;
+    let threshold = 50e3;
     const H = r(RESOURCE_HYDROGEN);
     const O = r(RESOURCE_OXYGEN);
 
@@ -95,16 +102,16 @@ const getT1Task = (room: Room) => {
     
     if (r('L') >= threshold) {
         const LO = r('LO'), LH = r('LH');
-        if (O >= 5000 && LO < LH) return [ 'LO', LO + 10e3 ];
-        if (H >= 5000 && LH < LO) return [ 'LH', LH + 10e3 ];
+        if (O >= 5000 && LO <= LH) return [ 'LO', LO + 10e3 ];
+        if (H >= 5000 && LH <= LO) return [ 'LH', LH + 10e3 ];
     }
     if (r('Z') >= threshold) {
         const ZO = r('ZO'), ZH = r('ZH');
-        if (O >= 5000 && ZO < ZH) return [ 'ZO', ZO + 10e3 ];
-        if (H >= 5000 && ZH < ZO) return [ 'ZH', ZH + 10e3 ];
+        if (O >= 5000 && ZO <= ZH) return [ 'ZO', ZO + 10e3 ];
+        if (H >= 5000 && ZH <= ZO) return [ 'ZH', ZH + 10e3 ];
     }
 
-    if (r('ZK') >= 10000 && r('UL') >= 10000) {
+    if (r('ZK') >= 5000 && r('UL') >= 5000) {
         return [ 'G', r('G') + 10e3 ];
     }
 

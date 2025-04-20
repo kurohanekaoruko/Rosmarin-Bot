@@ -1,3 +1,6 @@
+/**
+ * 工具函数
+ */
 export default class TeamUtils {
     // 获取队伍坐标范围
     public static getPosRange(team: Team):{ minX: number, maxX: number, minY: number, maxY: number } {

@@ -13,6 +13,8 @@ export const RESOURCE_BALANCE = {
     'G': [10e3, 20e3],
     'X': [10e3, 20e3],
     'OH': [10e3, 10e3],
+    'ZK': [5e3, 10e3],
+    'UL': [5e3, 10e3],
     'XUHO2': [10e3, 20e3],
     'XUH2O': [10e3, 20e3],
     'XZHO2': [10e3, 20e3],
