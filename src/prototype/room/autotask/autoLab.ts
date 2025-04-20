@@ -16,8 +16,8 @@ export default class AutoLab extends Room {
         const labB = Game.getObjectById(botmem.labB) as StructureLab;
         if (!labA || !labB) return;
         // 检查库存是否够合成
-        const ResAmountCheck = (this.getResAmount(botmem.labAtype) >= 500 &&
-                                this.getResAmount(botmem.labBtype) >= 500)
+        const ResAmountCheck = (this.getResAmount(botmem.labAtype) >= 1000 &&
+                                this.getResAmount(botmem.labBtype) >= 1000)
         // 检查当前填充的是否够合成
         const LabMineralCheck = labA && labB &&
                                 labA.mineralType === botmem.labAtype &&
