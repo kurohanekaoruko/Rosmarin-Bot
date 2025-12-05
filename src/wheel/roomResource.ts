@@ -107,8 +107,8 @@ myChart.setOption(option);
 }
 
 function roomResTips(roomName, data){
-    let divName = "a-"+roomName+"-6g3y-NB-"+Game.time;
-    let divNameShow = "a-"+roomName+"-6g3y-NB-"+Game.time+"-";
+    let divName = "a-"+roomName + Game.time;
+    let divNameShow = "a-"+roomName + Game.time+"-";
 return`
     <t class="${divName}" onclick="gotoRoom('${roomName}')" style="color:#7c97ff;cursor:pointer;font-weight:bold;padding:2px 4px;border-radius:3px;background:rgba(43,43,43,0.6);">[${roomName}]</t><script>
     (() => {
@@ -237,8 +237,7 @@ let pro = {
             var r = len % 3;
             return r > 0 ? b.slice(0, r) + "," + b.slice(r, len).match(/\d{3}/g).join(",") : b.slice(r, len).match(/\d{3}/g).join(",");
         }
-        
-        // 构建美化后的HTML
+
         let html = `
         <div style="white-space: normal; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: rgba(30,35,48,0.8); padding: 15px; border-radius: 8px; margin-top: 10px; color: #e0e0e0; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
             <div style="font-size: 18px; color: #e0e0e0; font-weight: bold; border-bottom: 1px solid #3d5174; padding-bottom: 5px;">
@@ -427,13 +426,12 @@ let pro = {
             })
             .sort((a, b) => a.freeRatio - b.freeRatio);
             
-        // 构建美化后的HTML
+
         let html = roomResEcharts() + `
-        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: rgba(30,35,48,0.8); padding: 15px; border-radius: 8px; margin-top: 10px; color: #e0e0e0; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+        <div style="white-space: normal; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: rgba(30,35,48,0.8); padding: 15px; border-radius: 8px; margin-top: 10px; color: #e0e0e0; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
             <div style="font-size: 18px; margin-bottom: 15px; color: #e0e0e0; font-weight: bold; border-bottom: 1px solid #3d5174; padding-bottom: 5px;">
                 🏠房间资源概览
             </div>
-            <div style="display: flex; flex-direction: column; gap: 12px;">
         `;
         
         // 为每个房间创建卡片

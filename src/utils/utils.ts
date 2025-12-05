@@ -208,7 +208,7 @@ export const creepPosBipartiteMatch = (creeps: Creep[], pos: RoomPosition[], ran
 }
 
 
-import { FlowerNames } from '@/constant/creepname/FlowerName';
+import { FlowerNames } from '@/constant/CreepName';
 
 // 生成一个短编码
 export function GenShortNumber() {

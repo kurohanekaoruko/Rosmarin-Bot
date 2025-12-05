@@ -50,13 +50,13 @@ const TeamModule = {
             // 配置
             const config = flagName.match(/TEAM_([0-9A-Za-z/]+)/)?.[1];
             if (!config) {
-                console.log(`未设置四人小队配置.`);
+                console.log(`未设置小队配置.`);
                 flag.remove();
                 continue;
             }
             let Team_Config = TEAM_CONFIG[config];
             if (!Team_Config) {
-                console.log(`四人小队配置 ${config} 不存在.`);
+                console.log(`小队配置 ${config} 不存在.`);
                 flag.remove();
                 continue;
             }
@@ -130,7 +130,7 @@ const TeamModule = {
             // 孵化计数
             flagMemory['lastTime'] = Game.time;
             flagMemory['spawnCount'] = (flagMemory['spawnCount']||0) + 1;
-            console.log(flagName, `已添加一支四人小队的孵化任务, 配置:${config}, 编号:${teamID}`);
+            console.log(flagName, `已添加一支小队的孵化任务, 配置:${config}, 编号:${teamID}`);
             // 孵化数量
             let spawnCount = flagName.match(/_N-(\d+)/)?.[1] as any;
             if (!spawnCount) {
@@ -173,7 +173,7 @@ const TeamModule = {
                 // 检查小队是否超时未集结
                 if (Game.time - teamData['time'] > 2000) {
                     delete Memory['TeamData'][teamID];
-                    console.log(`四人小队${teamID}已解散.`);
+                    console.log(`小队${teamID}已解散.`);
                     Game.flags[`Team-${teamID}`]?.remove();
                     continue;
                 }
